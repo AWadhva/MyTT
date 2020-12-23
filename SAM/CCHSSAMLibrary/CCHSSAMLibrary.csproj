@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6AE5ECCB-464F-4AF2-8E50-23605F23DF93}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IFS2.Equipment.CCHSSAMLibrary</RootNamespace>
+    <AssemblyName>IFS2.Equipment.CCHSSAMLibrary</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Outputs\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;WITHOUT_SHARED_DATA</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Outputs\</OutputPath>
+    <DefineConstants>TRACE;WITHOUT_SHARED_DATA</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="IFS2.Equipment.Common.ThalesLibrary, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Common\Outputs\IFS2.Equipment.Common.ThalesLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\ClassLibrary1\ReaderFunctions.cs">
+      <Link>ReaderFunctions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\cCCHSSAMClasses.cs">
+      <Link>cCCHSSAMClasses.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\CommonFunctions.cs">
+      <Link>CommonFunctions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\CommonTT.cs">
+      <Link>CommonTT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\DataConverter.cs">
+      <Link>DataConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Constants\Constants.cs">
+      <Link>Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\CSCv3Adapter\V3Adaptor.cs">
+      <Link>V3Adaptor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\CSCv4Adapter\V4Adaptor.cs">
+      <Link>V4Adaptor.cs</Link>
+    </Compile>
+    <Compile Include="..\CCHSSAM\CCSHSAM\CCHSSAMManger.cs">
+      <Link>CCHSSAMManger.cs</Link>
+    </Compile>
+    <Compile Include="Class1.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

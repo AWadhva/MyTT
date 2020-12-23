@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{09045512-2992-43FA-935D-6D4CB2B83288}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IFS2.Equipment.TicketingRules</RootNamespace>
+    <AssemblyName>IFS2.Equipment.TicketingRules.MediaTreatment</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Output_MonoLinux\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;MonoLinux _CCHSSAM_</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Output_MonoLinux\</OutputPath>
+    <DefineConstants>TRACE;MonoLinux _CCHSSAM_</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\ClassLibrary1\ReaderFunctions.cs">
+      <Link>ReaderFunctions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\cCCHSSAMClasses.cs">
+      <Link>cCCHSSAMClasses.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\CommonFunctions.cs">
+      <Link>CommonFunctions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\CommonTT.cs">
+      <Link>CommonTT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\DataConverter.cs">
+      <Link>DataConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Constants\Constants.cs">
+      <Link>Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Constants\ISOCONSTANTS.cs">
+      <Link>ISOCONSTANTS.cs</Link>
+    </Compile>
+    <Compile Include="..\..\CryptoflexFunctions\CryptoFlexFunctions.cs">
+      <Link>CryptoFlexFunctions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\CSCVisiontekAdapter\VisiontekAdaptor.cs">
+      <Link>VisiontekAdaptor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Rules\CommonRules\CommonRules.cs">
+      <Link>CommonRules.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Rules\CommonRules\Errors.cs">
+      <Link>Errors.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Rules\CommonRules\InformationRules.cs">
+      <Link>InformationRules.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Rules\CommonRules\PriceCalculation.cs">
+      <Link>PriceCalculation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Rules\CommonRules\SalesRules.cs">
+      <Link>SalesRules.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Rules\CommonRules\SharedData.cs">
+      <Link>SharedData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Rules\CommonRules\ValidationRules.cs">
+      <Link>ValidationRules.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SAM\CCHSSAM\CCSHSAM\CCHSSAMManger.cs">
+      <Link>CCHSSAMManger.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SecurityMgr\SecurityMgr\DESCryptoExtensions.cs">
+      <Link>DESCryptoExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SecurityMgr\SecurityMgr\DesfireKey.cs">
+      <Link>DesfireKey.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SecurityMgr\SecurityMgr\DesfireKeyRef.cs">
+      <Link>DesfireKeyRef.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SecurityMgr\SecurityMgr\MacAlgoAdaptor.cs">
+      <Link>MacAlgoAdaptor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SecurityMgr\SecurityMgr\SecurityMgr.cs">
+      <Link>SecurityMgr.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SecurityMgr\SecurityMgr\UltralightKey.cs">
+      <Link>UltralightKey.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SmartCard\SmartCard\ComposeCCHSTxn.cs">
+      <Link>ComposeCCHSTxn.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SmartCard\SmartCard\CSCrw.cs">
+      <Link>CSCrw.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SmartCard\SmartCard\Exceptions.cs">
+      <Link>Exceptions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SmartCard\SmartCard\MediaHw.cs">
+      <Link>MediaHw.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SmartCard\SmartCard\SmartFunctions.cs">
+      <Link>SmartFunctions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SmartCard\SmartCard\TokenFunctions.cs">
+      <Link>TokenFunctions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SmartCard\SmartCard\TokenRw.cs">
+      <Link>TokenRw.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EODParametersMoLi\EODParametersMoLi.csproj">
+      <Project>{B3F811E5-96D3-4274-93EC-14DA1C660F83}</Project>
+      <Name>EODParametersMoLi</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="IFS2.Equipment.Common.CommonDataStructures, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Common\MonoLinux\Output_MonoLinux\IFS2.Equipment.Common.CommonDataStructures.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.Common.FareProductSpecs, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Common\MonoLinux\Output_MonoLinux\IFS2.Equipment.Common.FareProductSpecs.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.Common.ThalesLibrary.MoLi, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Common\MonoLinux\Output_MonoLinux\IFS2.Equipment.Common.ThalesLibrary.MoLi.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.Common.Utilities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Common\MonoLinux\Output_MonoLinux\IFS2.Equipment.Common.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\ThirdPartyLib\MonoLinux\2.0\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\ThirdPartyLib\MonoLinux\2.0\System.Core.dll</HintPath>
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\ThirdPartyLib\MonoLinux\2.0\System.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\ThirdPartyLib\MonoLinux\2.0\System.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\ThirdPartyLib\MonoLinux\2.0\System.Xml.Linq.dll</HintPath>
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
