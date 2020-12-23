@@ -57,7 +57,7 @@
     </Reference>
     <Reference Include="IFS2.Equipment.Common.FareProductSpecsCE, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Common\WinCE\Output_WinCE\IFS2.Equipment.Common.FareProductSpecsCE.dll</HintPath>
+      <HintPath>..\..\..\Common\Output_WinCE\IFS2.Equipment.Common.FareProductSpecsCE.dll</HintPath>
     </Reference>
     <Reference Include="IFS2.Equipment.Common.ThalesLibrary.CE, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

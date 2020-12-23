@@ -26,7 +26,7 @@ namespace IFS2.Equipment.CSCReader
             _cryptoflexSAMUsage = (bool)Configuration.ReadParameter("CryptoflexSAMUsage","bool","true");
             hRw = -1;
         }
-
+        
         public static void Start(bool cryptoflex, bool delhiCCHS)
         {
             _delhiCCHSSAMUsage = delhiCCHS;

@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TestCSCApiV3")]
+[assembly: AssemblyTitle("TestCSCApiv3")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Thales")]
-[assembly: AssemblyProduct("TestCSCApiV3")]
-[assembly: AssemblyCopyright("Copyright © Thales 2013")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("TestCSCApiv3")]
+[assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("267dd656-edbc-4aec-9f27-72fd421e1cde")]
+[assembly: Guid("94c436b6-b18a-402e-b7ec-10200b2bb79f")]
 
 // Version information for an assembly consists of the following four values:
 //

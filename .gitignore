@@ -100,3 +100,7 @@ Outputs_CE/OpenNETCF.Configuration.xml
 SAM/ReadCCHSSAMID/bin/Debug/IFS2.Tools.ReadCCHSSAMID.exe.config
 ThalesCSCApiWrapperForSakeOfCallback/Debug/ThalesCSCApiWrapperForSakeOfCallback.dll.embed.manifest.res
 TT.suo
+WindowsCE/ReadCCHSSAMIDCE/bin/Debug/OpenNETCF.xml
+WindowsCE/ReadCCHSSAMIDCE/bin/Debug/OpenNETCF.WindowsCE.Messaging.xml
+WindowsCE/ReadCCHSSAMIDCE/bin/Debug/OpenNETCF.Configuration.xml
+Tests/TestCSCApiV3/obj/Debug/build.force

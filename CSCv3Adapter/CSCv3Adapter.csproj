@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -61,13 +62,6 @@
       <Project>{CD865DB0-9C54-4E66-AA47-1CFC75E30075}</Project>
       <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Constants\Constants.csproj">
-      <Project>{676BCED4-EF06-4D30-AF3A-E69C1AB62490}</Project>
-      <Name>Constants</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="NativeLIBs\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
