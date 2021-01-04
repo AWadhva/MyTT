@@ -228,7 +228,7 @@ namespace IFS2.Equipment.TicketingRules
                             byte[] pBlock0 = SerializeHelper<byte[]>.XMLDeserialize(tab[2]);
 
                             ulong mac_NotUsedByMe;
-                            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(_logMediaTokenForLastRequestedGetTokenPrice, pBlock0, out mac_NotUsedByMe));
+                            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(SharedData.TokenLayoutVersion, _logMediaTokenForLastRequestedGetTokenPrice, pBlock0, out mac_NotUsedByMe));
 
                             string packedCmdBuf = SerializeHelper<byte[]>.XMLSerialize(cb);
 

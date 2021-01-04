@@ -130,8 +130,8 @@ namespace IFS2.Equipment.TicketingRules
                 _logicalMediaReference.Application.TransportApplication.InitialisationDate = logMediaNow.Media.InitialisationDate;
                 _logicalMediaReference.Initialisation.DateTime = logMediaNow.Media.InitialisationDate;
             }
-
-            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(_logicalMediaReference, dataRead, out _macAttemptedToBeWrittenInLastAttempt));
+            
+            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(SharedData.TokenLayoutVersion, _logicalMediaReference, dataRead, out _macAttemptedToBeWrittenInLastAttempt));
             
             
             bool bSuccess;

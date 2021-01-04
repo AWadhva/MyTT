@@ -40,7 +40,8 @@ namespace IFS2.Equipment.TicketingRules
         public static int LineNumber { get { return _lineNumber; } set { _lineNumber = value; } }
         public static int StationNumber { get { return _stationNumber; } set { _stationNumber = value; } }
         public static short ServiceProvider { get { return _serviceProvider; } set { _serviceProvider = value; } }
-        public static string cscApiVersion { get { return _cscapiversion; } set { _cscapiversion = value; } }        
+        public static string cscApiVersion { get { return _cscapiversion; } set { _cscapiversion = value; } }
+        public static int TokenLayoutVersion { get; set; }
 
         public static AgentShift _agentShift = null;
         public static FareProductSpecs _fpSpecsRepository;
@@ -146,6 +147,8 @@ namespace IFS2.Equipment.TicketingRules
             //This is a problem at this moment. Because we could have received from EOD
             //FareProductSpecs.Load(true);
             //_fpSpecsRepository = FareProductSpecs.GetInstance();
+
+            TokenLayoutVersion = 0;
         }
 
         public static int TransactionSeqNo

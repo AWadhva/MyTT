@@ -822,7 +822,7 @@ namespace IFS2.Equipment.TicketingRules
             logMedia.Media.ChipSerialNumber = serialNbrTokenSelectedForOperation;
 
             ulong mac_NotUsedByMe;
-            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(logMedia, _pTokenData, out mac_NotUsedByMe));
+            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(SharedData.TokenLayoutVersion, logMedia, _pTokenData, out mac_NotUsedByMe));
 
             Logging.Log(LogLevel.Verbose, "Trying to write to token " + Utility.ByteListToString(cb));
             bool bTokenWritten = false;

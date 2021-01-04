@@ -88,7 +88,7 @@ namespace IFS2.Equipment.TicketingRules
             if (!SalesRules.RefundUpdateToken(_logicalMediaUpdatedForCurrentOp))
                 return ResultLastAttempt.MediaCouldntBeRead;
 
-            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(_logicalMediaUpdatedForCurrentOp, logMediaAtFront._tokenPhysicalData, out _macAttemptedToBeWrittenInLastAttempt));
+            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(SharedData.TokenLayoutVersion, _logicalMediaUpdatedForCurrentOp, logMediaAtFront._tokenPhysicalData, out _macAttemptedToBeWrittenInLastAttempt));
             CSC_READER_TYPE readerType;
 
             int hRW;
