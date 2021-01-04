@@ -60,15 +60,17 @@ namespace IFS2.Equipment.TicketingRules
                     _hRw,
                     3, out pSw1, out pSw2, out pResData);
                 if (Err != CSC_API_ERROR.ERR_NONE)
-                    Logging.Log(LogLevel.Verbose, "ReadMediaData2::ReadBlocks Err = " + Err.ToString());
+                    Logging.Log(LogLevel.Verbose, "DelhiTokenUltralight::ReadMediaData3 Err = " + Err.ToString());
                 if (Err == CONSTANT.NO_ERROR && pSw1 != CONSTANT.COMMAND_SUCCESS)
-                    Logging.Log(LogLevel.Verbose, "ReadMediaData2::ReadBlocks pSw1 = " + pSw1.ToString());
+                    Logging.Log(LogLevel.Verbose, "DelhiTokenUltralight::ReadMediaData3 pSw1 = " + pSw1.ToString());
 
                 if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
                 {
                     _bTokenRead = true;
                     logMedia._tokenPhysicalData = new byte[64];
                     Array.Copy(pResData, 1, logMedia._tokenPhysicalData, 0, 64);
+                    // NOTE THAT pResData has 8-bits in the beginning, that DON'T BELONG TO TOKEN DATA
+                    pResData = logMedia._tokenPhysicalData;
 
                     // Sale Block Layout
                     m.ChipSerialNumberRead = SmartFunctions.Instance.ReadSNbr();//(long)CFunctions.GetBitData(0, 56, pResData);
@@ -76,7 +78,7 @@ namespace IFS2.Equipment.TicketingRules
                     m.ChipTypeRead = Media.ChipTypeValues.UltralightC;
                     m.TypeRead = Media.TypeValues.Token;
 
-                    short typ = (short)CFunctions.GetBitData(1 * NUMBITSINONEBLOCK + 8 + 32, 8, pResData);
+                    short typ = (short)CFunctions.GetBitData(1 * NUMBITSINONEBLOCK + 32, 8, pResData);
 #if !_HHD_
                     if (typ == CONSTANT.TICKET_TYPE_TTAG)
                     {
@@ -89,7 +91,7 @@ namespace IFS2.Equipment.TicketingRules
 #if !_HHD_
                         logMedia.TTag.Hidden = true;
 #endif
-                        int OFFSET = 1 * NUMBITSINONEBLOCK + 8;
+                        int OFFSET = 1 * NUMBITSINONEBLOCK;
                         m.InitialisationDateRead = CFunctions.ConvertDosDate(OFFSET + 0, pResData);
                         ini.DateTimeRead = m.InitialisationDate;
                         ta.InitialisationDateRead = ini.DateTime;
@@ -114,19 +116,19 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         int OFFSET;
 
-                        int seqNumVTD1 = (int)CFunctions.GetBitData(2 * NUMBITSINONEBLOCK + 16 + 8, 18, pResData);
-                        int seqNumVTD2 = (int)CFunctions.GetBitData(3 * NUMBITSINONEBLOCK + 16 + 8, 18, pResData);
+                        int seqNumVTD1 = (int)CFunctions.GetBitData(2 * NUMBITSINONEBLOCK + 16, 18, pResData);
+                        int seqNumVTD2 = (int)CFunctions.GetBitData(3 * NUMBITSINONEBLOCK + 16, 18, pResData);
 
                         // TODO: As per documentation: If only one of the two blocks is readable, its data are used for the current processing. 
                         // But, how to determine, that "Data is Readable"??? Perhaps a check for all-zeroes for that block would work                        
                         if (seqNumVTD1 >= seqNumVTD2)
                         {
-                            OFFSET = 2 * NUMBITSINONEBLOCK + 8;
+                            OFFSET = 2 * NUMBITSINONEBLOCK;
                             ta.SequenceNumberRead = m.SequenceNumberRead = seqNumVTD1;
                         }
                         else
                         {
-                            OFFSET = 3 * NUMBITSINONEBLOCK + 8;
+                            OFFSET = 3 * NUMBITSINONEBLOCK;
                             ta.SequenceNumberRead = m.SequenceNumberRead = seqNumVTD2;
                         }
 
@@ -164,7 +166,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         // VTD1
                         var raw = logMedia.DelhiUltralightRaw;
-                        int OFFSET = 2 * NUMBITSINONEBLOCK + 8;
+                        int OFFSET = 2 * NUMBITSINONEBLOCK;
 
                         raw.LogicalTokenType1 = (byte)CFunctions.GetBitData(OFFSET, 8, pResData);
                         raw.TokenStatus1 = (byte)CFunctions.GetBitData(OFFSET + 8, 8, pResData);
@@ -186,7 +188,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         // VTD2
                         var raw = logMedia.DelhiUltralightRaw;
-                        int OFFSET = 3 * NUMBITSINONEBLOCK + 8;
+                        int OFFSET = 3 * NUMBITSINONEBLOCK;
 
                         raw.LogicalTokenType2 = (byte)CFunctions.GetBitData(OFFSET, 8, pResData);
                         raw.TokenStatus2 = (byte)CFunctions.GetBitData(OFFSET + 8, 8, pResData);
@@ -207,7 +209,7 @@ namespace IFS2.Equipment.TicketingRules
                     }
                     {
                         var raw = logMedia.DelhiUltralightRaw;
-                        int OFFSET = 1 * NUMBITSINONEBLOCK + 8;
+                        int OFFSET = 1 * NUMBITSINONEBLOCK;
 
                         raw.IssueDate = CFunctions.ConvertDosDate(OFFSET + 0, pResData);
                         raw.DateOfSale = CFunctions.ConvertDosDate(OFFSET + 16, pResData);
@@ -246,16 +248,12 @@ namespace IFS2.Equipment.TicketingRules
             _bTokenRead = false;
         }
 
-        public bool ReadMediaData2(LogicalMedia logMedia, out byte[] pResData, out CSC_API_ERROR Err, MediaDetectionTreatment readTreatment
-            //, int hRw
-            )
+        public bool ReadMediaData2(LogicalMedia logMedia, out byte[] pResData, out CSC_API_ERROR Err, MediaDetectionTreatment readTreatment)
         {
             Err = CSC_API_ERROR.ERR_NONE;
 
             pResData = new byte[CONSTANT.MAX_ISO_DATA_OUT_LENGTH];
 
-            // ANUJ: Commenting out, because it seems is now not used
-            //            if (_recoveryMade)
             {
                 byte pSw1 = 0xFF;
                 byte pSw2 = 0xFF;
@@ -272,23 +270,23 @@ namespace IFS2.Equipment.TicketingRules
                 OneProduct p = new OneProduct();
                 ps.Add(p);
 
-
-
-
                 //Manufacturer Block is read By Default, so Number of Blocks is excluding
                 //block 0
                 Err = TokenFunctions.ReadBlocks(CSC_READER_TYPE.V4_READER,
                     _hRw,
                     3, out pSw1, out pSw2, out pResData);
                 if (Err != CSC_API_ERROR.ERR_NONE)
-                    Logging.Log(LogLevel.Verbose, "ReadMediaData2::ReadBlocks Err = " + Err.ToString());
+                    Logging.Log(LogLevel.Verbose, "DelhiTokenUltralight::ReadMediaData2 Err = " + Err.ToString());
                 if (Err == CONSTANT.NO_ERROR && pSw1 != CONSTANT.COMMAND_SUCCESS)
-                    Logging.Log(LogLevel.Verbose, "ReadMediaData2::ReadBlocks pSw1 = " + pSw1.ToString());
+                    Logging.Log(LogLevel.Verbose, "DelhiTokenUltralight::ReadMediaData2 pSw1 = " + pSw1.ToString());
 
                 if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
                 {
                     logMedia._tokenPhysicalData = new byte[64];
                     Array.Copy(pResData, 1, logMedia._tokenPhysicalData, 0, 64);
+                    // NOTE THAT pResData has 8-bits in the beginning, that DON'T BELONG TO TOKEN DATA
+                    pResData = logMedia._tokenPhysicalData;
+
 
                     // Sale Block Layout
                     m.ChipSerialNumberRead = SmartFunctions.Instance.ReadSNbr();//(long)CFunctions.GetBitData(0, 56, pResData);
@@ -296,9 +294,9 @@ namespace IFS2.Equipment.TicketingRules
                     m.ChipTypeRead = Media.ChipTypeValues.UltralightC;
                     m.TypeRead = Media.TypeValues.Token;
 
-                    short typ = (short)CFunctions.GetBitData(1 * NUMBITSINONEBLOCK + 8 + 32, 8, pResData);
+                    short typ = (short)CFunctions.GetBitData(1 * NUMBITSINONEBLOCK + 32, 8, pResData);
 #if !_HHD_
-                    if (typ == CONSTANT.TICKET_TYPE_TTAG) // TODO: may have to modify after finalizing.
+                    if (typ == CONSTANT.TICKET_TYPE_TTAG)
                     {
                         _ReadTTag(logMedia, pResData);
                         logMedia.TTag.Hidden = false;
@@ -309,7 +307,7 @@ namespace IFS2.Equipment.TicketingRules
 #if !_HHD_
                         logMedia.TTag.Hidden = true;
 #endif
-                        int OFFSET = 1 * NUMBITSINONEBLOCK + 8;
+                        int OFFSET = 1 * NUMBITSINONEBLOCK;
                         m.InitialisationDateRead = CFunctions.ConvertDosDate(OFFSET + 0, pResData);
                         ini.DateTimeRead = m.InitialisationDate;
                         ta.InitialisationDateRead = ini.DateTime;
@@ -327,26 +325,27 @@ namespace IFS2.Equipment.TicketingRules
                         //                        lcav.ServiceProviderRead = m.Owner;
 
                         lcav.FareTiersRead = (short)CFunctions.GetBitData(OFFSET + 45, 6, pResData);
-                        lcav.LocationRead = (short)CFunctions.GetBitData(OFFSET + 52, 8, pResData);
+                        lcav.LocationRead =  (short)CFunctions.GetBitData(OFFSET + 52, 8, pResData);
                     }
+                    int version = TokenFunctions.ExtractVersion(pResData);
                     //Data Block Layout
                     //ps.Product(0).TypeRead = -- TODO, clerification required
                     {
                         int OFFSET;
 
-                        int seqNumVTD1 = (int)CFunctions.GetBitData(2 * NUMBITSINONEBLOCK + 16 + 8, 18, pResData);
-                        int seqNumVTD2 = (int)CFunctions.GetBitData(3 * NUMBITSINONEBLOCK + 16 + 8, 18, pResData);
+                        int seqNumVTD1 = (int)TokenFunctions.ExtractSeqNumVTD1(pResData);
+                        int seqNumVTD2 = (int)TokenFunctions.ExtractSeqNumVTD2(pResData);
 
-                        // TODO: As per documentation: If only one of the two blocks is readable, its data are used for the current processing. 
-                        // But, how to determine, that "Data is Readable"??? Perhaps a check for all-zeroes for that block would work                        
+                        byte[] vtd = new byte[16];
+                        
                         if (seqNumVTD1 >= seqNumVTD2)
-                        {
-                            OFFSET = 2 * NUMBITSINONEBLOCK + 8;
+                        {                            
+                            OFFSET = 2 * NUMBITSINONEBLOCK;
                             ta.SequenceNumberRead = m.SequenceNumberRead = seqNumVTD1;
                         }
                         else
                         {
-                            OFFSET = 3 * NUMBITSINONEBLOCK + 8;
+                            OFFSET = 3 * NUMBITSINONEBLOCK;
                             ta.SequenceNumberRead = m.SequenceNumberRead = seqNumVTD2;
                         }
 
@@ -385,7 +384,7 @@ namespace IFS2.Equipment.TicketingRules
                         {
                             // VTD1
                             var raw = logMedia.DelhiUltralightRaw;
-                            int OFFSET = 2 * NUMBITSINONEBLOCK + 8;
+                            int OFFSET = 2 * NUMBITSINONEBLOCK;
 
                             raw.LogicalTokenType1 = (byte)CFunctions.GetBitData(OFFSET, 8, pResData);
                             raw.TokenStatus1 = (byte)CFunctions.GetBitData(OFFSET + 8, 8, pResData);
@@ -407,7 +406,7 @@ namespace IFS2.Equipment.TicketingRules
                         {
                             // VTD2
                             var raw = logMedia.DelhiUltralightRaw;
-                            int OFFSET = 3 * NUMBITSINONEBLOCK + 8;
+                            int OFFSET = 3 * NUMBITSINONEBLOCK;
 
                             raw.LogicalTokenType2 = (byte)CFunctions.GetBitData(OFFSET, 8, pResData);
                             raw.TokenStatus2 = (byte)CFunctions.GetBitData(OFFSET + 8, 8, pResData);
@@ -428,7 +427,7 @@ namespace IFS2.Equipment.TicketingRules
                         }
                         {
                             var raw = logMedia.DelhiUltralightRaw;
-                            int OFFSET = 1 * NUMBITSINONEBLOCK + 8;
+                            int OFFSET = 1 * NUMBITSINONEBLOCK;
 
                             raw.IssueDate = CFunctions.ConvertDosDate(OFFSET + 0, pResData);
                             raw.DateOfSale = CFunctions.ConvertDosDate(OFFSET + 16, pResData);
@@ -451,15 +450,16 @@ namespace IFS2.Equipment.TicketingRules
             }
 
             return true;
-
-        }        
+        }
 #if !_HHD_
-        public bool _ReadTTag(LogicalMedia logMedia, byte[] pResData)
+        public bool _ReadTTag(LogicalMedia logMedia,
+            byte[] pResData // it has removed the 1st byte that doesn't belong to token data
+            )
         {
             var ct = logMedia.TTag;
-            
+
             {
-                int OFFSET = 1 * NUMBITSINONEBLOCK + 8; // TODO: Copied this + 8, from _ReadMediaData above. See, how to explain this
+                int OFFSET = 1 * NUMBITSINONEBLOCK; 
                 ct.IssueDate = CFunctions.ConvertDosDate(OFFSET + 0, pResData);
                 
                 {
@@ -470,7 +470,7 @@ namespace IFS2.Equipment.TicketingRules
                 }
                 
                 ct.ChipSerialNumber = (long)CFunctions.GetBitData(0, 56, pResData);
-                OFFSET = 2*NUMBITSINONEBLOCK + 8; // not sure that + 8 is good, doing it analogous as in _ReadMediaData
+                OFFSET = 2 * NUMBITSINONEBLOCK;
                 {
                     int size = 2 * 8;
                     ct.CountTokens = (short)CFunctions.GetBitData(OFFSET, size, pResData);

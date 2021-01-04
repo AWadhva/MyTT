@@ -647,12 +647,12 @@ namespace IFS2.Equipment.TicketingRules
             lcavDosTime = CFunctions.ToDosTime(dt);
         }
 
-        static private int ExtractVersion(byte[] pBlock0)
+        static public int ExtractVersion(byte[] pBlock0)
         {
             return (int)CFunctions.GetBitData(188, 2, pBlock0);
         }
 
-        static private ulong ExtractSeqNumVTD1(byte[] pBlock0)
+        static public ulong ExtractSeqNumVTD1(byte[] pBlock0)
         {
             int version = ExtractVersion(pBlock0);
             if (version != 1)
@@ -661,7 +661,7 @@ namespace IFS2.Equipment.TicketingRules
                 return CFunctions.GetBitData(264, 18, pBlock0);
         }
 
-        static private ulong ExtractSeqNumVTD2(byte[] pBlock0)
+        static public ulong ExtractSeqNumVTD2(byte[] pBlock0)
         {
             int version = ExtractVersion(pBlock0);
             if (version != 1)
