@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D3D88159-0B54-44F1-8456-495D57CA8180}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -65,10 +65,13 @@
     <Compile Include="ComposeCCHSTxn.cs" />
     <Compile Include="CSCrw.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="ITokenDataParserInterfaces.cs" />
     <Compile Include="MediaHw.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SmartFunctions.cs" />
+    <Compile Include="TokenDataParsersVer1.cs" />
     <Compile Include="TokenFunctions.cs" />
+    <Compile Include="TokenDataParsersVer0.cs" />
     <Compile Include="TokenRw.cs" />
   </ItemGroup>
   <ItemGroup>
