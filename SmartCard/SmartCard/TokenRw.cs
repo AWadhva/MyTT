@@ -17,7 +17,7 @@ namespace IFS2.Equipment.TicketingRules
         int _hRw = 0; // Giving it a valid value, because don't want to disturb HHD code
         public DelhiTokenUltralight(int hRw) { _hRw = hRw; }
 
-        private const int NUMBITSINONEBLOCK = 16 * 8;
+        //private const int NUMBITSINONEBLOCK = 16 * 8;
 
         protected override Boolean _ReadMediaData(LogicalMedia logMedia, MediaDetectionTreatment readTreatment)
         {
@@ -97,7 +97,7 @@ namespace IFS2.Equipment.TicketingRules
                     m.ChipTypeRead = Media.ChipTypeValues.UltralightC;
                     m.TypeRead = Media.TypeValues.Token;
 
-                    short typ = (short)CFunctions.GetBitData(1 * NUMBITSINONEBLOCK + 32, 8, pResData);
+                    short typ = (short)CFunctions.GetBitData(1 * CONSTANT.MIFARE_ULTRALT_BLOC_BITS + 32, 8, pResData);
 #if !_HHD_
                     if (typ == CONSTANT.TICKET_TYPE_TTAG)
                     {
@@ -234,7 +234,7 @@ namespace IFS2.Equipment.TicketingRules
                         }
                         {
                             var raw = logMedia.DelhiUltralightRaw;
-                            int OFFSET = 1 * NUMBITSINONEBLOCK;
+                            int OFFSET = 1 * CONSTANT.MIFARE_ULTRALT_BLOC_BITS;
 
                             raw.IssueDate = stdParser.Initialisationdate();
                             raw.DateOfSale = stdParser.SaleDate();
@@ -266,7 +266,7 @@ namespace IFS2.Equipment.TicketingRules
             var ct = logMedia.TTag;
 
             {
-                int OFFSET = 1 * NUMBITSINONEBLOCK; 
+                int OFFSET = 1 * CONSTANT.MIFARE_ULTRALT_BLOC_BITS; 
                 ct.IssueDate = CFunctions.ConvertDosDate(OFFSET + 0, pResData);
                 
                 {
@@ -277,7 +277,7 @@ namespace IFS2.Equipment.TicketingRules
                 }
                 
                 ct.ChipSerialNumber = (long)CFunctions.GetBitData(0, 56, pResData);
-                OFFSET = 2 * NUMBITSINONEBLOCK;
+                OFFSET = 2 * CONSTANT.MIFARE_ULTRALT_BLOC_BITS;
                 {
                     int size = 2 * 8;
                     ct.CountTokens = (short)CFunctions.GetBitData(OFFSET, size, pResData);
