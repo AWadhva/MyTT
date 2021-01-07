@@ -56,19 +56,19 @@
   <ItemGroup>
     <Reference Include="IFS2.Common.DataStructuresCE, Version=1.0.7363.20125, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Common\Output_WinCE\IFS2.Common.DataStructuresCE.dll</HintPath>
+      <HintPath>..\..\..\Common\WinCE\Output_WinCE\IFS2.Common.DataStructuresCE.dll</HintPath>
     </Reference>
     <Reference Include="IFS2.Equipment.Common.CommonDataStructuresCE, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Common\Output_WinCE\IFS2.Equipment.Common.CommonDataStructuresCE.dll</HintPath>
+      <HintPath>..\..\..\Common\WinCE\Output_WinCE\IFS2.Equipment.Common.CommonDataStructuresCE.dll</HintPath>
     </Reference>
     <Reference Include="IFS2.Equipment.Common.ThalesLibrary.CE, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Common\Output_WinCE\IFS2.Equipment.Common.ThalesLibrary.CE.dll</HintPath>
+      <HintPath>..\..\..\Common\WinCE\Output_WinCE\IFS2.Equipment.Common.ThalesLibrary.CE.dll</HintPath>
     </Reference>
     <Reference Include="IFS2.Equipment.Common.UtilitiesCE, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Common\Output_WinCE\IFS2.Equipment.Common.UtilitiesCE.dll</HintPath>
+      <HintPath>..\..\..\Common\WinCE\Output_WinCE\IFS2.Equipment.Common.UtilitiesCE.dll</HintPath>
     </Reference>
     <Reference Include="IFS2.Equipment.EODParametersCE, Version=1.0.7363.24059, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

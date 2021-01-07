@@ -55,7 +55,7 @@
   <ItemGroup>
     <Reference Include="IFS2.Equipment.Common.ThalesLibrary.CE, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Common\Output_WinCE\IFS2.Equipment.Common.ThalesLibrary.CE.dll</HintPath>
+      <HintPath>..\..\..\Common\WinCE\Output_WinCE\IFS2.Equipment.Common.ThalesLibrary.CE.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
