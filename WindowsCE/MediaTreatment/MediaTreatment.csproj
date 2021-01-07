@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{1BD5D95F-7F3A-4F3B-8189-9A256D4CDDD4}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -55,9 +55,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Common\Output_WinCE\IFS2.Equipment.Common.CommonDataStructuresCE.dll</HintPath>
     </Reference>
-    <Reference Include="IFS2.Equipment.Common.FareProductSpecsCE, Version=5.2.5.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IFS2.Equipment.Common.FareProductSpecsCE, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Common\Output_WinCE\IFS2.Equipment.Common.FareProductSpecsCE.dll</HintPath>
+      <HintPath>..\..\..\common\WinCE\Output_WinCE\IFS2.Equipment.Common.FareProductSpecsCE.dll</HintPath>
     </Reference>
     <Reference Include="IFS2.Equipment.Common.ThalesLibrary.CE, Version=5.2.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
