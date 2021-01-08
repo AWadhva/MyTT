@@ -104,3 +104,5 @@ WindowsCE/ReadCCHSSAMIDCE/bin/Debug/OpenNETCF.xml
 WindowsCE/ReadCCHSSAMIDCE/bin/Debug/OpenNETCF.WindowsCE.Messaging.xml
 WindowsCE/ReadCCHSSAMIDCE/bin/Debug/OpenNETCF.Configuration.xml
 Tests/TestCSCApiV3/obj/Debug/build.force
+obj
+IFS2.Equipment.TicketingRules.Start.vshost.exe.config
