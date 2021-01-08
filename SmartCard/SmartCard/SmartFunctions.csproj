@@ -63,6 +63,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComposeCCHSTxn.cs" />
+    <Compile Include="DM1HistroyParsers.cs" />
+    <Compile Include="DM2ValidationParsers.cs" />
+    <Compile Include="ICSCDataParserInterfaces.cs" />
     <Compile Include="CSCrw.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="ITokenDataParserInterfaces.cs" />

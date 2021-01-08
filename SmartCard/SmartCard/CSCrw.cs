@@ -749,7 +749,7 @@ namespace IFS2.Equipment.TicketingRules
             pSw1 = 0xFF;
             pSw2 = 0xFF;
             byte[] pResData = new byte[CONSTANT.MAX_ISO_DATA_OUT_LENGTH];
-            short i;
+            
             
             Err = SmartFunctions.Instance.ReadMetroValidationFile(out pSw1, out pSw2, out pResData);
             logBuffer("Validation DM2", pResData, CONSTANT.MAX_ISO_DATA_OUT_LENGTH);
@@ -757,78 +757,33 @@ namespace IFS2.Equipment.TicketingRules
             {
                 bDM2_ValidationRead = true;
                 _validationDataRead = true;
-                //Store the DM2 Validation Data
-                val.DateOfFirstTransactionRead = CFunctions.ConvertDosDate(0, pResData);
 
-                i = (short)CFunctions.GetBitData(16, 8, pResData);
-                switch (i)
-                {
-                    case CONSTANT.MBC_GateEntry:
-                        val.EntryExitBitRead = Validation.TypeValues.Entry;
-                        break;
-                    case CONSTANT.MBC_GateExit:
-                        val.EntryExitBitRead = Validation.TypeValues.Exit;
-                        break;
-                    default:
-                        val.EntryExitBitRead = Validation.TypeValues.Unknown;
-                        break;
-                }
-
-                val.LocationRead = (int)CFunctions.GetBitData(24, 8, pResData);
-
-                val.LastTransactionDateTimeRead = CFunctions.UnixTimeStampToDateTime((int)CFunctions.GetBitData(32, 32, pResData));
-
-                val.RejectCodeRead = (short)CFunctions.GetBitData(64, 8, pResData);
-
-                i = (short)CFunctions.GetBitData(72, 8, pResData);
-                switch (i)
-                {
-                    case 0:
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                    case 6:
-                        ta.StatusRead = (TransportApplication.StatusValues)i;
-                        break;
-                    default:
-                        ta.StatusRead = TransportApplication.StatusValues.Unknown;
-                        break;
-                }
-
-                ta.TestRead = Convert.ToBoolean((short)CFunctions.GetBitData(80, 1, pResData));
-
-                val.BonusValueRead = (int)CFunctions.GetBitData(81, 16, pResData);
-
-                
-
-                AutoReload ar = logMedia.Purse.AutoReload;
-                int offsetAutoTopup = 97;
-                i = (short)CFunctions.GetBitData(offsetAutoTopup, 1, pResData);
-                offsetAutoTopup += 1;
-                if (i == 1)
-                    ar.StatusRead = AutoReload.StatusValues.Enabled;
+                int version = (int)CFunctions.GetBitData(16, 3, pResData);
+                IDM2ValidationParser parser;
+                if (version == 0)
+                    parser = new DM2ValidationParser_Ver0(pResData);
                 else
-                    ar.StatusRead = AutoReload.StatusValues.Disabled;
+                    parser = new DM2ValidationParser_Ver1(pResData);
+            
+                val.DateOfFirstTransactionRead = parser.DateOfFirstTransaction();
+                val.EntryExitBitRead = parser.EntryExitBit();
 
-                offsetAutoTopup += 6; // reserved bits
+                val.LocationRead = parser.Location();
 
-                ar.AutoTopupDateAndTimeRead = CFunctions.UnixTimeStampToDateTime((int)CFunctions.GetBitData(offsetAutoTopup, 32, pResData));
-                offsetAutoTopup += 32;
+                val.LastTransactionDateTimeRead = parser.LastTransactionDateTime();
 
-                ar.ThresholdRead = 10 * (int)CFunctions.GetBitData(offsetAutoTopup, 32, pResData);
-                offsetAutoTopup += 32;
+                val.RejectCodeRead = parser.RejectCode();
 
-                ar.AmountRead = 10 * (int)CFunctions.GetBitData(offsetAutoTopup, 32, pResData);
-                offsetAutoTopup += 32;
+                ta.StatusRead = parser.Status();
 
-                offsetAutoTopup += 16; // last credit topup date
+                ta.TestRead = parser.Test();
 
+                val.BonusValueRead = parser.BonusValue();
 
-                ar.ExpiryDateRead = CFunctions.ConvertDosDate(offsetAutoTopup, pResData);                
-                     
-                val.AgentRemainingTripsRead = (short)CFunctions.GetBitData(249, 7, pResData);
+                int offsetAutoTopup = 97; // for both versions
+                AutoReloadParser(pResData, offsetAutoTopup, logMedia);
+
+                val.AgentRemainingTripsRead = parser.AgentRemainingTrips();
 
                 return true;
             }
@@ -836,6 +791,34 @@ namespace IFS2.Equipment.TicketingRules
 
             return false;
         }
+
+        public static void AutoReloadParser(byte[] pResData, int offsetAutoTopup, LogicalMedia logMedia)
+        {
+            AutoReload ar = logMedia.Purse.AutoReload;
+            
+            int i = (short)CFunctions.GetBitData(offsetAutoTopup, 1, pResData);
+            offsetAutoTopup += 1;
+            if (i == 1)
+                ar.StatusRead = AutoReload.StatusValues.Enabled;
+            else
+                ar.StatusRead = AutoReload.StatusValues.Disabled;
+
+            offsetAutoTopup += 6; // reserved bits
+
+            ar.AutoTopupDateAndTimeRead = CFunctions.UnixTimeStampToDateTime((int)CFunctions.GetBitData(offsetAutoTopup, 32, pResData));
+            offsetAutoTopup += 32;
+
+            ar.ThresholdRead = 10 * (int)CFunctions.GetBitData(offsetAutoTopup, 32, pResData);
+            offsetAutoTopup += 32;
+
+            ar.AmountRead = 10 * (int)CFunctions.GetBitData(offsetAutoTopup, 32, pResData);
+            offsetAutoTopup += 32;
+
+            offsetAutoTopup += 16; // last credit topup date
+
+            ar.ExpiryDateRead = CFunctions.ConvertDosDate(offsetAutoTopup, pResData);
+        }
+        
 
         protected override Boolean _ReadCustomerData(LogicalMedia logMedia)
         {
@@ -938,6 +921,7 @@ namespace IFS2.Equipment.TicketingRules
                 }
                 logMedia.DESFireDelhiLayout._df_a2_03_SaleAddValue._displayTransactionType.ValueRead = i;
 
+                //int version = (int)CFunctions.GetBitData(142, 8, pResData);
                 lcav.LocationRead = (int)CFunctions.GetBitData(142, 8, pResData);
 
                 lcav.ServiceProviderRead = (short)CFunctions.GetBitData(150, 8, pResData);
@@ -1141,6 +1125,12 @@ namespace IFS2.Equipment.TicketingRules
 
                     int j = index * 32 * 8;
 
+                    int version = (int)CFunctions.GetBitData(j + 158, 3, pResData);
+                    IDM1HistoryParser parser;
+                    if (version == 1)
+                        parser = new DM1HistoryParser_Ver1(pResData, index);
+                    else
+                        parser = new DM1HistoryParser_Ver0(pResData, index);
                     //Store History Data [Index]
                     trans.SequenceNumberRead = (long)CFunctions.GetBitData(j + 0, 32, pResData);
 
@@ -1185,7 +1175,7 @@ namespace IFS2.Equipment.TicketingRules
                             break;
                     }
 
-                    trans.LocationRead = (int)CFunctions.GetBitData(j + 142, 8, pResData);
+                    trans.LocationRead = parser.Location();
 
                     trans.ServiceProviderRead = (short)CFunctions.GetBitData(j + 150, 8, pResData);
 
@@ -1557,74 +1547,109 @@ namespace IFS2.Equipment.TicketingRules
             }
         }
 
-        private bool _tempInsertOneRecordInDM1HistoryFile(LogicalMedia logMedia)
+        private bool _tempInsertOneRecordInDM1HistoryFile(LogicalMedia logMedia, int versionId)
         {
-            byte[] pResData = new byte[32];
+            if (logMedia.Purse.History.List.Count != 1)
+                return false;
+            
+            byte[] pResData;
+            if (versionId == 0)
+                pResData = _tempInsertOneRecordInDM1HistoryFile_Ver0(logMedia);
+            else
+                pResData = _tempInsertOneRecordInDM1HistoryFile_Ver1(logMedia);
+            
+#if _BIP1300_
+            return SmartFunctions.Instance.WriteRecordFile(CONSTANT.DM1_AREA_CODE,0x03,0x00, pResData);
+#else
+            return SmartFunctions.Instance.WriteRecordFile(CONSTANT.DM1_AREA_CODE, GetFileNum(1, 3), 0x00, pResData);
+#endif
+        }
+
+        static Dictionary<OperationTypeValues, int> diOpType = new Dictionary<OperationTypeValues, int>{
+            {OperationTypeValues.NoValueDeductedInEntry, 0},
+            {OperationTypeValues.ValueDeductedInEntry, 1},
+            {OperationTypeValues.NoValueDeductedInExit, 0x10},
+            {OperationTypeValues.ValueDeductedInExit, 0x11},
+            {OperationTypeValues.PointsOrRidesDeductedInEntry, 2},
+            {OperationTypeValues.PeriodicTicketEntry, 3},
+            {OperationTypeValues.LoyaltyPointsUsedInEntry, 4},
+        };
+
+        private int GetOpType(OperationTypeValues op)
+        {
+            int res;
+            if (diOpType.TryGetValue(op, out res))
+                return res;
+            else
+                return (int)op;
+        }
+
+        private byte[] _tempInsertOneRecordInDM1HistoryFile_Ver0(LogicalMedia logMedia)
+        {            
             var bitBuffer = new bool[256];
             int i = 0;
-            OneTransaction onTxn ;//= new OneTransaction();
-            if (logMedia.Purse.History.List.Count == 1)
-            {
-                onTxn = (OneTransaction)logMedia.Purse.History.Transaction(0);//Assuming only Last transaction record is there
+            OneTransaction onTxn = (OneTransaction)logMedia.Purse.History.Transaction(0);//Assuming only Last transaction record is there
                 
-                 //Transaction Number
-                i = CFunctions.ConvertToBits((ulong)onTxn.SequenceNumber, i, 32, bitBuffer);
-                int unixtimestamp = CFunctions.ConvertToUnixTimestamp(onTxn.DateTime);
-                //Transaction Date and Time
-                i = CFunctions.ConvertToBits((ulong)unixtimestamp, i, 32, bitBuffer);
-                //Value of Transaction
-                i = CFunctions.ConvertToBits((ulong)onTxn.Amount / 10, i, 16, bitBuffer);
-                //CSC Electronic value after Transaction
-                i = CFunctions.ConvertToBits((ulong)onTxn.NewBalance / 10, i, 32, bitBuffer);
-                //Equipment ID 
-                i = CFunctions.ConvertToBits((ulong)(_equipmentTypeValue1(onTxn.EquipmentNumber)), i, 8, bitBuffer);              
-                i = CFunctions.ConvertToBits((ulong)(onTxn.EquipmentNumber&0xFFFF), i, 16, bitBuffer);
-                //Display Transaction Type
-                int j = 0;
-                switch (onTxn.OperationType)
-                {
-                    case OperationTypeValues.NoValueDeductedInEntry:
-                        j = 0;
-                        break;
-                    case OperationTypeValues.ValueDeductedInEntry:
-                        j=1 ;
-                        break;
-                    case OperationTypeValues.NoValueDeductedInExit:
-                        j=0x10 ;
-                        break;
-                    case OperationTypeValues.ValueDeductedInExit:
-                        j=0x11 ;
-                        break;
-                    case OperationTypeValues.PointsOrRidesDeductedInEntry:
-                        j=2 ;
-                        break;
-                    case OperationTypeValues.PeriodicTicketEntry:
-                        j=3 ;
-                        break;
-                    case OperationTypeValues.LoyaltyPointsUsedInEntry:
-                        j=4 ;
-                        break;
-                    default:
-                        j= (int)onTxn.OperationType;
-                        break;
-                }
-                i = CFunctions.ConvertToBits((ulong)j, i, 6, bitBuffer);
-                //Transaction Location Code
-                i = CFunctions.ConvertToBits((ulong)onTxn.Location, i, 8, bitBuffer);
-                //Service Provider Id
-                i = CFunctions.ConvertToBits((ulong)onTxn.ServiceProvider, i, 8, bitBuffer);
-                //Spare
-                i = CFunctions.ConvertToBits(0, i, 98, bitBuffer);
-                pResData = CFunctions.ConvertBoolTableToBytes(bitBuffer, 256);
-#if _BIP1300_
-                if (SmartFunctions.Instance.WriteRecordFile(CONSTANT.DM1_AREA_CODE,0x03,0x00, pResData)) return true;
-#else
-                if (SmartFunctions.Instance.WriteRecordFile(CONSTANT.DM1_AREA_CODE, GetFileNum(1, 3), 0x00, pResData)) return true;
-#endif
-                else return false;
-            }
-            else
-                return false;
+             //Transaction Number
+            i = CFunctions.ConvertToBits((ulong)onTxn.SequenceNumber, i, 32, bitBuffer);
+            int unixtimestamp = CFunctions.ConvertToUnixTimestamp(onTxn.DateTime);
+            //Transaction Date and Time
+            i = CFunctions.ConvertToBits((ulong)unixtimestamp, i, 32, bitBuffer);
+            //Value of Transaction
+            i = CFunctions.ConvertToBits((ulong)onTxn.Amount / 10, i, 16, bitBuffer);
+            //CSC Electronic value after Transaction
+            i = CFunctions.ConvertToBits((ulong)onTxn.NewBalance / 10, i, 32, bitBuffer);
+            //Equipment ID 
+            i = CFunctions.ConvertToBits((ulong)(_equipmentTypeValue1(onTxn.EquipmentNumber)), i, 8, bitBuffer);              
+            i = CFunctions.ConvertToBits((ulong)(onTxn.EquipmentNumber&0xFFFF), i, 16, bitBuffer);
+            //Display Transaction Type            
+            i = CFunctions.ConvertToBits((ulong)GetOpType(onTxn.OperationType), i, 6, bitBuffer);
+            //Transaction Location Code
+            i = CFunctions.ConvertToBits((ulong)onTxn.Location, i, 8, bitBuffer);
+            //Service Provider Id
+            i = CFunctions.ConvertToBits((ulong)onTxn.ServiceProvider, i, 8, bitBuffer);
+            //Spare
+            i = CFunctions.ConvertToBits(0, i, 98, bitBuffer);
+            return CFunctions.ConvertBoolTableToBytes(bitBuffer, 256);
+        }
+
+        private byte[] _tempInsertOneRecordInDM1HistoryFile_Ver1(LogicalMedia logMedia)
+        {
+            var bitBuffer = new bool[256];
+            int i = 0;
+            OneTransaction onTxn = (OneTransaction)logMedia.Purse.History.Transaction(0);//Assuming only Last transaction record is there
+
+            //Transaction Number
+            i = CFunctions.ConvertToBits((ulong)onTxn.SequenceNumber, i, 32, bitBuffer);
+            int unixtimestamp = CFunctions.ConvertToUnixTimestamp(onTxn.DateTime);
+            //Transaction Date and Time
+            i = CFunctions.ConvertToBits((ulong)unixtimestamp, i, 32, bitBuffer);
+            //Value of Transaction
+            i = CFunctions.ConvertToBits((ulong)onTxn.Amount / 10, i, 16, bitBuffer);
+            //CSC Electronic value after Transaction
+            i = CFunctions.ConvertToBits((ulong)onTxn.NewBalance / 10, i, 32, bitBuffer);
+            //Equipment ID 
+            i = CFunctions.ConvertToBits((ulong)(_equipmentTypeValue1(onTxn.EquipmentNumber)), i, 8, bitBuffer);
+            i = CFunctions.ConvertToBits((ulong)(onTxn.EquipmentNumber & 0xFFFF), i, 16, bitBuffer);
+            //Display Transaction Type            
+            i = CFunctions.ConvertToBits((ulong)GetOpType(onTxn.OperationType), i, 6, bitBuffer);
+
+            var bufferStationCode = new bool[10];
+            //Transaction Location Code
+            CFunctions.ConvertToBits((ulong)onTxn.Location, 0, 10, bufferStationCode);
+            Array.Copy(bufferStationCode, 0, bitBuffer, i, 8); i += 8;
+
+            //Service Provider Id
+            i = CFunctions.ConvertToBits((ulong)onTxn.ServiceProvider, i, 8, bitBuffer);
+
+            int version = 1;
+            i = CFunctions.ConvertToBits((ulong)version, i, 3, bitBuffer);
+
+            Array.Copy(bufferStationCode, 8, bitBuffer, i, 2); i += 2;
+            
+            //Spare
+            i = CFunctions.ConvertToBits(0, i, 93, bitBuffer);
+            return CFunctions.ConvertBoolTableToBytes(bitBuffer, 256);
         }
 
         protected override bool _UpdateMediaEndOfValidity(LogicalMedia logMedia)
@@ -1835,7 +1860,7 @@ namespace IFS2.Equipment.TicketingRules
             {
                 if (mApplication == CONSTANT.DM1_AREA_CODE && mFileId == 0x03)
                 {
-                    if (_tempInsertOneRecordInDM1HistoryFile(logMedia))
+                    if (_tempInsertOneRecordInDM1HistoryFile(logMedia, SharedData.DM1HistoryVersion))
                     {
                         Err = SmartFunctions.Instance.CommitTransaction(out pSw1, out pSw2);
                         if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
@@ -1854,7 +1879,7 @@ namespace IFS2.Equipment.TicketingRules
 
         protected override bool _AppendCommonAreaPurseHistoryRecord(LogicalMedia logMedia)
         {
-            return _tempInsertOneRecordInDM1HistoryFile(logMedia);
+            return _tempInsertOneRecordInDM1HistoryFile(logMedia, SharedData.DM1HistoryVersion);
         }
 
         public override Status GetLastStatus()

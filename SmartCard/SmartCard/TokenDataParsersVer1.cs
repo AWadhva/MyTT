@@ -45,8 +45,11 @@ namespace IFS2.Equipment.TicketingRules
         }
 
         public int Location()
-        {            
-            throw new NotImplementedException();
+        {
+            short lsb = (short)CFunctions.GetBitData(OFFSET + 52, 8, pResData);
+            short msb = (short)CFunctions.GetBitData(OFFSET + 62, 2, pResData);
+
+            return 256 * msb + lsb;
         }
 
         #endregion

@@ -133,8 +133,17 @@
     <Compile Include="..\..\SmartCard\SmartCard\CSCrw.cs">
       <Link>CSCrw.cs</Link>
     </Compile>
+    <Compile Include="..\..\SmartCard\SmartCard\DM1HistroyParsers.cs">
+      <Link>DM1HistroyParsers.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SmartCard\SmartCard\DM2ValidationParsers.cs">
+      <Link>DM2ValidationParsers.cs</Link>
+    </Compile>
     <Compile Include="..\..\SmartCard\SmartCard\Exceptions.cs">
       <Link>Exceptions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\SmartCard\SmartCard\ICSCDataParserInterfaces.cs">
+      <Link>ICSCDataParserInterfaces.cs</Link>
     </Compile>
     <Compile Include="..\..\SmartCard\SmartCard\ITokenDataParserInterfaces.cs">
       <Link>ITokenDataParserInterfaces.cs</Link>

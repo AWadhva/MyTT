@@ -42,6 +42,9 @@ namespace IFS2.Equipment.TicketingRules
         public static short ServiceProvider { get { return _serviceProvider; } set { _serviceProvider = value; } }
         public static string cscApiVersion { get { return _cscapiversion; } set { _cscapiversion = value; } }
         public static int TokenLayoutVersion { get; set; }
+        public static int DM1HistoryVersion { get; set; }        
+        public static int DM2ValidationVersion { get; set; }
+        public static int DM2SaleAddValueVersion { get; set; }
 
         public static AgentShift _agentShift = null;
         public static FareProductSpecs _fpSpecsRepository;
@@ -149,6 +152,9 @@ namespace IFS2.Equipment.TicketingRules
             //_fpSpecsRepository = FareProductSpecs.GetInstance();
 
             TokenLayoutVersion = 0;
+            DM1HistoryVersion = 0;
+            DM2ValidationVersion = 0;
+            DM2SaleAddValueVersion = 0;
         }
 
         public static int TransactionSeqNo
