@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C93795EE-5396-4EFD-9112-950802C34CF6}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -54,9 +54,9 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IFS2.Common.DataStructuresCE, Version=1.0.7363.20125, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IFS2.Common.DataStructuresCE, Version=1.0.7673.17826, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Common\WinCE\Output_WinCE\IFS2.Common.DataStructuresCE.dll</HintPath>
+      <HintPath>..\..\..\..\Common\CommonCE\Outputs\IFS2.Common.DataStructuresCE.dll</HintPath>
     </Reference>
     <Reference Include="IFS2.Equipment.Common.CommonDataStructuresCE, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
