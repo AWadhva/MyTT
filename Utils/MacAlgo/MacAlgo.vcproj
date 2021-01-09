@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="MacAlgo"
 	ProjectGUID="{8E44BE8B-72AC-428F-B8F1-5190E83B41AC}"
 	RootNamespace="MacAlgo"
-	SccProjectName="SAK"
-	SccAuxPath="SAK"
-	SccLocalPath="SAK"
-	SccProvider="SAK"
 	Keyword="ManagedCProj"
 	TargetFrameworkVersion="196613"
 	>
