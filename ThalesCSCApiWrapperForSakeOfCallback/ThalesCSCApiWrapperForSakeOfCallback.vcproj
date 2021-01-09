@@ -5,10 +5,6 @@
 	Name="ThalesCSCApiWrapperForSakeOfCallback"
 	ProjectGUID="{F81C99DE-39E2-4C90-AF01-E11C2D13DACC}"
 	RootNamespace="ThalesCSCApiWrapperForSakeOfCallback"
-	SccProjectName="SAK"
-	SccAuxPath="SAK"
-	SccLocalPath="SAK"
-	SccProvider="SAK"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
