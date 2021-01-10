@@ -12,8 +12,7 @@ using System.Diagnostics;
 namespace IFS2.Equipment.TicketingRules
 {
     public class DelhiDesfireEV0 : CommonHwMedia
-    {
-        private Boolean _recoveryMade = true;
+    {        
         private readonly bool _bAssumePurseSeqNumAsLocal;
         public DelhiDesfireEV0()
         {
@@ -921,8 +920,16 @@ namespace IFS2.Equipment.TicketingRules
                 }
                 logMedia.DESFireDelhiLayout._df_a2_03_SaleAddValue._displayTransactionType.ValueRead = i;
 
-                //int version = (int)CFunctions.GetBitData(142, 8, pResData);
-                lcav.LocationRead = (int)CFunctions.GetBitData(142, 8, pResData);
+                int version = (int)CFunctions.GetBitData(190, 3, pResData);
+                if (version == 1)
+                {
+                    var lsb = (int)CFunctions.GetBitData(142, 8, pResData);
+                    var msb = (int)CFunctions.GetBitData(193, 2, pResData);
+
+                    lcav.LocationRead = 256 * msb + lsb;
+                }
+                else
+                    lcav.LocationRead = (int)CFunctions.GetBitData(142, 8, pResData);                
 
                 lcav.ServiceProviderRead = (short)CFunctions.GetBitData(150, 8, pResData);
                 //lcav.DateTimeRead = CFunctions.UnixTimeStampToDateTime((int)CFunctions.GetBitData(158, 32, pResData));
@@ -1495,12 +1502,11 @@ namespace IFS2.Equipment.TicketingRules
             return false;
         }
 
-        private bool _tempUpdateLocal_SaleNAddVal_Data(LogicalMedia logMedia)
+        private bool _tempUpdateLocal_SaleNAddVal_Data(LogicalMedia logMedia, int version)
         {
             LocalLastAddValue lcav = logMedia.Application.LocalLastAddValue;
-            byte[] pResData = new byte[32];
+            byte[] pResData = new byte[32];            
             
-            AutoReload ar = logMedia.Purse.AutoReload;
             var bitBuffer = new bool[256];
             int i = 0;
             //Transaction Number
@@ -1517,10 +1523,33 @@ namespace IFS2.Equipment.TicketingRules
             i = CFunctions.ConvertToBits((ulong)lcav.EquipmentNumber, i, 24, bitBuffer);
             //Display Transaction Type
             i = CFunctions.ConvertToBits((ulong)GetDisplayTransactionTypeCode(lcav.OperationType), i, 6, bitBuffer);
-            //Transaction Location Code
-            i = CFunctions.ConvertToBits((ulong)lcav.Location, i, 8, bitBuffer);
-            //Service Provider Id
-            i = CFunctions.ConvertToBits((ulong)lcav.ServiceProvider, i, 8, bitBuffer);
+
+
+            if (version == 0)
+            {
+                //Transaction Location Code
+                i = CFunctions.ConvertToBits((ulong)lcav.Location, i, 8, bitBuffer);
+                //Service Provider Id
+                i = CFunctions.ConvertToBits((ulong)lcav.ServiceProvider, i, 8, bitBuffer);
+            }
+            else
+            {
+                var bufferStationCode = new bool[10];
+                //Transaction Location Code
+                CFunctions.ConvertToBits((ulong)onTxn.Location, 0, 10, bufferStationCode);
+                Array.Copy(bufferStationCode, 0, bitBuffer, i, 8); i += 8;
+
+                //Service Provider Id
+                i = CFunctions.ConvertToBits((ulong)onTxn.ServiceProvider, i, 8, bitBuffer);
+
+                // unused. earlier used as Last Bank Topup date
+                i = CFunctions.ConvertToBits(0, i, 32, bitBuffer);
+
+                int version = 1;
+                i = CFunctions.ConvertToBits((ulong)version, i, 3, bitBuffer);
+
+                Array.Copy(bufferStationCode, 8, bitBuffer, i, 2); i += 2;
+            }
 
             pResData = CFunctions.ConvertBoolTableToBytes(bitBuffer, 256);
             //Update DM2 : Last Add Value File
@@ -1682,7 +1711,7 @@ namespace IFS2.Equipment.TicketingRules
             {
                 if (_tempUpdateProductEndOfValidity(logMedia))
                 {
-                    if (_tempUpdateLocal_SaleNAddVal_Data(logMedia))
+                    if (_tempUpdateLocal_SaleNAddVal_Data(logMedia, SharedData.DM2SaleAddValueVersion))
                     {
                         if (bCommit)
                         {
