@@ -29,6 +29,7 @@ namespace IFS2.Equipment.TicketingRules
         int Destination();
         short RejectCode();
         Validation.TypeValues EntryExitBit();
+        byte EntryExitBitRaw();
         bool Test();
         int Amount();
         byte JourneyManagement();

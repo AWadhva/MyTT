@@ -208,9 +208,9 @@ namespace IFS2.Equipment.TicketingRules
 
                             raw.JourneyManagement1 = parser.JourneyManagement();
                             raw.RejectCode1 = (byte)parser.RejectCode();
-                            raw.EntryExitBit1 = (byte)parser.EntryExitBit();
+                            raw.EntryExitBit1 = parser.EntryExitBitRaw();
                             raw.TestFlag1 = Convert.ToByte(parser.Test());
-                            raw.TokenAmount1 = (short)(parser.Amount()/10);
+                            raw.TokenAmount1 = parser.Amount();
                         }
                         {
                             // VTD2
@@ -228,9 +228,9 @@ namespace IFS2.Equipment.TicketingRules
 
                             raw.JourneyManagement2 = parser.JourneyManagement();
                             raw.RejectCode2 = (byte)parser.RejectCode();
-                            raw.EntryExitBit2 = (byte)parser.EntryExitBit();
+                            raw.EntryExitBit2 = parser.EntryExitBitRaw();
                             raw.TestFlag2 = Convert.ToByte(parser.Test());
-                            raw.TokenAmount2 = (short)(parser.Amount()/10);
+                            raw.TokenAmount2 = parser.Amount();
                         }
                         {
                             var raw = logMedia.DelhiUltralightRaw;

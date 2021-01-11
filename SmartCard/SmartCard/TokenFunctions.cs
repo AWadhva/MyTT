@@ -549,7 +549,7 @@ namespace IFS2.Equipment.TicketingRules
                 i = CFunctions.ConvertToBits((ulong)SharedData.EquipmentNumber, i, 24, bitBuffer);
 
                 //Entry/Exit Stn Code
-                i = CFunctions.ConvertToBits((byte)val.Location, i, 10, bitBuffer);
+                i = CFunctions.ConvertToBits((ulong)val.Location, i, 10, bitBuffer);
 
                 ushort lastTxnDosDate, lastTxnDosTime;
                 CommonFunctions.CFunctions.GetDosDateTime(val.LastTransactionDateTime.ToUniversalTime(), true, out lastTxnDosDate, out lastTxnDosTime);
@@ -578,6 +578,9 @@ namespace IFS2.Equipment.TicketingRules
                 //Token Amount
                 i = CFunctions.ConvertToBits((ulong)(lcav.Amount / 10), i, 12, bitBuffer);
 
+                //Reserve
+                i = CFunctions.ConvertToBits(0, i, 2, bitBuffer);
+
 
                 ///////////////* BLOCK 3 : Replicaton of BLOCK 2 *//////////////////////
 
@@ -594,7 +597,7 @@ namespace IFS2.Equipment.TicketingRules
                 i = CFunctions.ConvertToBits((ulong)lcav.EquipmentNumber, i, 24, bitBuffer);
 
                 //Entry/Exit Stn Code
-                i = CFunctions.ConvertToBits((byte)val.Location, i, 10, bitBuffer);
+                i = CFunctions.ConvertToBits((ulong)val.Location, i, 10, bitBuffer);
 
                 //Transaction Time
                 i = CFunctions.ConvertToBits(lastTxnDosTime, i, 16, bitBuffer);
@@ -620,6 +623,9 @@ namespace IFS2.Equipment.TicketingRules
 
                 //Token Amount
                 i = CFunctions.ConvertToBits((ulong)(lcav.Amount / 10), i, 12, bitBuffer);
+
+                //Reserve
+                i = CFunctions.ConvertToBits(0, i, 2, bitBuffer);
 
                 pResBlocs = CFunctions.ConvertBoolTableToBytes(bitBuffer, 48 * 8);
 

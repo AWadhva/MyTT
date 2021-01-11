@@ -118,6 +118,11 @@ namespace IFS2.Equipment.TicketingRules
             return ((short)CFunctions.GetBitData(OFFSET + 112, 1, pResData) == CONSTANT.MBC_GateEntry ? Validation.TypeValues.Entry : Validation.TypeValues.Exit);
         }
 
+        public byte EntryExitBitRaw()
+        {
+            return (byte)CFunctions.GetBitData(OFFSET + 112, 1, pResData);
+        }
+
         public bool Test()
         {
             return Convert.ToBoolean((short)CFunctions.GetBitData(OFFSET + 113, 1, pResData));
