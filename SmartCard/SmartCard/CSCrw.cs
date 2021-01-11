@@ -1536,16 +1536,15 @@ namespace IFS2.Equipment.TicketingRules
             {
                 var bufferStationCode = new bool[10];
                 //Transaction Location Code
-                CFunctions.ConvertToBits((ulong)onTxn.Location, 0, 10, bufferStationCode);
+                CFunctions.ConvertToBits((ulong)lcav.Location, 0, 10, bufferStationCode);
                 Array.Copy(bufferStationCode, 0, bitBuffer, i, 8); i += 8;
 
                 //Service Provider Id
-                i = CFunctions.ConvertToBits((ulong)onTxn.ServiceProvider, i, 8, bitBuffer);
+                i = CFunctions.ConvertToBits((ulong)lcav.ServiceProvider, i, 8, bitBuffer);
 
                 // unused. earlier used as Last Bank Topup date
                 i = CFunctions.ConvertToBits(0, i, 32, bitBuffer);
-
-                int version = 1;
+                
                 i = CFunctions.ConvertToBits((ulong)version, i, 3, bitBuffer);
 
                 Array.Copy(bufferStationCode, 8, bitBuffer, i, 2); i += 2;
