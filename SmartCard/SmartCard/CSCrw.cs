@@ -1775,44 +1775,108 @@ namespace IFS2.Equipment.TicketingRules
         {
             if (SelectApplication(CONSTANT.DM2_AREA_CODE))
             {
-                var validation = logMedia.Application.Validation;
-                var ta = logMedia.Application.TransportApplication;
-                var ar = logMedia.Purse.AutoReload;
-
-                var bitBuffer = new bool[256];
-                int i = 0;                
+                bool[] bitBuffer;
 
                 DateTime begin = new DateTime(2000, 1, 1);
+                var validation = logMedia.Application.Validation;
                 if (validation.LastTransactionDateTime < begin)
                     validation.LastTransactionDateTime = begin;
-                i = CFunctions.ConvertToBits(validation.LastTransactionDateTime.ToDosDate(), i, 16, bitBuffer);
-                i = CFunctions.ConvertToBits(validation.EntryExitBit == Validation.TypeValues.Entry ? CONSTANT.MBC_GateEntry : CONSTANT.MBC_GateExit , i, 8, bitBuffer);
-                i = CFunctions.ConvertToBits((byte)validation.Location, i, 8, bitBuffer);
-                i = CFunctions.ConvertToBits((ulong)CFunctions.ConvertToUnixTimestamp(DateTime.Now), i, 32, bitBuffer);
-                i = CFunctions.ConvertToBits((byte)validation.RejectCode, i, 8, bitBuffer); // Reject code
-                i = CFunctions.ConvertToBits((byte)ta.Status, i, 8, bitBuffer);
-                i = CFunctions.ConvertToBits((byte)(ta.Test? 1 : 0), i, 1, bitBuffer);
-                i = CFunctions.ConvertToBits((ushort)validation.BonusValue, i, 16, bitBuffer);
 
-                ulong reserved = 0;
-                i = CFunctions.ConvertToBits((byte)(ar.Status), i, 1, bitBuffer);
-                i = CFunctions.ConvertToBits(reserved, i, 6, bitBuffer);
-                int unixtimestamp = CFunctions.ConvertToUnixTimestamp(ar.AutoTopupDateAndTime);
-                i = CFunctions.ConvertToBits((ulong)unixtimestamp, i, 32, bitBuffer);
-                i = CFunctions.ConvertToBits((ushort)(ar.Threshold / 10), i, 32, bitBuffer);
-                i = CFunctions.ConvertToBits((ulong)(ar.Amount / 10), i, 32, bitBuffer);
-                ushort lastCreditTopupDate = CFunctions.ToDosDate(ar.AutoTopupDateAndTime);
-                i = CFunctions.ConvertToBits((ushort)lastCreditTopupDate, i, 16, bitBuffer);
-                ushort dosDate = CFunctions.ToDosDate(ar.ExpiryDate);
-                i = CFunctions.ConvertToBits((ushort)dosDate, i, 16, bitBuffer);
-                i = CFunctions.ConvertToBits(reserved, i, 17, bitBuffer);
-                
+                if (SharedData.DM2ValidationVersion == 0)
+                    bitBuffer = GetBuffLocalValidationData_Ver0(logMedia);
+                else
+                    bitBuffer = GetBuffLocalValidationData_Ver1(logMedia);
                 bool bSuccess = SmartFunctions.Instance.WriteDataFile(CONSTANT.DM2_AREA_CODE, GetFileNum(CONSTANT.DM2_AREA_CODE, 2), CFunctions.ConvertBoolTableToBytes(bitBuffer, 256));
                 SmartFunctions.Instance.GetLastResult(out Err, out pSw1, out pSw2);
                 return bSuccess;
             }
             Logging.Log(LogLevel.Error, "CSCRw _UpdateMediaEndOfValidity cannot write the card");
             return false; 
+        }
+
+        bool[] GetBuffLocalValidationData_Ver0(LogicalMedia logMedia)
+        {
+            var validation = logMedia.Application.Validation;
+            var ta = logMedia.Application.TransportApplication;
+            var ar = logMedia.Purse.AutoReload;
+
+            var bitBuffer = new bool[256];
+            int i = 0;
+
+            i = CFunctions.ConvertToBits(validation.LastTransactionDateTime.ToDosDate(), i, 16, bitBuffer);
+            i = CFunctions.ConvertToBits(validation.EntryExitBit == Validation.TypeValues.Entry ? CONSTANT.MBC_GateEntry : CONSTANT.MBC_GateExit, i, 8, bitBuffer);
+            i = CFunctions.ConvertToBits((byte)validation.Location, i, 8, bitBuffer);
+            i = CFunctions.ConvertToBits((ulong)CFunctions.ConvertToUnixTimestamp(DateTime.Now), i, 32, bitBuffer);
+            i = CFunctions.ConvertToBits((byte)validation.RejectCode, i, 8, bitBuffer); // Reject code
+            i = CFunctions.ConvertToBits((byte)ta.Status, i, 8, bitBuffer);
+            i = CFunctions.ConvertToBits((byte)(ta.Test ? 1 : 0), i, 1, bitBuffer);
+            i = CFunctions.ConvertToBits((ushort)validation.BonusValue, i, 16, bitBuffer);
+
+            ulong reserved = 0;
+            i = CFunctions.ConvertToBits((byte)(ar.Status), i, 1, bitBuffer);
+            i = CFunctions.ConvertToBits(reserved, i, 6, bitBuffer);
+            int unixtimestamp = CFunctions.ConvertToUnixTimestamp(ar.AutoTopupDateAndTime);
+            i = CFunctions.ConvertToBits((ulong)unixtimestamp, i, 32, bitBuffer);
+            i = CFunctions.ConvertToBits((ushort)(ar.Threshold / 10), i, 32, bitBuffer);
+            i = CFunctions.ConvertToBits((ulong)(ar.Amount / 10), i, 32, bitBuffer);
+            ushort lastCreditTopupDate = CFunctions.ToDosDate(ar.AutoTopupDateAndTime);
+            i = CFunctions.ConvertToBits((ushort)lastCreditTopupDate, i, 16, bitBuffer);
+            ushort dosDate = CFunctions.ToDosDate(ar.ExpiryDate);
+            i = CFunctions.ConvertToBits((ushort)dosDate, i, 16, bitBuffer);
+            i = CFunctions.ConvertToBits(reserved, i, 17, bitBuffer);
+
+            return bitBuffer;
+        }
+
+        bool[] GetBuffLocalValidationData_Ver1(LogicalMedia logMedia)
+        {
+            var validation = logMedia.Application.Validation;
+            var ta = logMedia.Application.TransportApplication;
+            var ar = logMedia.Purse.AutoReload;
+
+            var bitBuffer = new bool[256];
+            int i = 0;
+
+            i = CFunctions.ConvertToBits(validation.LastTransactionDateTime.ToDosDate(), i, 16, bitBuffer);
+            
+            ulong version = 1;
+            i = CFunctions.ConvertToBits(version, i, 3, bitBuffer);
+
+            //Transaction Location Code
+            var bufferStationCode = new bool[10];
+            CFunctions.ConvertToBits((ulong)validation.Location, 0, 10, bufferStationCode);
+
+            //Transaction Location Code: most significant 2-bits
+            Array.Copy(bufferStationCode, 8, bitBuffer, i, 2); i += 2;
+
+            // Spare
+            i = CFunctions.ConvertToBits(0, i, 2, bitBuffer);
+
+            i = CFunctions.ConvertToBits(validation.EntryExitBit == Validation.TypeValues.Entry ? CONSTANT.MBC_GateEntry : CONSTANT.MBC_GateExit, i, 1, bitBuffer);
+
+            //Transaction Location Code: less significant 8-bits
+            Array.Copy(bufferStationCode, 0, bitBuffer, i, 8); i += 8;
+
+            i = CFunctions.ConvertToBits((ulong)CFunctions.ConvertToUnixTimestamp(DateTime.Now), i, 32, bitBuffer);
+            i = CFunctions.ConvertToBits((byte)validation.RejectCode, i, 8, bitBuffer); // Reject code
+            i = CFunctions.ConvertToBits((byte)ta.Status, i, 8, bitBuffer);
+            i = CFunctions.ConvertToBits((byte)(ta.Test ? 1 : 0), i, 1, bitBuffer);
+            i = CFunctions.ConvertToBits((ushort)validation.BonusValue, i, 16, bitBuffer);
+
+            ulong reserved = 0;
+            i = CFunctions.ConvertToBits((byte)(ar.Status), i, 1, bitBuffer);
+            i = CFunctions.ConvertToBits(reserved, i, 6, bitBuffer);
+            int unixtimestamp = CFunctions.ConvertToUnixTimestamp(ar.AutoTopupDateAndTime);
+            i = CFunctions.ConvertToBits((ulong)unixtimestamp, i, 32, bitBuffer);
+            i = CFunctions.ConvertToBits((ushort)(ar.Threshold / 10), i, 32, bitBuffer);
+            i = CFunctions.ConvertToBits((ulong)(ar.Amount / 10), i, 32, bitBuffer);
+            ushort lastCreditTopupDate = CFunctions.ToDosDate(ar.AutoTopupDateAndTime);
+            i = CFunctions.ConvertToBits((ushort)lastCreditTopupDate, i, 16, bitBuffer);
+            ushort dosDate = CFunctions.ToDosDate(ar.ExpiryDate);
+            i = CFunctions.ConvertToBits((ushort)dosDate, i, 16, bitBuffer);
+            i = CFunctions.ConvertToBits(reserved, i, 17, bitBuffer);
+
+            return bitBuffer;
         }
 
         public override bool _CommitModifications()
