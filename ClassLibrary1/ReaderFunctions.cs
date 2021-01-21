@@ -51,7 +51,8 @@ namespace IFS2.Equipment.CSCReader
             {
                 case CSC_READER_TYPE.V3_READER:
                 case CSC_READER_TYPE.V4_READER:
-                    return StatusV4(phRw, ref pStatusCSC);
+                case CSC_READER_TYPE.VIRTUAL_READER:
+                    return StatusV4(pReaderType,phRw, ref pStatusCSC);               
                 default:
 
                     return CSC_API_ERROR.ERR_DEVICE;
@@ -65,9 +66,8 @@ namespace IFS2.Equipment.CSCReader
             {
                 case CSC_READER_TYPE.V3_READER:
                 case CSC_READER_TYPE.V4_READER:
-
-                    return StopReaderV4(phRw);
-
+                case CSC_READER_TYPE.VIRTUAL_READER:
+                    return StopReaderV4(pReaderType,phRw);
                 default:
 
                     return CSC_API_ERROR.ERR_DEVICE;
@@ -83,7 +83,8 @@ namespace IFS2.Equipment.CSCReader
             {
                 case CSC_READER_TYPE.V3_READER:
                 case CSC_READER_TYPE.V4_READER:
-                    return InstallCardV4(phRw,
+                case CSC_READER_TYPE.VIRTUAL_READER:
+                    return InstallCardV4(pReaderType ,phRw,
                                          pDestType,
                                          pInstCardParams);
                 default:
@@ -98,7 +99,11 @@ namespace IFS2.Equipment.CSCReader
                                                  , Scenario scenarioNum
             )
         {
-            _lastErrorCode = V4Adaptor.sSmartConfigEx(phRw, (byte)scenarioNum, (byte)pPollingParams.Length, pPollingParams);
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+            if (pReaderType == CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode = CSCThalesVirtualReader.sSmartConfigEx(phRw, (byte)scenarioNum, (byte)pPollingParams.Length, pPollingParams);
+            else 
+#endif
+                _lastErrorCode = V4Adaptor.sSmartConfigEx(phRw, (byte)scenarioNum, (byte)pPollingParams.Length, pPollingParams);
             return (CSC_API_ERROR)_lastErrorCode;
         }
         
@@ -112,7 +117,9 @@ namespace IFS2.Equipment.CSCReader
             {
                 case CSC_READER_TYPE.V3_READER:
                 case CSC_READER_TYPE.V4_READER:
-                    return StartPollingV4(phRw, scenario, listener);
+                case CSC_READER_TYPE.VIRTUAL_READER:
+                    return StartPollingV4(pReaderType,phRw, scenario, listener);
+
                 default:
                     return CSC_API_ERROR.ERR_DEVICE;
             }
@@ -126,7 +133,8 @@ namespace IFS2.Equipment.CSCReader
             {
                 case CSC_READER_TYPE.V3_READER:
                 case CSC_READER_TYPE.V4_READER:
-                    return StartPollingV4(phRw, listener);
+                case CSC_READER_TYPE.VIRTUAL_READER:
+                    return StartPollingV4(pReaderType, phRw, listener);
 
                 default:
 
@@ -144,11 +152,18 @@ namespace IFS2.Equipment.CSCReader
                 case CSC_READER_TYPE.V3_READER:
                 case CSC_READER_TYPE.V4_READER:
                     _lastErrorCode = ERR_CODE = V4Adaptor.sSmartStopPollingEx(phRw);
-
                     return (CSC_API_ERROR)ERR_CODE;
+#if !WindowsCE
+#if !MonoLinux
+#if !NoVirtualReader
+                case CSC_READER_TYPE.VIRTUAL_READER:
+                    _lastErrorCode = ERR_CODE = CSCThalesVirtualReader.sSmartStopPollingEx(phRw);
+                    return (CSC_API_ERROR)ERR_CODE;
+#endif
+#endif
+#endif
 
                 default:
-
                     return CSC_API_ERROR.ERR_DEVICE;
             }
         }
@@ -196,14 +211,15 @@ namespace IFS2.Equipment.CSCReader
             {
                 case CSC_READER_TYPE.V3_READER:
                 case CSC_READER_TYPE.V4_READER:
+                case CSC_READER_TYPE.VIRTUAL_READER:
 
-                    return IsoCommandV4(phRw,
+                    return IsoCommandV4(pReaderType,phRw,
                                          pDestType,
                                          pCommandApdu,
                                          maxAttempt,
                                          out pSw1,
                                          out pSw2,
-                                         out pResData);                    
+                                         out pResData);
                 default:
                     pResData[0] = 0xFF;
                     return CSC_API_ERROR.ERR_DEVICE;
@@ -220,7 +236,15 @@ namespace IFS2.Equipment.CSCReader
                     {
                         _lastErrorCode = V4Adaptor.sSmartHaltCardEx(phRw);
                         return (CSC_API_ERROR)_lastErrorCode;
-                    }                
+                    }
+#if !WindowsCE
+#if !MonoLinux
+#if !NoVirtualReader
+                case CSC_READER_TYPE.VIRTUAL_READER:
+                    return (CSC_API_ERROR)CSCThalesVirtualReader.sSmartHaltCardEx(phRw);
+#endif
+#endif
+#endif
                 default:
                     Debug.Assert(false);
                     return CSC_API_ERROR.ERR_NONE;
@@ -238,6 +262,15 @@ namespace IFS2.Equipment.CSCReader
                         _lastErrorCode = V4Adaptor.sSmartStopDetectRemovalEx(phRw);
                         return (CSC_API_ERROR)_lastErrorCode;
                     }
+#if !WindowsCE
+#if !MonoLinux
+#if !NoVirtualReader
+                case CSC_READER_TYPE.VIRTUAL_READER:
+                    _lastErrorCode = CSCThalesVirtualReader.sSmartStopDetectRemovalEx(phRw);
+                    return (CSC_API_ERROR)_lastErrorCode;
+#endif
+#endif
+#endif
                 default:
                     Debug.Assert(false);
                     return CSC_API_ERROR.ERR_NONE;
@@ -251,16 +284,26 @@ namespace IFS2.Equipment.CSCReader
             switch (pReaderType)
             {                
                 case CSC_READER_TYPE.V4_READER:
+                case CSC_READER_TYPE.VIRTUAL_READER:
                     {
                         if (listener == null)
-                            _lastErrorCode = V4Adaptor.sSmartStartDetectRemovalEx(phRw, CONSTANT.DETECTION_WITHOUT_EVENT, IntPtr.Zero);
+                        {
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                            if (pReaderType == CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode = CSCThalesVirtualReader.sSmartStartDetectRemovalEx(phRw, CONSTANT.DETECTION_WITHOUT_EVENT);
+                            else 
+#endif
+                                _lastErrorCode = V4Adaptor.sSmartStartDetectRemovalEx(phRw, CONSTANT.DETECTION_WITHOUT_EVENT, IntPtr.Zero);
+                        }
 #if !WindowsCE && !MonoLinux && !NoAdditionalTests
                         else
                         {
                             if (_Del_listenerDetectionRemoval == null)
                                 _Del_listenerDetectionRemoval = new Utility.StatusListenerDelegate(listener);
-
-                            _lastErrorCode = V4Adaptor.sSmartStartDetectRemovalEx_V4(phRw, CONSTANT.DETECTION_WITH_EVENT, _Del_listenerDetectionRemoval);
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                            if (pReaderType == CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode = CSCThalesVirtualReader.sSmartStartDetectRemovalEx(phRw, CONSTANT.DETECTION_WITH_EVENT, _Del_listenerDetectionRemoval);
+                            else 
+#endif
+                                _lastErrorCode = V4Adaptor.sSmartStartDetectRemovalEx_V4(phRw, CONSTANT.DETECTION_WITH_EVENT, _Del_listenerDetectionRemoval);
                         }
 #endif
                         return (CSC_API_ERROR)_lastErrorCode;
@@ -272,7 +315,7 @@ namespace IFS2.Equipment.CSCReader
         }
 
         static Utility.StatusListenerDelegate _Del_listenerDetectionRemoval = null, _Del_listenerStartPolling = null;
-        static internal CSC_API_ERROR InstallCardV4(int phRw,
+        static internal CSC_API_ERROR InstallCardV4(CSC_READER_TYPE pReaderType,int phRw,
                                                     DEST_TYPE pDestType,
                                                     InstallCard pInstCardParams)
         {
@@ -349,34 +392,47 @@ namespace IFS2.Equipment.CSCReader
             IntPtr piInstCardParams = Marshal.AllocHGlobal(Marshal.SizeOf(pInstCardParams));
             Marshal.StructureToPtr(pInstCardParams, piInstCardParams, false);
            // IntPtr piInstCardParams = MarshalAnsi.StructureToPtr(pInstCardParams);
-            _lastErrorCode = V4Adaptor.sSmartInstCardEx(phRw, pDestType, piInstCardParams);
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+            if (pReaderType == CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode = CSCThalesVirtualReader.sSmartInstCardEx(phRw, pDestType, pInstCardParams);
+            else 
+#endif
+                _lastErrorCode = V4Adaptor.sSmartInstCardEx(phRw, pDestType, piInstCardParams);
             return (CSC_API_ERROR)_lastErrorCode;
 #endif
         }
         static IntPtr _listener = IntPtr.Zero;
         static IntPtr _listenerDetectionRemoval = IntPtr.Zero;
-        static internal CSC_API_ERROR StartPollingV4(int phRw, byte scenarioNum, Utility.StatusListenerDelegate lisenter)
+        static internal CSC_API_ERROR StartPollingV4(CSC_READER_TYPE pReaderType,int phRw, byte scenarioNum, Utility.StatusListenerDelegate lisenter)
         {
             if (lisenter == null)
-                _lastErrorCode = V4Adaptor.sSmartStartPollingEx(phRw, scenarioNum, AC_TYPE.AC_WITHOUT_COLLISION, CONSTANT.DETECTION_WITHOUT_EVENT, IntPtr.Zero);
+            {
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                if (pReaderType == CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode = CSCThalesVirtualReader.sSmartStartPollingEx(phRw, scenarioNum, AC_TYPE.AC_WITHOUT_COLLISION, CONSTANT.DETECTION_WITHOUT_EVENT, null);
+                else 
+#endif
+                    _lastErrorCode = V4Adaptor.sSmartStartPollingEx(phRw, scenarioNum, AC_TYPE.AC_WITHOUT_COLLISION, CONSTANT.DETECTION_WITHOUT_EVENT, IntPtr.Zero);
+            }
 #if !WindowsCE && !MonoLinux && !NoAdditionalTests
             else
             {
-                if (_Del_listenerStartPolling == null)                
-                    _Del_listenerStartPolling = new Utility.StatusListenerDelegate(lisenter);                    
-                
-                _lastErrorCode = V4Adaptor.sSmartStartPollingEx_V4(phRw, scenarioNum, AC_TYPE.AC_WITHOUT_COLLISION, CONSTANT.DETECTION_WITH_EVENT, _Del_listenerStartPolling);
+                if (_Del_listenerStartPolling == null)
+                    _Del_listenerStartPolling = new Utility.StatusListenerDelegate(lisenter);
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                if (pReaderType == CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode = CSCThalesVirtualReader.sSmartStartPollingEx(phRw, scenarioNum, AC_TYPE.AC_WITHOUT_COLLISION, CONSTANT.DETECTION_WITH_EVENT, _Del_listenerStartPolling);
+                else
+#endif 
+                    _lastErrorCode = V4Adaptor.sSmartStartPollingEx_V4(phRw, scenarioNum, AC_TYPE.AC_WITHOUT_COLLISION, CONSTANT.DETECTION_WITH_EVENT, _Del_listenerStartPolling);
             }
 #endif
             return (CSC_API_ERROR)_lastErrorCode;
         }
 
-        static internal CSC_API_ERROR StartPollingV4(int phRw, Utility.StatusListenerDelegate lisenter)
+        static internal CSC_API_ERROR StartPollingV4(CSC_READER_TYPE pReaderType, int phRw, Utility.StatusListenerDelegate lisenter)
         {
-            return StartPollingV4(phRw, 1, lisenter);            
+            return StartPollingV4(pReaderType,phRw, 1, lisenter);            
         }
 
-        static internal CSC_API_ERROR IsoCommandV4(int phRw,
+        static internal CSC_API_ERROR IsoCommandV4(CSC_READER_TYPE pReaderType, int phRw,
                                                    DEST_TYPE pDestType,
                                                    byte[] pCommandApdu,
             int maxReattemptsInCaseOfErrData,
@@ -401,8 +457,28 @@ namespace IFS2.Equipment.CSCReader
                     IntPtr piDataLen = Marshal.AllocHGlobal(DataLen);
 
                     Marshal.WriteInt16(piDataLen, DataLen);
-
-                    _lastErrorCode = ERR_CODE = V4Adaptor.sSmartISOEx(phRw, pDestType, Convert.ToInt16(pCommandApdu.Length), pCommandApdu, piDataLen, piDataOut);
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                    if (pReaderType == CSC_READER_TYPE.VIRTUAL_READER)
+                    {
+                        byte[] DataOut;
+                        _lastErrorCode = ERR_CODE = CSCThalesVirtualReader.sSmartISOEx(phRw, pDestType, Convert.ToInt16(pCommandApdu.Length), pCommandApdu, out DataLen, out DataOut);
+                        if (DataOut == null)
+                        {
+                            DataLen = 0;
+                        }
+                        else
+                        {
+                            Marshal.WriteInt16(piDataLen, DataLen);
+                            unsafe
+                            {
+                                byte* opArray = (byte*)piDataOut.ToPointer();
+                                if (DataLen > 0) for (i = 0; i < DataOut.Length; i++) *(opArray + i) = DataOut[i];
+                            }
+                        }
+                    }
+                    else
+#endif
+                        _lastErrorCode = ERR_CODE = V4Adaptor.sSmartISOEx(phRw, pDestType, Convert.ToInt16(pCommandApdu.Length), pCommandApdu, piDataLen, piDataOut);
 
                     if (ERR_CODE == CONSTANT.NO_ERROR)
                     {
@@ -456,8 +532,9 @@ namespace IFS2.Equipment.CSCReader
                     {
                         case CSC_READER_TYPE.V3_READER:
                         case CSC_READER_TYPE.V4_READER:
+                        case CSC_READER_TYPE.VIRTUAL_READER:
                             Logging.Log(LogLevel.Verbose, "ReaderFunctions.ReloadReader before InitReaderv4");
-                            Err = InitReaderV4(pReaderComm, out phRw, out pFirmware, rfPower);
+                            Err = InitReaderV4(pReaderType,pReaderComm, out phRw, out pFirmware, rfPower);
                             Logging.Log(LogLevel.Verbose, "ReaderFunctions.ReloadReader after InitReaderv4");
                             break;
                         default:
@@ -508,7 +585,7 @@ namespace IFS2.Equipment.CSCReader
                         case CSC_READER_TYPE.V3_READER:
                          Logging.Log(LogLevel.Verbose, "ReaderFunctions.ReloadReader before InitReaderv4");
                          byte readerRFPower = (byte)Configuration.ReadParameter("PowerOfCSCReader", "byte", "1");
-                         Err = InitReaderV4(pReaderComm, out phRw, out pFirmware, readerRFPower);
+                         Err = InitReaderV4(pReaderType,pReaderComm, out phRw, out pFirmware, readerRFPower);
                          Logging.Log(LogLevel.Verbose, "ReaderFunctions.ReloadReader after InitReaderv4");
                            break;
 
@@ -542,9 +619,9 @@ namespace IFS2.Equipment.CSCReader
             }
         }
 
-        static internal CSC_API_ERROR InitReaderV4(ReaderComm pReaderComm,
+        static internal CSC_API_ERROR InitReaderV4(CSC_READER_TYPE pReaderType,ReaderComm pReaderComm,
                                                    out int phRw,
-                                                   out FirmwareInfo pFirmware, byte? rfPower)
+                                                   out FirmwareInfo pFirmware, byte? rfPower )
         {
             short ERR_CODE = CONSTANT.IS_ERROR;
 
@@ -562,19 +639,34 @@ namespace IFS2.Equipment.CSCReader
                     IntPtr piMajorVersion = Marshal.AllocHGlobal(sizeof(int)),
                            piMinorVersion = Marshal.AllocHGlobal(sizeof(int));
 
-                    
+                    int MajorVersion=0;
+                    int MinorVersion=0;
                     //Logging.Log(LogLevel.Verbose, "ReaderFunctions -> InitReaderV4, before  V4Adaptor.sCSCReaderGetApiVersionEx");
-                    _lastErrorCode = ERR_CODE = V4Adaptor.sCSCReaderGetApiVersionEx(piMajorVersion, piMinorVersion);
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                    if (pReaderType==CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode=ERR_CODE=CSCThalesVirtualReader.sCSCReaderGetApiVersionEx(out MajorVersion, out MinorVersion);
+                    else
+#endif 
+                        _lastErrorCode = ERR_CODE = V4Adaptor.sCSCReaderGetApiVersionEx(piMajorVersion, piMinorVersion);
                    // ERR_CODE = V4Adaptor.sCSCReaderGetApiVersionEx(&pMajorVersion, &pMinorVersion);
                     //Logging.Log(LogLevel.Verbose, "ReaderFunctions -> InitReaderV4, after  V4Adaptor.sCSCReaderGetApiVersionEx");
 
                     if (ERR_CODE == CONSTANT.NO_ERROR)
                     {
-                        int* MajorVerPtr = (int*)piMajorVersion.ToPointer();
-                        int* MinorVerPtr = (int*)piMinorVersion.ToPointer();
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                        if (pReaderType==CSC_READER_TYPE.VIRTUAL_READER)
+                        {
+                        }
+                        else
+                        {
+#endif
+                            int* MajorVerPtr = (int*)piMajorVersion.ToPointer();
+                            int* MinorVerPtr = (int*)piMinorVersion.ToPointer();
 
-                        int MajorVersion = *MajorVerPtr;
-                        int MinorVersion = *MinorVerPtr;
+                            MajorVersion = *MajorVerPtr;
+                            MinorVersion = *MinorVerPtr;
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                        }
+#endif
                        // Logging.Log(LogLevel.Error, "ReaderFunctions -> InitReaderV4, before  if (MajorVersion >= 1 || MinorVersion >= 2)");
                         Logging.Log(LogLevel.Information, "InitReaderV4 Versions CSC API " + Convert.ToString(MajorVersion) + "." + Convert.ToString(MinorVersion));
 
@@ -609,7 +701,11 @@ namespace IFS2.Equipment.CSCReader
                             //    hRw = -1;
                             //}
                             //~SKS
-                            _lastErrorCode = ERR_CODE = V4Adaptor.sCSCReaderStartEx(pReaderComm.COM_PORT, pReaderComm.COM_SPEED, out phRw);
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                            if (pReaderType==CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode=ERR_CODE=CSCThalesVirtualReader.sCSCReaderStartEx(pReaderComm.COM_PORT, pReaderComm.COM_SPEED, out phRw);
+                            else
+#endif 
+                                _lastErrorCode = ERR_CODE = V4Adaptor.sCSCReaderStartEx(pReaderComm.COM_PORT, pReaderComm.COM_SPEED, out phRw);
 #endif
                             Logging.Log(LogLevel.Verbose, "InitReaderV4 Start Communication " + Convert.ToString(ERR_CODE)+";"+Convert.ToString(phRw));                           
 
@@ -617,7 +713,11 @@ namespace IFS2.Equipment.CSCReader
                             {
                                 hRw = phRw;//SKS added on 20190501
                                 StatusCSC pStatusCSC;
-                                _lastErrorCode = ERR_CODE = V4Adaptor.sSmartStatusEx(phRw, out pStatusCSC);
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                                if (pReaderType==CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode = ERR_CODE = CSCThalesVirtualReader.sSmartStatusEx(phRw, out pStatusCSC);
+                                else 
+#endif
+                                    _lastErrorCode = ERR_CODE = V4Adaptor.sSmartStatusEx(phRw, out pStatusCSC);
 
                                 Logging.Log(LogLevel.Verbose, "InitReaderV4 Reading Status " + Convert.ToString(ERR_CODE));
                                 if (ERR_CODE != 0)
@@ -630,7 +730,11 @@ namespace IFS2.Equipment.CSCReader
                                 if (pStatusCSC.ucStatCSC != CONSTANT.ST_VIRGIN)
                                 {
                                     Logging.Log(LogLevel.Verbose, "ReaderFunctions -> InitReaderV4 Restarting Reader....");
-                                    _lastErrorCode = ERR_CODE = V4Adaptor.sCscRebootEx(phRw);                                  
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                                    if (pReaderType==CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode = ERR_CODE = CSCThalesVirtualReader.sCscRebootEx(phRw); 
+                                    else
+#endif 
+                                        _lastErrorCode = ERR_CODE = V4Adaptor.sCscRebootEx(phRw);                                  
                                 }
                                 if (rfPower != null)
                                 {
@@ -641,8 +745,11 @@ namespace IFS2.Equipment.CSCReader
 #if!WindowsCE
                                 CSC_BOOTIDENT pOutFirmareName;
                                     Logging.Log(LogLevel.Verbose, "InitReaderV4 Has rebooted " + Convert.ToString(ERR_CODE));
-
-                                _lastErrorCode = ERR_CODE = V4Adaptor.sCscConfigEx(phRw, out pOutFirmareName);
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                                if (pReaderType==CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode = ERR_CODE = CSCThalesVirtualReader.sCscConfigEx(phRw, out pOutFirmareName);
+                                else 
+#endif
+                                    _lastErrorCode = ERR_CODE = V4Adaptor.sCscConfigEx(phRw, out pOutFirmareName);
 
                                 pFirmware.Chargeur = Convert.ToString(pOutFirmareName.ucBootLabel);
                                 pFirmware.AppCSC = Convert.ToString(pOutFirmareName.ucPrgLabel);
@@ -730,12 +837,17 @@ namespace IFS2.Equipment.CSCReader
 
         }        
 
-        static private CSC_API_ERROR StatusV4(int phRw, ref StatusCSC pStatusCSC)
+
+        static private CSC_API_ERROR StatusV4(CSC_READER_TYPE pReader_Type, int phRw, ref StatusCSC pStatusCSC)
         {
             short ERR_CODE = CONSTANT.IS_ERROR;
             try
             {
-                _lastErrorCode = ERR_CODE = V4Adaptor.sSmartStatusEx(phRw, out pStatusCSC);
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                if (pReader_Type==CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode = ERR_CODE = CSCThalesVirtualReader.sSmartStatusEx(phRw, out pStatusCSC);
+                else
+#endif 
+                    _lastErrorCode = ERR_CODE = V4Adaptor.sSmartStatusEx(phRw, out pStatusCSC);
                 return (CSC_API_ERROR)ERR_CODE;
             }
             catch (Exception )
@@ -745,9 +857,14 @@ namespace IFS2.Equipment.CSCReader
             }
         }
 
-        static internal CSC_API_ERROR StopReaderV4(int phRw)
+
+        static internal CSC_API_ERROR StopReaderV4(CSC_READER_TYPE pReaderType,int phRw)
         {
-            _lastErrorCode = V4Adaptor.sCSCReaderStopEx(phRw);
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+            if (pReaderType==CSC_READER_TYPE.VIRTUAL_READER) _lastErrorCode = CSCThalesVirtualReader.sCSCReaderStopEx(phRw);
+            else
+#endif 
+                _lastErrorCode = V4Adaptor.sCSCReaderStopEx(phRw);
             return (CSC_API_ERROR)_lastErrorCode;
         }
 
@@ -767,6 +884,13 @@ namespace IFS2.Equipment.CSCReader
                         _lastErrorCode = V4Adaptor.sCscPingEx(_hRw, MINPINGSIZE, MINPONGSIZE);
                         return (CSC_API_ERROR)_lastErrorCode;
                     }
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                case CSC_READER_TYPE.VIRTUAL_READER:
+                    {
+                        _lastErrorCode = CSCThalesVirtualReader.sCscPingEx(_hRw, MINPINGSIZE, MINPONGSIZE);
+                        return (CSC_API_ERROR)_lastErrorCode;
+                    }
+#endif
                 default:
                     throw new NotSupportedException(); // v3 doesn't offer pinging.
             }
@@ -782,19 +906,32 @@ namespace IFS2.Equipment.CSCReader
                 case CSC_READER_TYPE.V4_READER:
                 case CSC_READER_TYPE.V3_READER:                    
                         _lastErrorCode = V4Adaptor.sSmartFieldEx(_hRw, (byte)0);
-                        return (CSC_API_ERROR)_lastErrorCode;                    
+                        return (CSC_API_ERROR)_lastErrorCode; 
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                case CSC_READER_TYPE.VIRTUAL_READER:
+                        _lastErrorCode = CSCThalesVirtualReader.sSmartFieldEx(_hRw, (byte)0);
+                        return (CSC_API_ERROR)_lastErrorCode; 
+#endif
                 default:
                     return CSC_API_ERROR.ERR_NOT_AVAIL;
             }
         }
         public static CSC_API_ERROR StartField(CSC_READER_TYPE cSC_READER_TYPE, int _hRw)
         {
-            _lastErrorCode =(int) CSC_API_ERROR.ERR_API;
-
-            if (cSC_READER_TYPE == CSC_READER_TYPE.V4_READER || cSC_READER_TYPE == CSC_READER_TYPE.V3_READER)
-                _lastErrorCode = V4Adaptor.sSmartFieldEx(_hRw, CONSTANT.FIELD_ON);
-
-            return (CSC_API_ERROR)_lastErrorCode;
+            switch (cSC_READER_TYPE)
+            {
+                case CSC_READER_TYPE.V4_READER:
+                case CSC_READER_TYPE.V3_READER:
+                    _lastErrorCode = V4Adaptor.sSmartFieldEx(_hRw, CONSTANT.FIELD_ON);
+                    return (CSC_API_ERROR)_lastErrorCode;
+#if !WindowsCE && !MonoLinux && !NoVirtualReader
+                case CSC_READER_TYPE.VIRTUAL_READER:
+                    _lastErrorCode = CSCThalesVirtualReader.sSmartFieldEx(_hRw, CONSTANT.FIELD_ON);
+                    return (CSC_API_ERROR)_lastErrorCode;
+#endif
+                default:
+                    return CSC_API_ERROR.ERR_API;
+            }
         }
     }
 }

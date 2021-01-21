@@ -127,53 +127,53 @@ namespace IFS2.Equipment.CSCReaderAdaptor
            byte ucFieldState);
 
 #else
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CharSet = CharSet.Auto)] //Fait
         public static extern short sCSCReaderGetApiVersionEx
                                (IntPtr piMajorVersion,
                                 IntPtr piMinorVersion);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sCSCReaderStartEx(
               [MarshalAs(UnmanagedType.LPStr)] string pszComName,
               int ulSpeed,
               out int phRw);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sCSCReaderStopEx(
                 int phRw);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sCscRebootEx(
                 int phRw);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sSmartStatusEx(
                 int phRw,
                 out StatusCSC pStatusCSC);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sCscConfigEx(
             int phRw,
             out CSC_BOOTIDENT pFirmwareName);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sSmartInstCardEx(
             int phRw,
             DEST_TYPE pDestReaderType,
             IntPtr pxInstallCard);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sSmartHaltCardEx(
             int phRw);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sSmartConfigEx(
             int phRw,
             byte ucNumScenario,
             byte ucNbRecord,
             [In] ScenarioPolling[] pxConfigPolling);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sSmartISOEx(
             int phRw,
             DEST_TYPE pDestReaderType,
@@ -182,7 +182,7 @@ namespace IFS2.Equipment.CSCReaderAdaptor
             IntPtr pusOutDataLen,
             IntPtr pucDataOut);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sSmartStartPollingEx(
             int phRw,
             byte ucNumScenario,
@@ -190,7 +190,7 @@ namespace IFS2.Equipment.CSCReaderAdaptor
             byte ucSpontCall,
             IntPtr pvCallBackEx);
 
-        [DllImport("ThalesCSCApiWrapperForSakeOfCallback.dll", SetLastError = true, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("ThalesCSCApiWrapperForSakeOfCallback.dll", SetLastError = true, CallingConvention = CallingConvention.StdCall)] //Fait
         public extern static short sSmartStartPollingEx_V4(
             int phRw,
             byte ucNumScenario,
@@ -200,14 +200,14 @@ namespace IFS2.Equipment.CSCReaderAdaptor
             );
 
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sSmartStartDetectRemovalEx(
             int phRw,
             byte ucSpontCall, // Specifies the notification method to use when the CSC removal is detected by the reader. The two possible values are:
                              // DETECTION_WITH_EVENT (the callback routine is executed) or DETECTION_WITHOUT_EVENT (no callback)
             IntPtr pvCallBackEx);
 
-        [DllImport("ThalesCSCApiWrapperForSakeOfCallback.dll", SetLastError = true, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("ThalesCSCApiWrapperForSakeOfCallback.dll", SetLastError = true, CallingConvention = CallingConvention.StdCall)] //Fait
         public extern static short sSmartStartDetectRemovalEx_V4(
             int phRw,
             byte ucSpontCall, // Specifies the notification method to use when the CSC removal is detected by the reader. The two possible values are:
@@ -215,11 +215,11 @@ namespace IFS2.Equipment.CSCReaderAdaptor
             Utility.StatusListenerDelegate listener            
             );
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sSmartStopDetectRemovalEx(
             int phRw);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sSmartStopPollingEx(
             int phRw);
 
@@ -228,12 +228,12 @@ namespace IFS2.Equipment.CSCReaderAdaptor
                                          out StatusCSC pStatusCSC);
 
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sSmartFieldEx(
             int phRw,
             byte ucFieldState);
 
-        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThalesCscApi.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)] //Fait
         public extern static short sCscPingEx(
             int phRw,
             short pingSize,

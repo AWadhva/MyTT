@@ -19,7 +19,8 @@ namespace IFS2.Equipment.TicketingRules.CommonTT
         V1_READER = 1,  //Not supported 
         V2_READER = 2,  //Not supported 
         V3_READER = 3,
-        V4_READER = 4
+        V4_READER = 4,
+        VIRTUAL_READER = 99
     }
 
     /*---------------------------------*/

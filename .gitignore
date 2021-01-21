@@ -106,3 +106,7 @@ WindowsCE/ReadCCHSSAMIDCE/bin/Debug/OpenNETCF.Configuration.xml
 Tests/TestCSCApiV3/obj/Debug/build.force
 obj
 IFS2.Equipment.TicketingRules.Start.vshost.exe.config
+
+Outputs/*.*
+SAM/CCHSSAM/Outputs/*.*
+
