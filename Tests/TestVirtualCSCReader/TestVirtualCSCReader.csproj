@@ -103,6 +103,14 @@
       <Project>{21D259C4-51B5-42B4-8E2C-B71A666EB16E}</Project>
       <Name>CSCVirtualReader</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\SmartCard\SmartCard\SmartFunctions.csproj">
+      <Project>{D3D88159-0B54-44F1-8456-495D57CA8180}</Project>
+      <Name>SmartFunctions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SmartMedia\SmartMedia.csproj">
+      <Project>{7D58F338-376A-4436-A062-614D35297DA3}</Project>
+      <Name>SmartMedia</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
