@@ -62,6 +62,7 @@ namespace IFS2.Equipment.TicketingRules
         private OneEvent _last100Errors = null;
 
         private ulong lastSNMediaReadyToInitialise = 0;
+        private int countSAMText = 60;
 
         public MainTicketingRules()
             : base("MainTicketingRules")
@@ -766,6 +767,8 @@ namespace IFS2.Equipment.TicketingRules
                 _ReaderInitialized = false;
                 Stopped = false;
                 _ReaderInitialized = this.Init();
+                int countSAMText = Configuration.ReadIntParameter("FrequencyOfSAMTest", 30);
+
                 
             }
             catch (Exception e1)
@@ -943,35 +946,55 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         UpdateOneAlarm(CSCReloaderDriverAlarms.IsOffLine, false);
                         UpdateOneAlarmAndMetaStatus(CSCReloaderDriverAlarms.OutOfOrder, false);
+                        Logging.Log(LogLevel.Verbose, "TTMain.ForDEbug.1");
                         if (IFSEventsList.Activated(StatusConsts.DSMDriver, new int[] { (int)DSMDriverAlarms.SAM1OutOfOrder, (int)DSMDriverAlarms.SAM1IsOffLine, (int)DSMDriverAlarms.SAM1Blocked, (int)DSMDriverAlarms.SAM1IsNotPresent }))
                         {
-                           bool ret = mDFCairo.GetReaderInstance().SAM_GetKUCQuota(0x01, out _samKUCQuota, out _samCurrvalue);
+                            Logging.Log(LogLevel.Verbose, "TTMain.ForDEbug.2");
+                            bool ret = mDFCairo.GetReaderInstance().SAM_GetKUCQuota(0x01, out _samKUCQuota, out _samCurrvalue);
                             Logging.Log(LogLevel.Information, "SAM KUC Quota after recovery: Curr val: " + _samCurrvalue.ToString() + " , Quota: " + _samKUCQuota.ToString());
 
-                            NXP_SAM_Info dsmInfo= null;
+                            NXP_SAM_Info dsmInfo = null;
                             mDFCairo.GetReaderInstance().SAM_GetVersion(out dsmInfo);
-                                if (dsmInfo != null)
-                                {
-                                    //BitConverter.ToString(dsmInfo.SerialNum).Replace("-", string.Empty)
-                                    _samSerialNumber = Utility.ConvertByesTabToLong(dsmInfo.SerialNum);
-                                    UpdateForSAmQuota();
-                                    IFSEventsList.SetAttribute(StatusConsts.DSMDriver, (int)DSMDriverAlarms.SAM1SerialNumber, _samSerialNumber.ToString());
-                                }
+                            if (dsmInfo != null)
+                            {
+                                //BitConverter.ToString(dsmInfo.SerialNum).Replace("-", string.Empty)
+                                _samSerialNumber = Utility.ConvertByesTabToLong(dsmInfo.SerialNum);
+                                UpdateForSAmQuota();
+                                IFSEventsList.SetAttribute(StatusConsts.DSMDriver, (int)DSMDriverAlarms.SAM1SerialNumber, _samSerialNumber.ToString());
+                            }
 
-                                if (mDFCairo.GetReaderInstance().SAM_Activated())
-                                {
-                                    UpdateOneAlarm(DSMDriverAlarms.SAM1IsOffLine, false);
+                            if (mDFCairo.GetReaderInstance().SAM_Activated())
+                            {
+                                UpdateOneAlarm(DSMDriverAlarms.SAM1IsOffLine, false);
+                                UpdateOneAlarm(DSMDriverAlarms.SAM1IsNotPresent, false);
+                                UpdateOneAlarmAndMetaStatus(DSMDriverAlarms.SAM1OutOfOrder, false);
+                            }
+                            else
+                            {
+                                UpdateOneAlarm(DSMDriverAlarms.SAM1IsOffLine, true);
+                                if (ret)
                                     UpdateOneAlarm(DSMDriverAlarms.SAM1IsNotPresent, false);
-                                    UpdateOneAlarmAndMetaStatus(DSMDriverAlarms.SAM1OutOfOrder, false);
-                                }
-                                else
+                                else UpdateOneAlarm(DSMDriverAlarms.SAM1IsNotPresent, true);
+                                UpdateOneAlarmAndMetaStatus(DSMDriverAlarms.SAM1OutOfOrder, true);
+                            }
+                        }
+                        else
+                        {
+                            Logging.Log(LogLevel.Verbose, "TTMain.ForDEbug.3");
+                            countSAMText--;
+                            if (countSAMText == 0)
+                            {
+                                Logging.Log(LogLevel.Verbose, "Check of SAM Status in case of");
+                                countSAMText = Configuration.ReadIntParameter("FrequencyOfSAMTest", 30);
+                                bool ret = mDFCairo.GetReaderInstance().SAM_GetKUCQuota(0x01, out _samKUCQuota, out _samCurrvalue);
+                                if (!ret)
                                 {
                                     UpdateOneAlarm(DSMDriverAlarms.SAM1IsOffLine, true);
-                                  if(ret)
-                                      UpdateOneAlarm(DSMDriverAlarms.SAM1IsNotPresent, false);
-                                  else UpdateOneAlarm(DSMDriverAlarms.SAM1IsNotPresent, true);
+                                    UpdateOneAlarm(DSMDriverAlarms.SAM1IsNotPresent, false);
                                     UpdateOneAlarmAndMetaStatus(DSMDriverAlarms.SAM1OutOfOrder, true);
+                                    _ReaderInitialized = false;
                                 }
+                            }
                         }
                         
                     }
