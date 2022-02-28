@@ -98,7 +98,7 @@ namespace IFS2.Equipment.TicketingRules
 
             CSC_API_ERROR ErrWriting = ((DelhiTokenUltralight)_ticketingRules.hwToken).WriteToToken(cb, out bSuccess);
             if (ErrWriting != CSC_API_ERROR.ERR_NONE)
-                Logging.Log(LogLevel.Verbose, "ReadMediaData2::ReadBlocks " + ErrWriting.ToString());
+                Logging.Log(LogLevel.Verbose, "MediaOpReqTTagIssue::CorrectMediaAppeared " + ErrWriting.ToString());
 
             if (ErrWriting == CSC_API_ERROR.ERR_NONE && bSuccess)
             {

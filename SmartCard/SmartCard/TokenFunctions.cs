@@ -216,7 +216,7 @@ namespace IFS2.Equipment.TicketingRules
         /// <param name="pLogicalMedia"></param>
         /// <param name="pBlock0"></param>
         /// <returns>Data Blocks[48]</returns>
-        static public byte[] GetDataBlocks(LogicalMedia logMediaRef,             
+        static public byte[] GetDataBlocksVer0(LogicalMedia logMediaRef,             
                                            byte[] pBlock0, out ulong mac)
         {
             //RespBlocs will be [1, 2, 3 of 16 bytes each]
@@ -299,22 +299,21 @@ namespace IFS2.Equipment.TicketingRules
                 //Calculate Mac and Add to Buffer
                 Block1Buf = CFunctions.ConvertBoolTableToBytes(bitBuffer, 8 * 8);
 
-                /* Mac Calculation */
-
-                //Copy Block0 buffer
+                // Mac Calculation begins -------------------------------------------
+                // copy token serial number
                 Array.Copy(pBlock0, 0, MacDataBuf, 0,
                     16
                     );
 
                 //Copy Block1 buffer
                 Array.Copy(Block1Buf, 0, MacDataBuf, 16, Block1Buf.Length);
-
-                //Generate mac bytes
+                
                 byte[] macbytes = SecurityMgr.Instance.GenerateMAC(MacDataBuf);
 
                 mac = CFunctions.ConvertFromByteLE(macbytes);
 
                 i = CFunctions.ConvertToBits(mac, i, 64, bitBuffer);
+                // Mac Calculation Ends -------------------------------------------
 
                 /////////////////////////* BLOCK 2 *////////////////////////////////////
 
@@ -325,8 +324,8 @@ namespace IFS2.Equipment.TicketingRules
                 i = CFunctions.ConvertToBits((ulong)ta.Status, i, 8, bitBuffer);
 
                 //Sequence Number
-                var seqNumVTD1 = CFunctions.GetBitData(272, 18, pBlock0);
-                var seqNumVTD2 = CFunctions.GetBitData(400, 18, pBlock0);
+                var seqNumVTD1 = ExtractSeqNumVTD1(pBlock0);
+                var seqNumVTD2 = ExtractSeqNumVTD2(pBlock0);
 
                 var seqNumNew = ((seqNumVTD1 > seqNumVTD2) ? seqNumVTD1 + 1 : seqNumVTD2 + 1);
                 m.SequenceNumberRead = (long)seqNumNew;
@@ -426,6 +425,226 @@ namespace IFS2.Equipment.TicketingRules
             return pResBlocs;
         }
 
+        static public byte[] GetDataBlocksVer1(LogicalMedia logMediaRef,
+                                   byte[] pBlock0, out ulong mac)
+        {
+            //RespBlocs will be [1, 2, 3 of 16 bytes each]
+            byte[] pResBlocs = new byte[48];
+
+            //Block 1 data, Excluding the mac bits (16 - 8) = 8
+            byte[] Block1Buf = new byte[CONSTANT.MIFARE_ULTRALT_BLOC_SIZE - 8];
+
+            //MacDataBuffer : Block_0 data (16 bytes) + Block_1 (8 bytes)
+            byte[] MacDataBuf = new byte[CONSTANT.MIFARE_ULTRALT_BLOC_SIZE + Block1Buf.Length];
+
+            mac = 0;
+
+            Media m = logMediaRef.Media;
+
+            //Initialisation ini = pLogicalMedia.Initialisation;
+            TransportApplication ta = logMediaRef.Application.TransportApplication;
+            LocalLastAddValue lcav = logMediaRef.Application.LocalLastAddValue;
+            Customer cu = logMediaRef.Application.Customer;
+            Validation val = logMediaRef.Application.Validation;
+            //#if !_HHD_
+            TTag ttag = logMediaRef.TTag;
+            //#endif
+            Products ps = logMediaRef.Application.Products;
+
+            if (m.ChipSerialNumber != 0)
+            {
+                int j;
+
+                var bitBuffer = new bool[CONSTANT.MIFARE_ULTRALT_BLOC_BITS * 3];
+
+                /////////////////////////* BLOCK 1 */////////////////////////
+
+                //Initialization Date
+                int i = 0;
+                {
+                    ushort dt, tim;
+                    ExtractTimeInDosFormat(//m.InitialisationDate, It has to be incorrect, i.e. wiped with every sale, to cover up a pre-condition for cs22 tom.
+                        lcav.DateTime,
+                        out dt, out tim);
+
+                    i = CFunctions.ConvertToBits(dt, i, 16, bitBuffer);
+                }
+
+                //Date Of Sale
+                {
+                    ushort dt, tim;
+                    ExtractTimeInDosFormat(DatesUtility.BusinessDay(lcav.DateTime, new DateTime(2010, 1, 1, 2, 0, 0)), out dt, out tim);
+                    i = CFunctions.ConvertToBits(dt, i, 16, bitBuffer);
+                }
+
+                //Physical Token Type
+                i = CFunctions.ConvertToBits((ulong)m.DesignType, i, 8, bitBuffer);
+
+                //Language Bit
+                switch (cu.Language)
+                {
+                    default:
+                        j = (int)cu.Language;
+                        break;
+                }
+
+                i = CFunctions.ConvertToBits((ulong)j, i, 1, bitBuffer);
+
+                //Service Provider Id
+                i = CFunctions.ConvertToBits((ulong)lcav.ServiceProvider, i, 4, bitBuffer);
+
+                //FareTier
+                i = CFunctions.ConvertToBits((ulong)lcav.FareTiers, i, 6, bitBuffer);
+
+                //KeyVersion
+                i = CFunctions.ConvertToBits((ulong)SecurityMgr.Instance.GetTokenActiveKeyVer(), i, 1, bitBuffer);
+
+                var bufferStationCode = new bool[10];
+                //Sale Station Code
+                CFunctions.ConvertToBits((ulong)lcav.Location, 0, 10, bufferStationCode);
+                Array.Copy(bufferStationCode, 0, bitBuffer, i, 8); i += 8; // 8-bits 
+
+                int Version = 1;
+                i = CFunctions.ConvertToBits((ulong)Version, i, 2, bitBuffer);
+
+                Array.Copy(bufferStationCode, 8, bitBuffer, i, 2); i += 2;
+
+                //Calculate Mac and Add to Buffer
+                Block1Buf = CFunctions.ConvertBoolTableToBytes(bitBuffer, 8 * 8);
+
+                // Mac Calculation begins -------------------------------------------
+                // copy token serial number
+                Array.Copy(pBlock0, 0, MacDataBuf, 0,
+                    16
+                    );
+
+                //Copy Block1 buffer
+                Array.Copy(Block1Buf, 0, MacDataBuf, 16, Block1Buf.Length);
+
+                byte[] macbytes = SecurityMgr.Instance.GenerateMAC(MacDataBuf);
+
+                mac = CFunctions.ConvertFromByteLE(macbytes);
+
+                i = CFunctions.ConvertToBits(mac, i, 64, bitBuffer);
+                // Mac Calculation Ends -------------------------------------------
+
+                /////////////////////////* BLOCK 2 *////////////////////////////////////
+
+                //Logical Token Type
+                i = CFunctions.ConvertToBits((ulong)ps.Product(0).Type, i, 4, bitBuffer);
+
+                //Token Status
+                i = CFunctions.ConvertToBits((ulong)ta.Status, i, 4, bitBuffer);
+
+                //Sequence Number
+                var seqNumVTD1 = ExtractSeqNumVTD1(pBlock0);
+                var seqNumVTD2 = ExtractSeqNumVTD2(pBlock0);
+
+                var seqNumNew = ((seqNumVTD1 > seqNumVTD2) ? seqNumVTD1 + 1 : seqNumVTD2 + 1);
+                m.SequenceNumberRead = (long)seqNumNew;
+
+                i = CFunctions.ConvertToBits(seqNumNew, i, 18, bitBuffer);
+
+                //Sale Equipment Id
+                i = CFunctions.ConvertToBits((ulong)SharedData.EquipmentNumber, i, 24, bitBuffer);
+
+                //Entry/Exit Stn Code
+                i = CFunctions.ConvertToBits((ulong)val.Location, i, 10, bitBuffer);
+
+                ushort lastTxnDosDate, lastTxnDosTime;
+                CommonFunctions.CFunctions.GetDosDateTime(val.LastTransactionDateTime.ToUniversalTime(), true, out lastTxnDosDate, out lastTxnDosTime);
+
+                //Transaction Time
+                i = CFunctions.ConvertToBits(lastTxnDosTime, i, 16, bitBuffer);
+
+                //Destination Station Code
+                i = CFunctions.ConvertToBits(0, i, 10, bitBuffer);
+
+                //Transaction Date
+                i = CFunctions.ConvertToBits(lastTxnDosDate, i, 16, bitBuffer);
+
+                //Don't get mislead by document that this field is used for rjt. IT IS ALSO USED BY SJT, AND MUST BE 1 WHEN ISSUED
+                i = CFunctions.ConvertToBits(1, i, 2, bitBuffer);
+
+                //Reject Code
+                i = CFunctions.ConvertToBits((ulong)val.RejectCode, i, 8, bitBuffer);
+
+                //Entry Exit bit
+                i = CFunctions.ConvertToBits(val.EntryExitBit == Validation.TypeValues.Entry ? CONSTANT.MBC_GateEntry : CONSTANT.MBC_GateExit, i, 1, bitBuffer);
+
+                //Test Flag
+                i = CFunctions.ConvertToBits((ulong)Convert.ToInt32(m.Test), i, 1, bitBuffer);
+
+                //Token Amount
+                i = CFunctions.ConvertToBits((ulong)(lcav.Amount / 10), i, 12, bitBuffer);
+
+                //Reserve
+                i = CFunctions.ConvertToBits(0, i, 2, bitBuffer);
+
+
+                ///////////////* BLOCK 3 : Replicaton of BLOCK 2 *//////////////////////
+
+                //Logical Token Type
+                i = CFunctions.ConvertToBits((ulong)ps.Product(0).Type, i, 4, bitBuffer);
+
+                //Token Status
+                i = CFunctions.ConvertToBits((ulong)ta.Status, i, 4, bitBuffer);
+
+                //Sequence Number
+                i = CFunctions.ConvertToBits(seqNumNew, i, 18, bitBuffer);
+
+                //Sale Equipment Id
+                i = CFunctions.ConvertToBits((ulong)lcav.EquipmentNumber, i, 24, bitBuffer);
+
+                //Entry/Exit Stn Code
+                i = CFunctions.ConvertToBits((ulong)val.Location, i, 10, bitBuffer);
+
+                //Transaction Time
+                i = CFunctions.ConvertToBits(lastTxnDosTime, i, 16, bitBuffer);
+
+                //(ulong)lcav.Destination
+                //Destination Station Code
+                i = CFunctions.ConvertToBits(0, i, 10, bitBuffer);
+
+                //Transaction Date                
+                i = CFunctions.ConvertToBits(lastTxnDosDate, i, 16, bitBuffer);
+
+                //Don't get mislead by document that this field is used for rjt. IT IS ALSO USED BY SJT, AND MUST BE 1 WHEN ISSUED
+                i = CFunctions.ConvertToBits(1, i, 2, bitBuffer);
+
+                //Reject Code
+                i = CFunctions.ConvertToBits((ulong)val.RejectCode, i, 8, bitBuffer);
+
+                //Entry Exit bit
+                i = CFunctions.ConvertToBits(val.EntryExitBit == Validation.TypeValues.Entry ? CONSTANT.MBC_GateEntry : CONSTANT.MBC_GateExit, i, 1, bitBuffer);
+
+                //Test Flag
+                i = CFunctions.ConvertToBits((ulong)Convert.ToInt32(m.Test), i, 1, bitBuffer);
+
+                //Token Amount
+                i = CFunctions.ConvertToBits((ulong)(lcav.Amount / 10), i, 12, bitBuffer);
+
+                //Reserve
+                i = CFunctions.ConvertToBits(0, i, 2, bitBuffer);
+
+                pResBlocs = CFunctions.ConvertBoolTableToBytes(bitBuffer, 48 * 8);
+
+                return pResBlocs;
+            }
+
+            return pResBlocs;
+        }
+
+        static public byte[] GetDataBlocks(int version, LogicalMedia logMediaRef,
+                                   byte[] pBlock0, out ulong mac)
+        {                
+            if (version == 1)
+                return GetDataBlocksVer1(logMediaRef, pBlock0, out mac);
+            else
+                return GetDataBlocksVer0(logMediaRef, pBlock0, out mac);
+        }
+
+
         private static void ExtractTimeInDosFormat(DateTime dt, out ushort lcavDosDate, out ushort lcavDosTime)
         {
 //            DateTime utctime = TimeZoneInfo.ConvertTimeToUtc(dt);
@@ -434,7 +653,29 @@ namespace IFS2.Equipment.TicketingRules
             lcavDosTime = CFunctions.ToDosTime(dt);
         }
 
-//#if !_HHD_
+        static public int ExtractVersion(byte[] pBlock0)
+        {
+            return (int)CFunctions.GetBitData(188, 2, pBlock0);
+        }
+
+        static public ulong ExtractSeqNumVTD1(byte[] pBlock0)
+        {
+            int version = ExtractVersion(pBlock0);
+            if (version != 1)
+                return CFunctions.GetBitData(272, 18, pBlock0);
+            else
+                return CFunctions.GetBitData(264, 18, pBlock0);
+        }
+
+        static public ulong ExtractSeqNumVTD2(byte[] pBlock0)
+        {
+            int version = ExtractVersion(pBlock0);
+            if (version != 1)
+                return CFunctions.GetBitData(400, 18, pBlock0);
+            else
+                return CFunctions.GetBitData(392, 18, pBlock0);
+        }
+
         static public byte[] GetDataBlocksForTTag(TTag ct)
         {
             // TODO: Perform Mac calculation

@@ -91,8 +91,8 @@ namespace IFS2.Equipment.TicketingRules
             _logicalMediaUpdatedForCurrentOp.Application.Validation.LastTransactionDateTime
                 = _logicalMediaUpdatedForCurrentOp.Application.LocalLastAddValue.DateTime
                 = DateTime.Now;
-            
-            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(_logicalMediaUpdatedForCurrentOp, logMediaAtFront._tokenPhysicalData, out _macAttemptedToBeWrittenInLastAttempt));
+
+            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(SharedData.TokenLayoutVersion, _logicalMediaUpdatedForCurrentOp, logMediaAtFront._tokenPhysicalData, out _macAttemptedToBeWrittenInLastAttempt));
             CSC_READER_TYPE readerType;
             int hRW;
             _ticketingRules.GetReaderHandle(out readerType, out hRW);

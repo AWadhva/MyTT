@@ -130,8 +130,8 @@ namespace IFS2.Equipment.TicketingRules
                 _logicalMediaReference.Application.TransportApplication.InitialisationDate = logMediaNow.Media.InitialisationDate;
                 _logicalMediaReference.Initialisation.DateTime = logMediaNow.Media.InitialisationDate;
             }
-
-            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(_logicalMediaReference, dataRead, out _macAttemptedToBeWrittenInLastAttempt));
+            
+            byte[] cb = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocks(SharedData.TokenLayoutVersion, _logicalMediaReference, dataRead, out _macAttemptedToBeWrittenInLastAttempt));
             
             
             bool bSuccess;
@@ -277,7 +277,7 @@ namespace IFS2.Equipment.TicketingRules
                     CSC_API_ERROR ErrWriting = ((DelhiTokenUltralight)_ticketingRules.hwToken).WriteToToken(TokenFunctions.GetWriteCmdBuffer(cb), out bSuccess);
                     if (ErrWriting != CSC_API_ERROR.ERR_NONE || !bSuccess)
                     {
-                        Logging.Log(LogLevel.Verbose, "ReadMediaData2::ReadBlocks " + ErrWriting.ToString());
+                        Logging.Log(LogLevel.Verbose, "MediaOpReqTokenIssue::CorrectMediaForCancellationAppeared " + ErrWriting.ToString());
                         _lastCancelAttempt = ResultLastCancelAttempt.MediaCouldntBeWritten;
                     }
                     else
