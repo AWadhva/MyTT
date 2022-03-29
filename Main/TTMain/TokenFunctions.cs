@@ -143,30 +143,6 @@ namespace IFS2.Equipment.TicketingRules
 #if !WindowsCE 
                 case "GETLISTFARETIERS":
                     {
-                        //List<int> lstSites = new List<int>();
-                        //XmlDocument xml = new XmlDocument();
-                        //xml.LoadXml(Disk.ReadAllTextFile(Disk.BaseDataDirectory + @"\CurrentXmlParameters\Topology.xml"));
-                        //XmlElement root = xml.DocumentElement;
-                        //XmlNodeList nodelist = root.SelectNodes("Lines/Line");
-                        //foreach (XmlNode node in nodelist)
-                        //{
-                        //    int lineNum = Convert.ToInt32(node.SelectSingleNode("Code").InnerText);
-
-                        //    try
-                        //    {
-                        //        XmlNodeList nodelist1 = node.SelectNodes("Sts/St");
-
-                        //        foreach (XmlNode node1 in nodelist1)
-                        //        {
-                        //            int siteId = Convert.ToInt32(node1.SelectSingleNode("Code").InnerText);
-                        //            bool active = node1.SelectSingleNode("Act").InnerText == "1";
-                        //            if (active)                                        
-                        //                lstSites.Add(siteId);
-                        //        }
-                        //    }
-                        //    catch { }                            
-                        //}
-
                         SortedDictionary<int, int> fareTierVsFare = new SortedDictionary<int, int>();
                         bool bSuccess = true;
                         Logging.Trace("ListeFareTiers " + TopologyParameters.Stations.Keys.Count.ToString());
@@ -179,22 +155,14 @@ namespace IFS2.Equipment.TicketingRules
                             int FareTier = FareParameters.GetFareTier(SharedData.StationNumber, siteId);
                             //Logging.Trace("Fare Tiers Value " + FareTier.ToString());
                             if (FareTier <= 0) continue;
-                            //{
-                            //    bSuccess = false;
-                            //    break;
-                            //}
+                            
                             int temp;
                             if (fareTierVsFare.TryGetValue(FareTier, out temp))
                                 continue;
                             int tokenPrice = (int)SalePriceCalculation.CalculateTokenPriceZoneBased(FareTier);
                             //Logging.Trace("Price Value " + tokenPrice.ToString());
                             if (tokenPrice <= 0) continue;
-                            //{
-                            //    bSuccess = false;
-                            //    break;
-                            //}
-                            //else
-                                fareTierVsFare[FareTier] = tokenPrice;
+                            fareTierVsFare[FareTier] = tokenPrice;
                         }
                         if (bSuccess)
                         {
@@ -279,7 +247,7 @@ namespace IFS2.Equipment.TicketingRules
             byte[] data = TokenFunctions.GetWriteCmdBuffer(TokenFunctions.GetDataBlocksForTTag(ttag));
             byte p1, p2;
             bool bSuccess;
-            IFS2.Equipment.TicketingRules.CommonTT.CSC_API_ERROR err = TokenFunctions.WriteBlocks((IFS2.Equipment.TicketingRules.CommonTT.CSC_READER_TYPE)(_ReaderType), _hRw, data, out p1, out p2, out bSuccess);
+            IFS2.Equipment.TicketingRules.CommonTT.CSC_API_ERROR err = TokenFunctions.WriteBlocks(_ReaderType, _hRw, data, out p1, out p2, out bSuccess);
 
             SmartFunctions.Instance.SwitchToDetectRemovalState();
             if (err == IFS2.Equipment.TicketingRules.CommonTT.CSC_API_ERROR.ERR_NONE && bSuccess)

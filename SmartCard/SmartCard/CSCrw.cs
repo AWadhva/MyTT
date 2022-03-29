@@ -14,7 +14,8 @@ namespace IFS2.Equipment.TicketingRules
     public class DelhiDesfireEV0 : CommonHwMedia
     {        
         private readonly bool _bAssumePurseSeqNumAsLocal;
-        public DelhiDesfireEV0()
+        public DelhiDesfireEV0(SmartFunctions sf_)
+            : base(sf_)
         {
             _bAssumePurseSeqNumAsLocal = Configuration.ReadBoolParameter("AssumePurseSeqNumAsLocal", true);
         }
@@ -76,7 +77,7 @@ namespace IFS2.Equipment.TicketingRules
         protected override Boolean _ReadManufacturerData(LogicalMedia logMedia)
         {            
             Media m = logMedia.Media;
-            m.ChipSerialNumberRead = SmartFunctions.Instance.ReadSNbr();
+            m.ChipSerialNumberRead = sf.ReadSNbr();
             m.ChipTypeRead = Media.ChipTypeValues.DesfireEV0;
             m.TypeRead = Media.TypeValues.CSC;
             return true;                
@@ -95,9 +96,9 @@ namespace IFS2.Equipment.TicketingRules
 
             ////Store Manufacturer Data 
             ////To see because has been already read before
-            //Err = SmartFunctions.Instance.ReadUID(out pSerialNbr);
+            //Err = sf.ReadUID(out pSerialNbr);
 
-            //m.ChipSerialNumberRead = SmartFunctions.Instance.ReadSNbr();
+            //m.ChipSerialNumberRead = sf.ReadSNbr();
             //m.HardwareType=Media.HardwareTypeValues.DesfireCSC;
             //m.ChipTypeRead = Media.ChipTypeValues.DesfireEV0;
             //m.TypeRead = Media.TypeValues.CSC;                                
@@ -271,7 +272,7 @@ namespace IFS2.Equipment.TicketingRules
 
             if (!SelectApplication(CONSTANT.DM1_AREA_CODE))
                 return false;
-            Err = SmartFunctions.Instance.ReadPurseLinkageFileDelhiDesfire(out pSw1, out pSw2, out pResData);
+            Err = sf.ReadPurseLinkageFileDelhiDesfire(out pSw1, out pSw2, out pResData);
             if (Err != CONSTANT.NO_ERROR || pSw1 != CONSTANT.COMMAND_SUCCESS)
                 return false;
             bDM1_PurseLinkageRead = true;
@@ -306,7 +307,7 @@ namespace IFS2.Equipment.TicketingRules
             if (!SelectApplication(CONSTANT.DM1_AREA_CODE))
                 return false;
 
-            Err = SmartFunctions.Instance.ReadPersonalizationFile(out pSw1, out pSw2, out pResData);
+            Err = sf.ReadPersonalizationFile(out pSw1, out pSw2, out pResData);
             logBuffer("PersonalisationFile", pResData, CONSTANT.MAX_ISO_DATA_OUT_LENGTH);
 
             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
@@ -402,7 +403,7 @@ namespace IFS2.Equipment.TicketingRules
             if (!SelectApplication(CONSTANT.DM1_AREA_CODE))
                 return false;
 
-            Err = SmartFunctions.Instance.ReadValidationFile(out pSw1, out pSw2, out pResData);
+            Err = sf.ReadValidationFile(out pSw1, out pSw2, out pResData);
             logBuffer("ValidationFile DM1", pResData, CONSTANT.MAX_ISO_DATA_OUT_LENGTH);
 
             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
@@ -496,7 +497,7 @@ namespace IFS2.Equipment.TicketingRules
             if (!SelectApplication(CONSTANT.DM1_AREA_CODE))
                 return false;
 
-            Err = SmartFunctions.Instance.ReadSaleFile(out pSw1, out pSw2, out pResData);
+            Err = sf.ReadSaleFile(out pSw1, out pSw2, out pResData);
             logBuffer("SaleFile DM1", pResData, CONSTANT.MAX_ISO_DATA_OUT_LENGTH);
             Logging.Log(LogLevel.Verbose, "Return of read DM1 " + Convert.ToString(pSw1) + " " + Convert.ToString(pSw2) + " " + Convert.ToString(Err));
             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
@@ -555,7 +556,7 @@ namespace IFS2.Equipment.TicketingRules
             pSw2 = 0xFF;
             byte[] pResData = new byte[CONSTANT.MAX_ISO_DATA_OUT_LENGTH];
 
-            Err = SmartFunctions.Instance.ReadPendingFareDeductionFileDM2_DelhiDesfire(out pSw1, out pSw2, out pResData);
+            Err = sf.ReadPendingFareDeductionFileDM2_DelhiDesfire(out pSw1, out pSw2, out pResData);
 
             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
             {
@@ -595,7 +596,7 @@ namespace IFS2.Equipment.TicketingRules
             {
                 if (_applicationSelected != applN)
                 {
-                    if (!SmartFunctions.Instance.SelectApplication(applN))
+                    if (!sf.SelectApplication(applN))
                     {
                         Logging.Log(LogLevel.Error, "DelhiDesfireEV0_ReadMediaData: DM1_AREA_CODE Application Not Found");
                         return false;
@@ -629,7 +630,7 @@ namespace IFS2.Equipment.TicketingRules
             pSw2 = 0xFF;
             byte[] pResData = new byte[CONSTANT.MAX_ISO_DATA_OUT_LENGTH];
 
-            Err = SmartFunctions.Instance.ReadMetroSaleFile(out pSw1, out pSw2, out pResData);
+            Err = sf.ReadMetroSaleFile(out pSw1, out pSw2, out pResData);
             logBuffer("SaleFile DM2", pResData, CONSTANT.MAX_ISO_DATA_OUT_LENGTH);
             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
             {
@@ -675,7 +676,7 @@ namespace IFS2.Equipment.TicketingRules
                 pSw2 = 0xFF;
                 byte[] pResData = new byte[CONSTANT.MAX_ISO_DATA_OUT_LENGTH];
 
-                Err = SmartFunctions.Instance.ReadMetroPersonalization(out pSw1, out pSw2, out pResData);
+                Err = sf.ReadMetroPersonalization(out pSw1, out pSw2, out pResData);
                 logBuffer("AgentFile DM2", pResData, CONSTANT.MAX_ISO_DATA_OUT_LENGTH);
 
                 if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
@@ -750,7 +751,7 @@ namespace IFS2.Equipment.TicketingRules
             byte[] pResData = new byte[CONSTANT.MAX_ISO_DATA_OUT_LENGTH];
             
             
-            Err = SmartFunctions.Instance.ReadMetroValidationFile(out pSw1, out pSw2, out pResData);
+            Err = sf.ReadMetroValidationFile(out pSw1, out pSw2, out pResData);
             logBuffer("Validation DM2", pResData, CONSTANT.MAX_ISO_DATA_OUT_LENGTH);
             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
             {
@@ -835,7 +836,7 @@ namespace IFS2.Equipment.TicketingRules
             pSw2 = 0xFF;
             byte[] pResData = new byte[CONSTANT.MAX_ISO_DATA_OUT_LENGTH];
          
-            Err = SmartFunctions.Instance.ReadCardHolderFile(out pSw1, out pSw2, out pResData);
+            Err = sf.ReadCardHolderFile(out pSw1, out pSw2, out pResData);
             logBuffer("Holder DM1", pResData, CONSTANT.MAX_ISO_DATA_OUT_LENGTH);
             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
             {
@@ -878,7 +879,7 @@ namespace IFS2.Equipment.TicketingRules
             pSw2 = 0xFF;
             byte[] pResData = new byte[CONSTANT.MAX_ISO_DATA_OUT_LENGTH];
 
-            Err = SmartFunctions.Instance.ReadMetroAddValueFile(out pSw1, out pSw2, out pResData);
+            Err = sf.ReadMetroAddValueFile(out pSw1, out pSw2, out pResData);
             logBuffer("AddValue DM2", pResData, CONSTANT.MAX_ISO_DATA_OUT_LENGTH);
             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
             {
@@ -974,7 +975,7 @@ namespace IFS2.Equipment.TicketingRules
                 return false;
 
             int pBalance;
-            Err = SmartFunctions.Instance.ReadPurseFile(out pBalance, out pSw1, out pSw2);
+            Err = sf.ReadPurseFile(out pBalance, out pSw1, out pSw2);
             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
             {
                 bDM1_PurseRead = true;
@@ -1006,7 +1007,7 @@ namespace IFS2.Equipment.TicketingRules
                 return false;
 
             long pSqN;
-            Err = SmartFunctions.Instance.ReadSequenceNbrFile(out pSqN, out pSw1, out pSw2);
+            Err = sf.ReadSequenceNbrFile(out pSqN, out pSw1, out pSw2);
             Logging.Log(LogLevel.Verbose, "ReadTPurseData: err[" + Err.ToString() + "] pSw1[" + pSw1.ToString() + "]");
             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
             {
@@ -1120,7 +1121,7 @@ namespace IFS2.Equipment.TicketingRules
 
             int NbrOfRecords = 6;
 
-            Err = SmartFunctions.Instance.ReadHistoryFile(NbrOfRecords, out pSw1, out pSw2, out pResData);
+            Err = sf.ReadHistoryFile(NbrOfRecords, out pSw1, out pSw2, out pResData);
             Logging.Log(LogLevel.Verbose, "DelhiDesfireEV0_ReadAllHistory: err["+ Err.ToString() +"] pSw1["+pSw1.ToString() +"]");
             logBuffer1("HistoryFile DM1", pResData, NbrOfRecords*32);
             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
@@ -1221,13 +1222,13 @@ namespace IFS2.Equipment.TicketingRules
             if (modifyPursevalueBy != 0)
             {
                 //Update the Purse Value : DM1
-                Err = SmartFunctions.Instance.WritePurseFile(out pSw1, out pSw2, modifyPursevalueBy / 10);
+                Err = sf.WritePurseFile(out pSw1, out pSw2, modifyPursevalueBy / 10);
 
                 if (Err != CONSTANT.NO_ERROR || pSw1 != CONSTANT.COMMAND_SUCCESS || pSw2 != 0)
                     return false;
             }
             //Update the Sequence Number : DM1
-            Err = SmartFunctions.Instance.WriteSequenceNbrFile(out pSw1, out pSw2, (int)1);
+            Err = sf.WriteSequenceNbrFile(out pSw1, out pSw2, (int)1);
 
             if (Err != CONSTANT.NO_ERROR || pSw1 != CONSTANT.COMMAND_SUCCESS || pSw2 != 0)
                 return false;
@@ -1241,7 +1242,7 @@ namespace IFS2.Equipment.TicketingRules
             }
             if (bCommit)
             {
-                Err = SmartFunctions.Instance.CommitTransaction(out pSw1, out pSw2);
+                Err = sf.CommitTransaction(out pSw1, out pSw2);
                 if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
                 {
                     return true;
@@ -1330,8 +1331,8 @@ namespace IFS2.Equipment.TicketingRules
 
             byte[] pResData = CFunctions.ConvertBoolTableToBytes(bitBuffer, 256);
             
-            bool bSuccess = SmartFunctions.Instance.WriteDataFile(CONSTANT.DM1_AREA_CODE, 0x15, pResData);
-            SmartFunctions.Instance.GetLastResult(out Err, out pSw1, out pSw2);
+            bool bSuccess = sf.WriteDataFile(CONSTANT.DM1_AREA_CODE, 0x15, pResData);
+            sf.GetLastResult(out Err, out pSw1, out pSw2);
             return bSuccess;
         }
 
@@ -1415,9 +1416,9 @@ namespace IFS2.Equipment.TicketingRules
 
                 try
                 {
-                    if (SmartFunctions.Instance.WriteDataFile(CONSTANT.DM1_AREA_CODE, 0x15, pResData))
+                    if (sf.WriteDataFile(CONSTANT.DM1_AREA_CODE, 0x15, pResData))
                     {
-                        Err = SmartFunctions.Instance.CommitTransaction(out pSw1, out pSw2);
+                        Err = sf.CommitTransaction(out pSw1, out pSw2);
                         if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
                         {
                             return true;
@@ -1427,7 +1428,7 @@ namespace IFS2.Equipment.TicketingRules
                 }
                 finally
                 {
-                    SmartFunctions.Instance.GetLastResult(out Err, out pSw1, out pSw2);
+                    sf.GetLastResult(out Err, out pSw1, out pSw2);
                 }
             }
             Logging.Log(LogLevel.Error, "CSCRw _UpdateMediaEndOfValidity cannot write the card");
@@ -1467,7 +1468,7 @@ namespace IFS2.Equipment.TicketingRules
                 i = CFunctions.ConvertToBits(0, i, 208, bitBuffer);
                 byte[] pResData = new byte[32];
                 pResData = CFunctions.ConvertBoolTableToBytes(bitBuffer, 256);
-                return (SmartFunctions.Instance.WriteDataFile(CONSTANT.DM1_AREA_CODE, 0x16, pResData));
+                return (sf.WriteDataFile(CONSTANT.DM1_AREA_CODE, 0x16, pResData));
 
             }
             finally
@@ -1478,7 +1479,7 @@ namespace IFS2.Equipment.TicketingRules
 
         private void GetLastErrorFromSmartFunction()
         {
-            SmartFunctions.Instance.GetLastResult(out Err, out pSw1, out pSw2);
+            sf.GetLastResult(out Err, out pSw1, out pSw2);
         }
 
         private bool _tempUpdateProductEndOfValidity(LogicalMedia logMedia)
@@ -1498,7 +1499,7 @@ namespace IFS2.Equipment.TicketingRules
             byte[] pResData = new byte[32];
             pResData = CFunctions.ConvertBoolTableToBytes(bitBuffer, 256);
 
-            if (SmartFunctions.Instance.WriteDataFile(CONSTANT.DM2_AREA_CODE, 0x11, pResData)) return true;
+            if (sf.WriteDataFile(CONSTANT.DM2_AREA_CODE, 0x11, pResData)) return true;
             return false;
         }
 
@@ -1552,7 +1553,7 @@ namespace IFS2.Equipment.TicketingRules
 
             pResData = CFunctions.ConvertBoolTableToBytes(bitBuffer, 256);
             //Update DM2 : Last Add Value File
-            if (SmartFunctions.Instance.WriteDataFile(CONSTANT.DM2_AREA_CODE, 0x13, pResData)) return true;
+            if (sf.WriteDataFile(CONSTANT.DM2_AREA_CODE, 0x13, pResData)) return true;
             else return false;
         }
 
@@ -1587,9 +1588,9 @@ namespace IFS2.Equipment.TicketingRules
                 pResData = _tempInsertOneRecordInDM1HistoryFile_Ver1(logMedia);
             
 #if _BIP1300_
-            return SmartFunctions.Instance.WriteRecordFile(CONSTANT.DM1_AREA_CODE,0x03,0x00, pResData);
+            return sf.WriteRecordFile(CONSTANT.DM1_AREA_CODE,0x03,0x00, pResData);
 #else
-            return SmartFunctions.Instance.WriteRecordFile(CONSTANT.DM1_AREA_CODE, GetFileNum(1, 3), 0x00, pResData);
+            return sf.WriteRecordFile(CONSTANT.DM1_AREA_CODE, GetFileNum(1, 3), 0x00, pResData);
 #endif
         }
 
@@ -1689,7 +1690,7 @@ namespace IFS2.Equipment.TicketingRules
             {
                 if (_tempUpdateMediaEndOfValidity(logMedia))
                 {
-                    Err = SmartFunctions.Instance.CommitTransaction(out pSw1, out pSw2);
+                    Err = sf.CommitTransaction(out pSw1, out pSw2);
                     if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
                     {
                         return true;
@@ -1714,7 +1715,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         if (bCommit)
                         {
-                            Err = SmartFunctions.Instance.CommitTransaction(out pSw1, out pSw2);
+                            Err = sf.CommitTransaction(out pSw1, out pSw2);
                             if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
                             {
                                 return true;
@@ -1745,8 +1746,8 @@ namespace IFS2.Equipment.TicketingRules
                 i = CFunctions.ConvertToBits((ushort)customer.IDType, i, 8, bitBuffer);
                 i = CFunctions.ConvertToBits(customer.ID, i, 160, bitBuffer);
 
-                bool bSuccess = SmartFunctions.Instance.WriteDataFile(CONSTANT.DM1_AREA_CODE, GetFileNum(CONSTANT.DM1_AREA_CODE, 9), CFunctions.ConvertBoolTableToBytes(bitBuffer, 256));
-                SmartFunctions.Instance.GetLastResult(out Err, out pSw1, out pSw2);                
+                bool bSuccess = sf.WriteDataFile(CONSTANT.DM1_AREA_CODE, GetFileNum(CONSTANT.DM1_AREA_CODE, 9), CFunctions.ConvertBoolTableToBytes(bitBuffer, 256));
+                sf.GetLastResult(out Err, out pSw1, out pSw2);                
                 return bSuccess;
             }
             return false;
@@ -1763,8 +1764,8 @@ namespace IFS2.Equipment.TicketingRules
                 i = CFunctions.ConvertToBits(0, i, 8, bitBuffer); // Key version (Not used, as per doc)
                 i = CFunctions.ConvertToBits((byte)logMedia.Media.Status, i, 8, bitBuffer);
 
-                bool bSuccess = SmartFunctions.Instance.WriteDataFile(CONSTANT.DM1_AREA_CODE, GetFileNum(CONSTANT.DM1_AREA_CODE, 6), CFunctions.ConvertBoolTableToBytes(bitBuffer, 256));
-                SmartFunctions.Instance.GetLastResult(out Err, out pSw1, out pSw2);
+                bool bSuccess = sf.WriteDataFile(CONSTANT.DM1_AREA_CODE, GetFileNum(CONSTANT.DM1_AREA_CODE, 6), CFunctions.ConvertBoolTableToBytes(bitBuffer, 256));
+                sf.GetLastResult(out Err, out pSw1, out pSw2);
                 return bSuccess;
             }
             Logging.Log(LogLevel.Error, "CSCRw _UpdateMediaEndOfValidity cannot write the card");
@@ -1786,8 +1787,8 @@ namespace IFS2.Equipment.TicketingRules
                     bitBuffer = GetBuffLocalValidationData_Ver0(logMedia);
                 else
                     bitBuffer = GetBuffLocalValidationData_Ver1(logMedia);
-                bool bSuccess = SmartFunctions.Instance.WriteDataFile(CONSTANT.DM2_AREA_CODE, GetFileNum(CONSTANT.DM2_AREA_CODE, 2), CFunctions.ConvertBoolTableToBytes(bitBuffer, 256));
-                SmartFunctions.Instance.GetLastResult(out Err, out pSw1, out pSw2);
+                bool bSuccess = sf.WriteDataFile(CONSTANT.DM2_AREA_CODE, GetFileNum(CONSTANT.DM2_AREA_CODE, 2), CFunctions.ConvertBoolTableToBytes(bitBuffer, 256));
+                sf.GetLastResult(out Err, out pSw1, out pSw2);
                 return bSuccess;
             }
             Logging.Log(LogLevel.Error, "CSCRw _UpdateMediaEndOfValidity cannot write the card");
@@ -1881,7 +1882,7 @@ namespace IFS2.Equipment.TicketingRules
 
         public override bool _CommitModifications()
         {
-            Err = SmartFunctions.Instance.CommitTransaction(out pSw1, out pSw2);
+            Err = sf.CommitTransaction(out pSw1, out pSw2);
             return (Err == CSC_API_ERROR.ERR_NONE && pSw1 == 0x90 && pSw2 == 0x00);
         }
 
@@ -1954,7 +1955,7 @@ namespace IFS2.Equipment.TicketingRules
                 {
                     if (_tempInsertOneRecordInDM1HistoryFile(logMedia, SharedData.DM1HistoryVersion))
                     {
-                        Err = SmartFunctions.Instance.CommitTransaction(out pSw1, out pSw2);
+                        Err = sf.CommitTransaction(out pSw1, out pSw2);
                         if (Err == CONSTANT.NO_ERROR && pSw1 == CONSTANT.COMMAND_SUCCESS)
                         {
                             return true;

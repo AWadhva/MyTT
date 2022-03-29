@@ -12,10 +12,8 @@ namespace IFS2.Equipment.TicketingRules
 {
     public class DelhiTokenUltralight : CommonHwMedia
     {
-        public DelhiTokenUltralight() { }
-
         int _hRw = 0; // Giving it a valid value, because don't want to disturb HHD code
-        public DelhiTokenUltralight(int hRw) { _hRw = hRw; }
+        public DelhiTokenUltralight(SmartFunctions sf, int hRw):base(sf) { _hRw = hRw; }
 
         //private const int NUMBITSINONEBLOCK = 16 * 8;
 
@@ -32,7 +30,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             if (!_bTokenRead)
             {
-                byte []tempData;
+                byte[] tempData;
                 _bTokenRead = ReadMediaData2(logMedia, bPopulateRawData, out tempData);
                 return _bTokenRead;
             }
@@ -92,7 +90,7 @@ namespace IFS2.Equipment.TicketingRules
 
 
                     // Sale Block Layout
-                    m.ChipSerialNumberRead = SmartFunctions.Instance.ReadSNbr();//(long)CFunctions.GetBitData(0, 56, pResData);
+                    m.ChipSerialNumberRead = sf.ReadSNbr();//(long)CFunctions.GetBitData(0, 56, pResData);
                     m.HardwareTypeRead = Media.HardwareTypeValues.TokenUltralight;
                     m.ChipTypeRead = Media.ChipTypeValues.UltralightC;
                     m.TypeRead = Media.TypeValues.Token;
@@ -141,19 +139,19 @@ namespace IFS2.Equipment.TicketingRules
                     if (version == 1)
                     {
                         vtdParser1 = new VTDParser_Ver1(1, pResData);
-                        vtdParser2 = new VTDParser_Ver1(2, pResData);                        
+                        vtdParser2 = new VTDParser_Ver1(2, pResData);
                     }
                     else
                     {
                         vtdParser1 = new VTDParser_Ver0(1, pResData);
                         vtdParser2 = new VTDParser_Ver0(2, pResData);
                     }
-                    
+
                     //Data Block Layout                    
                     {
                         int seqNumVTD1 = vtdParser1.SeqNum();// (int)TokenFunctions.ExtractSeqNumVTD1(pResData);
                         int seqNumVTD2 = vtdParser2.SeqNum(); //(int)TokenFunctions.ExtractSeqNumVTD2(pResData);                        
-                        
+
                         if (seqNumVTD1 >= seqNumVTD2)
                         {
                             vtdParser = vtdParser1;
@@ -173,7 +171,7 @@ namespace IFS2.Equipment.TicketingRules
                         lcav.EquipmentNumberRead = vtdParser.SaleEquipmentNumber();
 
                         val.LocationRead = vtdParser.EntryExitStationCode();
-                        
+
                         val.LastTransactionDateTimeRead = vtdParser.LastTransactionDateTime();
 
                         // I think not useful for sjt/free exit/paid exit. Useful only for RJT.
@@ -194,7 +192,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         {
                             // VTD1
-                            var parser = vtdParser1;                            
+                            var parser = vtdParser1;
                             var raw = logMedia.DelhiUltralightRaw;
 
                             raw.LogicalTokenType1 = (byte)parser.LogicalTokenType();
@@ -266,16 +264,16 @@ namespace IFS2.Equipment.TicketingRules
             var ct = logMedia.TTag;
 
             {
-                int OFFSET = 1 * CONSTANT.MIFARE_ULTRALT_BLOC_BITS; 
+                int OFFSET = 1 * CONSTANT.MIFARE_ULTRALT_BLOC_BITS;
                 ct.IssueDate = CFunctions.ConvertDosDate(OFFSET + 0, pResData);
-                
+
                 {
                     int size = 8;
                     int type = (int)CFunctions.GetBitData(OFFSET + 32, size, pResData);
                     if (type != CONSTANT.TICKET_TYPE_TTAG)
                         return false;
                 }
-                
+
                 ct.ChipSerialNumber = (long)CFunctions.GetBitData(0, 56, pResData);
                 OFFSET = 2 * CONSTANT.MIFARE_ULTRALT_BLOC_BITS;
                 {
@@ -284,21 +282,21 @@ namespace IFS2.Equipment.TicketingRules
                     OFFSET += size;
                 }
                 {
-                    int size = 4*8;
+                    int size = 4 * 8;
                     ct.EquipmentNumber = (int)CFunctions.GetBitData(OFFSET, size, pResData);
                     OFFSET += size;
                 }
                 {
                     DateTime dt = CFunctions.ConvertDosDate(OFFSET, pResData);
                     OFFSET += 2 * 8;
-                    
+
                     DateTime tim = CFunctions.ConvertDosTime(OFFSET, pResData);
                     OFFSET += 2 * 8;
 
                     ct.TimeLastWritten = CFunctions.MergeDateTime(dt, tim);
                 }
                 {
-                    int size = 4*8;
+                    int size = 4 * 8;
                     ct.SerialNumber = (int)CFunctions.GetBitData(OFFSET, size, pResData);
                     OFFSET += size;
                 }
@@ -333,8 +331,8 @@ namespace IFS2.Equipment.TicketingRules
                 return Status.FailedNotCategorized;
             }
         }
-#endif        
-    
+#endif
+
         public CSC_API_ERROR WriteToToken(byte[] pCmdBuffer, out bool bSuccessTokenGlo)
         {
             Err = TokenFunctions.WriteBlocks(CSC_READER_TYPE.V4_READER,

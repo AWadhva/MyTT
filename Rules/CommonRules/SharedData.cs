@@ -74,9 +74,7 @@ namespace IFS2.Equipment.TicketingRules
             {
                 Logging.Log(LogLevel.Error, "SharedData: Saving Context File Error " + e.Message);
             }
-        }
-
-        static public bool bLoginMode = false;
+        }        
 
         private static bool _bDispenserAvailable = false;
         public static bool IsDispenserAvailable

@@ -12,7 +12,7 @@ namespace IFS2.Equipment.TicketingRules
 {
     public class CommonHwMedia
     {
-        public CommonHwMedia()
+        public CommonHwMedia(SmartFunctions sf_)
         {
             _simulationFile = (string) Configuration.ReadParameter("CSCSimulationFile", "string", "C:\\IFS2\\Data\\Simulation\\CSCSimulationFile.xml");
             _simulation = (Boolean)Configuration.ReadParameter("SimulationActivated", "bool", "false");
@@ -23,7 +23,13 @@ namespace IFS2.Equipment.TicketingRules
                 _xmlDocument.Load(_simulationFile);
                 _xmlRoot = _xmlDocument.DocumentElement;
             }
+            if (sf_ != null)
+                sf = sf_;
+            else
+                sf = SmartFunctions.Instance;
         }
+
+        protected SmartFunctions sf;        
 
         private XmlDocument _xmlDocument;
         private XmlElement _xmlRoot;

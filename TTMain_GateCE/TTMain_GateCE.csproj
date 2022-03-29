@@ -1,0 +1,196 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{14E17A73-BF38-42E9-A383-847BFA75C30B}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IFS2.Equipment.TicketingRules</RootNamespace>
+    <AssemblyName>IFS2.Equipment.TicketingRules.StartCE_Gate</AssemblyName>
+    <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <PlatformFamilyName>WindowsCE</PlatformFamilyName>
+    <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
+    <OSVersion>5.0</OSVersion>
+    <DeployDirSuffix>\FlashDisk\IFS2\System\bin\TTMainCE</DeployDirSuffix>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <NativePlatformName>Windows CE</NativePlatformName>
+    <FormFactorID>
+    </FormFactorID>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <DeployDirPrefix>\</DeployDirPrefix>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Outputs_CE\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;WindowsCE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Outputs_CE\</OutputPath>
+    <DefineConstants>TRACE;WindowsCE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="IFS2.Equipment.Common.CommonDataStructuresCE, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Common\WinCE\Output_WinCE\IFS2.Equipment.Common.CommonDataStructuresCE.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.Common.FareProductSpecsCE, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Common\WinCE\Output_WinCE\IFS2.Equipment.Common.FareProductSpecsCE.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.Common.ThalesLibrary.CE, Version=5.2.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Common\WinCE\Output_WinCE\IFS2.Equipment.Common.ThalesLibrary.CE.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.Common.UtilitiesCE, Version=5.2.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Common\WinCE\Output_WinCE\IFS2.Equipment.Common.UtilitiesCE.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.EODParametersCE, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CoreCommon\OutputsCE\IFS2.Equipment.EODParametersCE.dll</HintPath>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="OpenNETCF, Version=2.3.12004.0, Culture=neutral, PublicKeyToken=e60dbea84bb431b7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Common\WinCE\Output_WinCE\OpenNETCF.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenNETCFThreading, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Common\WinCE\Output_WinCE\OpenNETCFThreading.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Common\DataConverter.cs">
+      <Link>DataConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\StatusCSCEx.cs">
+      <Link>StatusCSCEx.cs</Link>
+    </Compile>
+    <Compile Include="..\CSCv4Adapter\V4Adaptor.cs">
+      <Link>V4Adaptor.cs</Link>
+    </Compile>
+    <Compile Include="..\Main\TTMain\Config.cs">
+      <Link>Config.cs</Link>
+    </Compile>
+    <Compile Include="..\Main\TTMain\Parameters.cs">
+      <Link>Parameters.cs</Link>
+    </Compile>
+    <Compile Include="..\Main\TTMain\TTMainCommon.cs">
+      <Link>TTMainCommon.cs</Link>
+    </Compile>
+    <Compile Include="..\SAM\CCHSSAM\CCSHSAM\CCHSSAMManger.cs">
+      <Link>CCHSSAMManger.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\ConnectionMonitor\ReaderConnectionMonitor.cs">
+      <Link>ConnectionMonitor\ReaderConnectionMonitor.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\ConnectionMonitor\ThalesReaderConnectionMonitor.cs">
+      <Link>ConnectionMonitor\ThalesReaderConnectionMonitor.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\ConnectionMonitor\V4ReaderConf.cs">
+      <Link>V4ReaderConf.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\IReader.cs">
+      <Link>IReader.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\IV4ReaderApi.cs">
+      <Link>IV4ReaderApi.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\MainTicketingRules.cs">
+      <Link>MainTicketingRules.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\MediaMonitor\ReaderMediaMonitor.cs">
+      <Link>MediaMonitor\ReaderMediaMonitor.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\MediaMonitor\V4ReaderMediaMonitor.cs">
+      <Link>MediaMonitor\V4ReaderMediaMonitor.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\MyTimer.cs">
+      <Link>MyTimer.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\Program.cs">
+      <Link>Program.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\SecurityModule\CryptoFlexOnThalesReader.cs">
+      <Link>SecurityModule\CryptoFlexOnThalesReader.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\SecurityModule\ISAMOnThalesReader.cs">
+      <Link>SecurityModule\ISAMOnThalesReader.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\SecurityModule\SAM.cs">
+      <Link>SecurityModule\SAM.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\SecurityModule\ThalesSAMOnThalesReader.cs">
+      <Link>SecurityModule\ThalesSAMOnThalesReader.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\ThalesReader.cs">
+      <Link>ThalesReader.cs</Link>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="V4ReaderApi.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WindowsCE\EODParameters\EODParameters.csproj">
+      <Project>{57E7EA11-EAFF-40B8-9947-89DE339CB966}</Project>
+      <Name>EODParameters %28WindowsCE\EODParameters%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WindowsCE\MediaTreatment\MediaTreatment.csproj">
+      <Project>{1BD5D95F-7F3A-4F3B-8189-9A256D4CDDD4}</Project>
+      <Name>MediaTreatment</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
+        <HostingProcess disable="1" />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

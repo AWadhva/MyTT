@@ -109,7 +109,7 @@ namespace IFS2.Equipment.TicketingRules
                 }
             }
 
-            DelhiTokenUltralight ul = new DelhiTokenUltralight();
+            DelhiTokenUltralight ul = new DelhiTokenUltralight(null, 0);
 
             _logicalMediaReference.Media.ChipSerialNumber = _mediaSrNbr;
             // TODO: To be more precise, may edit the sale date too.

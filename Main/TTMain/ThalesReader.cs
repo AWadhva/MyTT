@@ -303,7 +303,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             detectionState = SmartFunctions.MediaDetected.NONE;
             byte[] serialNbrBytes = new byte[8];
-            SmartFunctions._IsNFCCardDetected = false;
+            SmartFunctions.Instance._IsNFCCardDetected = false;
             if (pStatusCSC.xCardType == (int)CSC_TYPE.CARD_MIFARE1 && pStatusCSC.ucLgATR == 12)
             {
                 byte[] ba = pStatusCSC.ucATR;
@@ -326,7 +326,7 @@ namespace IFS2.Equipment.TicketingRules
                 {
                     if ((bool)(Configuration.ReadParameter("NFCFunctionality", "bool", "false")))
                     {
-                        SmartFunctions._IsNFCCardDetected = true;
+                        SmartFunctions.Instance._IsNFCCardDetected = true;
                         if (ba[3] == 0x40)// Gemalto NFC Desfire Sim card is detected...
                         {
                         }

@@ -54,7 +54,7 @@ namespace IFS2.Equipment.TicketingRules
 
         private Boolean _IsReaderLoaded = false;
         private Boolean _IsRearReaderLoaded = false;
-        private int _ReaderType;
+        private CSC_READER_TYPE _ReaderType;
         private int _hRw;
         IReader _reader = null;
         private int _hRwRearReaderAtTokenDispenser;
@@ -110,43 +110,10 @@ namespace IFS2.Equipment.TicketingRules
 
         public Semaphore semStopAsked;
 
-        public static OneEvent _ticketKeysMissing = null;
-        public static OneEvent _ticketKeysError = null;
-        public static OneEvent _ticketKeysMetaStatus = null;
-        public static OneEvent _fpStatus = null;
-        public static OneEvent _fpError = null;
-        public static OneEvent _fpMetaStatus = null;
-        public static OneEvent _prgStatus = null;
-        public static OneEvent _prgError = null;
-        public static OneEvent _prgMetaStatus = null;
-
-        public static OneEvent _parametersMissing = null;
-        public static OneEvent _parametersError = null;
-        public static OneEvent _parametersActivationError = null;
-        public static OneEvent _parametersMetaStatus = null;
-        public static OneEvent _globalMetaStatus = null;
-
         public static OneEvent _cscReloader_FrontOrOnly_Failure = null, _cscReloader_FrontNRear_Failure = null;
         public static OneEvent _cscReloader_FrontOrOnly_IsOffLine = null, _cscReloader_FrontNRear_OffLine = null;
         public static OneEvent _evtRearReaderOffline = null, _evtRearReaderOOO = null, _evtRearReaderMetaStatus = null;
         private static bool _bRearReaderStatusBroadcastOnce = false;
-        public static OneEvent _cscReloaderMetaStatus = null;
-        private static OneEvent _readerSerialNumber = null;
-        private static OneEvent _firmwareVersion = null;
-        private static OneEvent _cscAPIVersion = null;
-        private static OneEvent _cscChargeurVersion = null;
-
-        // CCHS SAM Status
-        private static OneEvent _cchsSAMType = null;
-
-        public static OneEvent _dataSecurityModuleLocked = null;
-        public static OneEvent _dataSecurityModuleFailure = null;
-        public static OneEvent _dataSecurityModuleAusent = null;
-        public static OneEvent _dataSecurityModuleIsOffLine = null;
-        public static OneEvent _dataSecurityModuleMetaStatus = null;
-        private static OneEvent _dataSecurityModuleSerialNumber = null;
-        private static OneEvent _dataSecurityModuleFirmwareVersion = null;
-        private static OneEvent _dataSecurityModuleDeviceNumber = null;
 
         private int _frequencyToAttemptReloadReaderInDisconnection;
 
@@ -178,12 +145,15 @@ namespace IFS2.Equipment.TicketingRules
         SmartFunctions inst;
         const string moduleRearReader = "RearReader";
 
+        public static OneEvent _ticketKeysMissing = null;
+        public static OneEvent _ticketKeysError = null;
+        public static OneEvent _ticketKeysMetaStatus = null;
+
 
 
         public MainTicketingRules()
             : base("MainTicketingRules")
-        {
-            LoadTokenIDsFile();
+        {            
             try
             {
                 Logging.Log(LogLevel.Information, Configuration.DumpAllConfiguration());
@@ -206,11 +176,6 @@ namespace IFS2.Equipment.TicketingRules
 
                 string MMIChannel = "MMIChannel";
                 string CoreChannel = "CoreChannel";
-
-                string SCInterfaceChannel = "SCInterfaceChannel";
-
-
-
 
                 SendMsg.SetThreadName(ThreadName, this);
 
@@ -238,25 +203,7 @@ namespace IFS2.Equipment.TicketingRules
                     Logging.Log(LogLevel.Critical, "MainTicketingRules.Constructor.ErrorLoading.EODAlarmLevelStatus");
                 }
 
-                //We need to create the static from the parameters
-                FareParameters.Start();
-                TopologyParameters.Start();
-                MediaDenyList.Start();
-                EquipmentDenyList.Start();
-                RangeDenyList.Start();
-                AgentList.Start();
-                OverallParameters.Start();
-                TVMEquipmentParameters.Start();
-                TicketsSaleParameters.Start();
-
-                BasicParameterFile.Register(new PenaltyParameters());
-                BasicParameterFile.Register(new ParkingParameters());
-                BasicParameterFile.Register(new AdditionalProductsParameters());
-                BasicParameterFile.Register(new TopologyBusParameters());
-                BasicParameterFile.Register(new FareBusParameters());
-                BasicParameterFile.Register(new HighSecurityList());
-                BasicParameterFile.Register(new MaxiTravelTime());
-                BasicParameterFile.Register(new LocalAgentList());
+                InitParameterRelated();
 
 
                 //Initialisation of all the tags managed by the TT
@@ -264,49 +211,6 @@ namespace IFS2.Equipment.TicketingRules
                 _ticketKeysError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 2, "TicketKeysError", "OCKDEC", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
                 _ticketKeysMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 3, "TicketKeysMetaStatus", "OCKMET", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
                 _ticketKeysMetaStatus.SetMetaStatusLinkage("", "TicketKeysMissing;TicketKeysError");
-
-                _fpStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 4, "FpStatus", "OFPMIS", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
-                _fpError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 5, "FpError", "OFPDEC", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
-                _fpMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 6, "FpMetaStatus", "FPMMET", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
-                _fpMetaStatus.SetMetaStatusLinkage("", "FpStatus;FpError");
-
-                _prgStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 7, "PrgStatus", "PROMIS", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
-                _prgError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 8, "PrgError", "PRODEC", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
-                _prgMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 9, "PrgMetaStatus", "PROMET", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
-                _prgMetaStatus.SetMetaStatusLinkage("", "PrgStatus;PrgError");
-
-                _parametersMissing = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 34, "ParametersMissing", "PARMIS", AlarmStatus.Alarm, OneEvent.OneEventType.MetaAlarm);
-                _parametersMissing.SetMetaAlarmLinkage(Configuration.ReadStringParameter("SetParametersMissing", "AgentListMissing;MediaDenyListMissing;RangeDenyListMissing;EquipmentDenyListMissing;TopologyMissing;FaresMissing;OverallMissing;EquipmentParametersMissing;TicketSaleParametersMissing"));
-
-                _parametersError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 35, "ParametersError", "PARDEC", AlarmStatus.Alarm, OneEvent.OneEventType.MetaAlarm);
-                //_parametersError.SetMetaAlarmLinkage("AgentListError;MediaDenyListError;RangeDenyListError;EquipmentDenyListError;TopologyError;FaresError;OverallError;EquipmentParametersError;TicketSaleParametersError");
-                _parametersError.SetMetaAlarmLinkage(Configuration.ReadStringParameter("SetParametersError", "AgentListError;MediaDenyListError;RangeDenyListError;EquipmentDenyListError;TopologyError;FaresError;OverallError;EquipmentParametersError;TicketSaleParametersError"));
-
-                _parametersActivationError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 37, "ParametersActivationError", "EODFAI", AlarmStatus.Alarm, OneEvent.OneEventType.MetaAlarm);
-             //   _parametersActivationError.SetMetaAlarmLinkage("AgentListActivationError;MediaDenyListActivationError;RangeDenyListActivationError;EquipmentDenyListActivationError;TopologyActivationError;FaresActivationError;OverallActivationError;EquipmentParametersActivationError;TicketSaleParametersActivationError");
-                _parametersActivationError.SetMetaAlarmLinkage(Configuration.ReadStringParameter("SetParametersActivationError", "AgentListActivationError;MediaDenyListActivationError;RangeDenyListActivationError;EquipmentDenyListActivationError;TopologyActivationError;FaresActivationError;OverallActivationError;EquipmentParametersActivationError;TicketSaleParametersActivationError"));
-
-
-                _parametersMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 36, "ParametersMetaStatus", "PARMET", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
-                _parametersMetaStatus.SetMetaStatusLinkage("", Configuration.ReadStringParameter("SetParametersMetaStatus", "ParametersMissing;ParametersError;ParametersActivationError"));
-
-                _globalMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 38, "EODMetaStatus", "METEOD", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
-                _globalMetaStatus.SetMetaStatusLinkage("", Configuration.ReadStringParameter("SetGlobalEODMetaStatus","ParametersMissing;ParametersError;ParametersActivationError;TicketKeysMissing;TicketKeysError;FpStatus;FpError;PrgStatus;PrgError"));
-
-
-                if (!Config._bTreatTicketSaleParameterInEOD)
-                {
-                    TicketsSaleParameters._ticketSaleParametersActivation.SetAlarm(false);
-                    TicketsSaleParameters._ticketSaleParametersError.SetAlarm(false);
-                    TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(false);
-                }
-                if (!Config._bTreatTVMEquipmentParametersInEOD)
-                {
-                    TVMEquipmentParameters._equipmentParametersActivation.SetAlarm(false);
-                    TVMEquipmentParameters._equipmentParametersError.SetAlarm(false);
-                    TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(false);
-                }
-
 
                 //Tags for CSC Reloader Management                
                 _cscReloader_FrontOrOnly_IsOffLine = new OneEvent((int)StatusConsts.CSCReloaderDriver, "CSCReloaderDriver", 1, "IsOffLine", "CS1COM", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
@@ -372,18 +276,18 @@ namespace IFS2.Equipment.TicketingRules
                 SharedData.ReadContextFile();
 
                 //Commands from MMI
-                Communication.AddEventsToReceive(ThreadName, "SetLoginMode;StopCardDistribution", this);
+                Communication.AddEventsToReceive(ThreadName, "StopCardDistribution", this);
                 Communication.AddEventsToReceive(ThreadName, "UseAntenna", this);
                 Communication.AddEventsToReceive(ThreadName, "MediaNotFoundFitForOperationAcked", this);
                 Communication.AddEventsToReceive(ThreadName, "GetTokenPrice;GetTokenPriceForFreeOrPaidExit;ReadUserCardSummary;GetListFareTiers;ManualPaidAtEntryBus", this);
-                Communication.AddEventsToReceive(ThreadName, "ReloadTPurseOnCard;ReadUserCardGlobalData;ReadUserCardTransactionHistory;VerifyAgentData;PaymentWithTPurse;PaymentDeduction", this);
-                Communication.AddEventsToReceive(ThreadName, "DetailsOfMediaToBeRead;AgentLoggedIn;AgentLoggedOut", this);
-                Communication.AddEventsToReceive(ThreadName, "Shutdown;GetTicketingKeyMetaStatus;GetEODMetaStatus;GetCSCReloaderMetaStatus", this);
-                Communication.AddEventsToReceive(ThreadName, "GetCertificate;SendEquipmentMode;KillApplication", this);
-                Communication.AddEventsToReceive(ThreadName, "GetTokenBinData;GetAllEvents;Initialisation;ResetCSCReloader;EquipmentLocation", this);
-
-                Communication.AddEventsToReceive(ThreadName, "GetProductFamily", this);
-                Communication.AddEventsToExternal("GetProductFamilyAnswer", MMIChannel);
+                Communication.AddEventsToReceive(ThreadName, "ReloadTPurseOnCard;ReadUserCardGlobalData;ReadUserCardTransactionHistory;PaymentWithTPurse;PaymentDeduction", this);
+                Communication.AddEventsToReceive(ThreadName, "DetailsOfMediaToBeRead;AgentLoggedOut", this);
+                Communication.AddEventsToReceive(ThreadName, "Shutdown;GetCSCReloaderMetaStatus", this);
+                Communication.AddEventsToReceive(ThreadName, "GetCertificate;SendEquipmentMode", this);
+                Communication.AddEventsToReceive(ThreadName, "GetTokenBinData;ResetCSCReloader", this);
+                Communication.AddEventsToReceive(ThreadName, "GetTicketingKeyMetaStatus", this);               
+                
+                
                 Communication.AddEventsToExternal("TokenInBin;CardInBin", MMIChannel);
 
                 Communication.AddEventsToReceive(ThreadName, "NotMainstream_GiveAllMediaSerialNumsInVicinity", this);
@@ -396,34 +300,27 @@ namespace IFS2.Equipment.TicketingRules
                 Communication.AddEventToReceive(ThreadName, "GetMachineId", this);
                 Communication.AddEventToReceive(ThreadName, "GetCSCReloaderStatus", this);
                 Communication.AddEventToReceive(ThreadName, "GetSAMStatus", this);
-                Communication.AddEventToReceive(ThreadName, "GetSoftwareVersion", this);
-                Communication.AddEventToReceive(ThreadName, "StopApplication", this);
-                Communication.AddEventToReceive(ThreadName, "ActivateNewParameterFile", this);
+                
+                
+                
                 Communication.AddEventToReceive(ThreadName, "NewTicketingKeysFile", this);
 
-                Communication.AddEventsToReceive(ThreadName, "SetLogLevel", this);
+                
                 //Messages for MMI
                 Communication.AddEventsToExternal("UpdateMediaInitiatingNewOp;MediaNotFoundFitForOperation;GetTokenPriceAnswer;GetListFareTiersAnswer;ReadUserCardSummaryAnswer;CSCMediaDetection;CSTMediaDetection;GetInitialisationParams;MediaRemoved;UpdateMediaOpCantBePerformed;UpdateMediaOpAudited", MMIChannel);
                 Communication.AddEventsToExternal("ReloadTPurseOnCardAnswer;ReadUserCardGlobalDataAnswer;ReadUserCardTransactionHistoryAnswer;VerifyAgentDataAnswer", MMIChannel);
-                Communication.AddEventsToExternal("BadPassengerCardDetection;BadAgentCardDetection;AgentCardDetection;UpdateCardStatus;EquipmentParams", MMIChannel);
+                Communication.AddEventsToExternal("BadPassengerCardDetection;BadAgentCardDetection;AgentCardDetection;UpdateCardStatus", MMIChannel);
 
                 Communication.AddEventsToExternal("GetTokenBinDataAnswer;GetAllEventsAnswer;EquipmentParams;GetMachineIdAnswer;GetSAMStatusAnswer", CoreChannel);
                 Communication.AddEventsToExternal("SAMMetaStatus", MMIChannel);
 
-                Communication.AddEventsToExternal("GetCSCReloaderStatusAnswer;GetSoftwareVersionAnswer;StopApplicationAnswer;GetMachineIdAnswer", MMIChannel);
+                Communication.AddEventsToExternal("GetCSCReloaderStatusAnswer;GetMachineIdAnswer", MMIChannel);
 
-                Communication.AddEventsToExternal("GetSAMStatusAnswer;CSCReloaderMetaStatus;TicketingKeyMetaStatus;EODMetaStatus", MMIChannel);
+                Communication.AddEventsToExternal("GetSAMStatusAnswer;CSCReloaderMetaStatus;TicketingKeyMetaStatus", MMIChannel);
 
                 Communication.AddEventsToExternal("TopologyParametersUpdated;ParametersUpdated", MMIChannel);
-                Communication.AddEventsToExternal("UpdateMediaTerminated", MMIChannel);
-
-                //For EOD Messages
-                Communication.AddEventToReceive(ThreadName, "GetListLines;GetListStations;GetListProducts;GetListPenalties;GetListAdditionalProducts;GetParkingDurationPrice;GetListParkingProducts", this);
-                Communication.AddEventsToReceive(ThreadName, "GetListParkingLines;GetListParkingStations;GetListBusLines;GetListBusStations;GetSingleTicketPrice;GetTravelDurationFromFareTiers", this);
-                Communication.AddEventsToReceive(ThreadName, "GetListPricesOnRestOfLine", this);
-                Communication.AddEventsToExternal("GetListLinesAnswer;GetListStationsAnswer;GetListProductsAnswer;GetListPenaltiesAnswer;GetListAdditionalProductsAnswer;GetListParkingProductsAnswer", MMIChannel);
-                Communication.AddEventsToExternal("GetParkingDurationPriceAnswer;GetListParkingLinesAnswer;GetListParkingStationsAnswer;GetListBusLinesAnswer;GetListBusStationsAnswer", MMIChannel);
-                Communication.AddEventsToExternal("GetSingleTicketPriceAnswer;GetTravelDurationFromFareTiersAnswer;GetListPricesOnRestOfLineAnswer", MMIChannel);
+                Communication.AddEventsToExternal("UpdateMediaTerminated", MMIChannel);               
+                
 
                 if (SharedData.EquipmentType == EquipmentFamily.TOM)
                 {
@@ -477,39 +374,17 @@ namespace IFS2.Equipment.TicketingRules
 
                 //Alarms for CoreChannel
                 Communication.AddEventsToExternal("CSCReloaderMetaStatus;StoreAlarm;GetCSCReloaderStatusAnswer", CoreChannel);
-                if (!Config._bCoreCommonUsed)
-                {
-                    //Messages for SC TVM Interface
-                    //Communication.AddEventToExternal("CSCReaderComm", SCInterfaceChannel);
-                    //Communication.AddEventToExternal("CSCReaderStatus", SCInterfaceChannel); 
-                    Communication.AddEventToExternal("GetCertificateOfEqptAnswer", SCInterfaceChannel);
-                    Communication.AddEventToExternal("GetCertificateOfCAAnswer", SCInterfaceChannel);
-                    //Communication.AddEventToExternal("GetResponseToChallengeAnswer", SCInterfaceChannel);
-                    Communication.AddEventToExternal("GetMachineIdAnswer", SCInterfaceChannel);
-                    Communication.AddEventToExternal("EncryptUsingPrivateKeyAnswer", SCInterfaceChannel);
-                    Communication.AddEventsToExternal("GetCSCReloaderStatusAnswer", SCInterfaceChannel);
-                    Communication.AddEventToExternal("EquipmentParams", SCInterfaceChannel);
-
-                    //Alarms for SC TVM Interface
-                    Communication.AddEventsToExternal("CSCReloaderMetaStatus;SendAlarm", SCInterfaceChannel);
-                    Communication.AddEventsToExternal("EODMetaStatus;SendAlarm", SCInterfaceChannel);
-                    Communication.AddEventToExternal("ActivateNewParameterFileAnswer", SCInterfaceChannel);
-                }
-                else
-                {
-                    Communication.AddEventToExternal("ActivateNewParameterFileAnswer", CoreChannel);
-                }
 
                 //Load the Comm params
                 _ReaderComm.COM_PORT = (string)Configuration.ReadParameter("ComPort", "String", "COM1:");
                 _ReaderComm.COM_SPEED = (int)Configuration.ReadParameter("ComSpeed", "int", "115200");
-                _ReaderType = (int)Configuration.ReadParameter("ReaderType", "int", "4");
+                _ReaderType = (CSC_READER_TYPE)((int)Configuration.ReadParameter("ReaderType", "int", "4"));
 
                 if (Config.bCleanedUp)
                 {
-                    if (_ReaderType == 4)
+                    if (_ReaderType == CSC_READER_TYPE.V4_READER)
                         _reader = new V4Reader();
-                    else if (_ReaderType == 3)
+                    else if (_ReaderType == CSC_READER_TYPE.V3_READER)
                         _reader = new V3Reader(this);
 
                     if (_reader != null)
@@ -535,7 +410,7 @@ namespace IFS2.Equipment.TicketingRules
                 catch { }
 
                 if (SharedData.EquipmentType != EquipmentFamily.TOM)
-                    SmartFunctions.Instance.SetReaderType((int)CSC_READER_TYPE.V4_READER, -1);
+                    SmartFunctions.Instance.SetReaderType(CSC_READER_TYPE.V4_READER, -1);
                 Logging.Log(LogLevel.Information, ThreadName + "_Started");
             }
             catch (Exception e)
@@ -550,35 +425,10 @@ namespace IFS2.Equipment.TicketingRules
         public void SetMediaKeptOnReaderWasLastUpdatedInThisVeryCycle()
         {
             _bTicketDataStructuresSynchedWithTicketData = false;
-        }
-
-        string fileName = @"c:\junk\tokenIds.xml";
-        const string _rootName = "Tokens";
-        XElement _root = new XElement(_rootName);
+        }        
 
         Dictionary<long, int> _SerialNumVsId = new Dictionary<long, int>();
         Dictionary<int, long> _IdVsSerialNum = new Dictionary<int, long>();
-
-        private void LoadTokenIDsFile()
-        {
-#if !WindowsCE
-            if (File.Exists(fileName))
-            {
-                string txt = File.ReadAllText(fileName);
-                XDocument doc = XDocument.Parse(txt);
-                _root = new XElement(doc.Root);
-                var tokenElemnts = doc.Root.Elements();
-                foreach (XElement tokenElem in tokenElemnts)
-                {
-                    int id = Convert.ToInt32(tokenElem.Element("Id").Value);
-                    long serialNum = Convert.ToInt64(tokenElem.Element("SerialNum").Value);
-
-                    _SerialNumVsId[serialNum] = id;
-                    _IdVsSerialNum[id] = serialNum;
-                }
-            }
-#endif
-        }
 
         const int FareMode_Incident = 3;
         public override int TreatMessageReceived(EventMessage eventMessage)
@@ -588,6 +438,7 @@ namespace IFS2.Equipment.TicketingRules
                 Logging.Log(LogLevel.Verbose, "Main TT : Message received " + eventMessage.EventID + " " + eventMessage.Attribute + " " + eventMessage.Message);
                 if (TreatParametersMessageReceived(eventMessage)) return 0;
                 if (TreatTokenMessageReceived(eventMessage)) return 0;
+                if (TreatCommonMessage(eventMessage)) return 0;
                 if (TreatCSCMessageReceived(eventMessage))
                 {
                     //SKS: Added on 09-10-2014
@@ -597,20 +448,14 @@ namespace IFS2.Equipment.TicketingRules
                 }
                 switch (eventMessage.EventID.ToUpper())
                 {
-                    case "KILLAPPLICATION":
-                        semStopAsked.Release();
-                        return (0);
-                    case "SETLOGINMODE":
-                        SharedData.bLoginMode = Boolean.Parse(eventMessage._par[0]);
+                    case "GETFAREMODEREPLY": // used exclusively by TOM
+                        _eqptStatus = SerializeHelper<RegisterEquipmentStatus>.XMLDeserialize(eventMessage._par[0]);
+                        break;
+                    case "REGISTEREQUIPMENTSTATUS": // used exclusively by TOM
+                        _eqptStatus = SerializeHelper<RegisterEquipmentStatus>.XMLDeserialize(eventMessage._par[0]);
                         break;
                     case "USEANTENNA":
                         Handle_UseAntenna(Convert.ToInt32(eventMessage._par[0]));
-                        break;
-                    case "GETFAREMODEREPLY":
-                        _eqptStatus = SerializeHelper<RegisterEquipmentStatus>.XMLDeserialize(eventMessage._par[0]);
-                        break;
-                    case "REGISTEREQUIPMENTSTATUS":
-                        _eqptStatus = SerializeHelper<RegisterEquipmentStatus>.XMLDeserialize(eventMessage._par[0]);
                         break;
                     case "MEDIANOTFOUNDFITFOROPERATIONACKED":
                         Handle_MEDIANOTFOUNDFITFOROPERATIONACKED();
@@ -630,18 +475,15 @@ namespace IFS2.Equipment.TicketingRules
 
                             break;
                         }
+                    case "GETTICKETINGKEYMETASTATUS":
+                        SendMessage(ThreadName, "", "TicketingKeyMetaStatus", _ticketKeysMetaStatus.Value.ToString(), "");
+                        break;
                     case "COMPLETEAFMOPUSINGLOOSETOKENS":
                         {
                             _reader.StartPolling();
                             Debug.Assert(_mediaUpdate != null);
                             if (_mediaUpdate != null)
                                 _mediaUpdate.CompleteAFMOpUsingLooseTokens();
-                            break;
-                        }
-                    case "GETPRODUCTFAMILY":
-                        {
-                            int product = Convert.ToInt32(eventMessage._par[0]);
-                            Communication.SendMessage(ThreadName, "", "GetProductFamilyAnswer", ProductParameters.GetProductFamily(product).ToString());
                             break;
                         }
                     case "MEDIAPRODUCED":
@@ -653,28 +495,6 @@ namespace IFS2.Equipment.TicketingRules
 
                             break;
                         }
-                    case "GETSOFTWAREVERSION":
-                        string versoft = "<Software Name=\"TTApplicatipon\" >";
-                        //All versions of all parts shall be added.
-                        versoft += "<Module Name=\"TT Application\" Version=\"1\" />";
-                        versoft += "</Software>";
-                        Communication.SendMessage(ThreadName, "Answer", "GetSoftwareVersionAnswer", "TTApplication", versoft);
-                        return (0);
-                    case "INITIALISATION":
-                        SharedData.Initialise(eventMessage.Attribute);
-                        SharedData.SaveContextFile();
-                        return 0;
-                    case "EQUIPMENTLOCATION":
-                        EquipmentLocation eqploc = SerializeHelper<EquipmentLocation>.XMLDeserialize(eventMessage.Attribute);
-                        SharedData.LineNumber = eqploc.LineNumber;
-                        SharedData.StationNumber = eqploc.StationNumber;
-                        SharedData.ServiceProvider = (short)eqploc.ServiceProvider;
-                        SharedData.SaveContextFile();
-                        return 0;
-                    case "STOPAPPLICATION":
-                        Communication.SendMessage(ThreadName, "Answer", "StopApplicationAnswer", "TTApplication", "0");
-                        semStopAsked.Release();
-                        return (0);
                     case "SENDEQUIPMENTMODE":
                         //This message permits to indicate if we are in maintenance mode.
                         SharedData.EquipmentStatus = (EquipmentStatus)Convert.ToInt32(eventMessage.Attribute);
@@ -701,7 +521,7 @@ namespace IFS2.Equipment.TicketingRules
 #endif
                                 File.Delete(eventMessage.Message);
 
-                                SecurityMgr.Instance.LoadKeyList((CSC_READER_TYPE)_ReaderType, _hRw, content);
+                                SecurityMgr.Instance.LoadKeyList(_ReaderType, _hRw, content);
                             }
                             //Do we need to reboot reader in this case
                             _ticketKeysError.SetAlarm(false);
@@ -727,9 +547,6 @@ namespace IFS2.Equipment.TicketingRules
                             Logging.Log(LogLevel.Error, "TTMain.TreatMessage " + e.Message);
                         }
                         return 0;
-                    case "GETTICKETINGKEYMETASTATUS":
-                        SendMessage(ThreadName, "", "TicketingKeyMetaStatus", _ticketKeysMetaStatus.Value.ToString(), "");
-                        break;
                     case "GETCERTIFICATEOFEQPT":
                         if (_cryptoflexSAMUsage)
                         {
@@ -773,99 +590,6 @@ namespace IFS2.Equipment.TicketingRules
                         }
 
                         return (0);
-                    case "GETMACHINEID":
-                        {
-                            try
-                            {
-                                uint result = 0;
-                                string addResult = "";
-                                if (_readEquipmentNumberInFile)
-                                {
-                                    try
-                                    {
-                                        string s = FileUtility.ReadContext("DeviceID");
-                                        s = Utility.SearchSimpleCompleteTag(s, "Data");
-                                        s = Crypto.DecryptString2(s, "LeonettiJeanIFS2.Ticketing_113*_");
-                                        result = Convert.ToUInt32(s);
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logging.Log(LogLevel.Error, "SharedData: Saving Context File Error " + e.Message);
-                                        Communication.SendMessage(ThreadName, "Answer", "GetMachineIdAnswer", "0", Convert.ToString((int)TTErrorTypes.Exception));    // As per specification if TT does not get proper machine ID then it should send error code in message else message value =0                                
-                                        return 0;
-                                    }
-
-                                }
-                                else if (_cryptoflexSAMUsage)
-                                {
-                                    result = (uint)cFlex.GetEQPLocalId(DEST_TYPE.DEST_SAM1);
-                                }
-                                else if (_readDeviceIDInCCHSSAM && _delhiCCHSSAMUsage)
-                                {
-                                    //Data have been already read normalli
-                                    GetDataFromDSM eqp = new GetDataFromDSM();
-                                    string s10 = "";
-                                    for (int i = 0; i < 15 && mCCHSSAMMgr.mCCHSDSMInfo.ucIPaddress[i] != 0; i++) s10 += (char)mCCHSSAMMgr.mCCHSDSMInfo.ucIPaddress[i];
-                                    s10 = s10.TrimEnd(' ');
-                                    eqp.Location.IPAddress = s10;
-                                    s10 = "";
-                                    for (int i = 0; i < 10 && mCCHSSAMMgr.mCCHSDSMInfo.ucDeviceID[i] != 0; i++) s10 += (char)mCCHSSAMMgr.mCCHSDSMInfo.ucDeviceID[i];
-                                    eqp.Location.ServiceProvider = Convert.ToInt32(s10.Substring(0, 2));
-                                    eqp.Definition.EquipmentType = Convert.ToInt32(s10.Substring(2, 2));
-                                    eqp.Definition.EquipmentSubType = Convert.ToInt32(s10.Substring(4, 1));
-                                    eqp.Definition.DeviceID = (Convert.ToInt32(eqp.Definition.EquipmentType) << 16) + Convert.ToInt32(s10.Substring(5, 5));
-                                    eqp.Definition.EquipmentNumber = eqp.Definition.DeviceID;
-                                    eqp.Definition.EquipmentIndex = eqp.Definition.DeviceID & 0xFFFF;
-                                    eqp.Definition.DSM = Convert.ToString(mCCHSSAMMgr.mCCHSDSMInfo.ulDSMid);
-                                    s10 = "";
-                                    for (int i = 0; i < 20 && mCCHSSAMMgr.mCCHSDSMInfo.ucUniqueInfo[i] != 0; i++) s10 += (char)mCCHSSAMMgr.mCCHSDSMInfo.ucUniqueInfo[i];
-                                    eqp.Location.LineNumber = Convert.ToInt32(s10.Substring(0, 2));
-                                    eqp.Location.StationNumber = Convert.ToInt32(s10.Substring(2, 3));
-                                    eqp.Location.LocationNumber = Convert.ToInt32(s10.Substring(5, 5));
-                                    eqp.Location.LocationName = s10.Substring(10);
-                                    eqp.Location.LocationName.TrimEnd(' ');
-                                    //We can make now string to send back data
-                                    result = Convert.ToUInt32(eqp.Definition.DeviceID);
-                                    addResult = SerializeHelper<GetDataFromDSM>.XMLSerialize(eqp);
-                                    //foreach (cSAMConf samcnf in SharedData.mSAMUsed)
-                                    //{
-                                    //    if (samcnf.mSAMType == CONSTANT.CCHSSAMType.ISAM)
-                                    //    {
-                                    //        Err = (CSC_API_ERROR)mCCHSSAMMgr.SAMInstallCard((DEST_TYPE)samcnf.SAM_Slot);
-                                    //        if (Err == CSC_API_ERROR.ERR_NONE)
-                                    //        {
-                                    //            /// Configure CCHS SAM and Switch to mode 2
-                                    //            Err = mCCHSSAMMgr.ConfigCCHSSAM((DEST_TYPE)samcnf.SAM_Slot);
-                                    //            SharedData.TransactionSeqNo = mCCHSSAMMgr.TxnSeqenceNo;
-                                    //            result = mCCHSSAMMgr.DSMId;
-                                    //            //TODO: to be checked whether we need sam status info.... now ??? it is already avaialble with CCHSSAM Manager class
-                                    //        }
-                                    //    }
-                                    //}                                    
-                                }
-
-                                if (result > 0)
-                                {
-                                    SharedData.EquipmentNumber = (int)result;
-                                    SharedData.EquipmentType = (EquipmentFamily)(result >> 16);
-                                    if (addResult == "")
-                                        Communication.SendMessage(ThreadName, "Answer", "GetMachineIdAnswer", result.ToString(), "1");// As TVM SC interface is treating message=1 as good so changing it to 1 form 0 
-                                    else
-                                        Communication.SendMessage(ThreadName, "Answer", "GetMachineIdAnswer", result.ToString(), "1", addResult);// As TVM SC interface is treating message=1 as good so changing it to 1 form 0 
-                                }
-                                else
-                                {
-                                    Communication.SendMessage(ThreadName, "Answer", "GetMachineIdAnswer", "0", "0");
-                                }
-                            }
-                            catch (Exception e1)
-                            {
-                                Communication.SendMessage(ThreadName, "Answer", "GetMachineIdAnswer", "0", Convert.ToString((int)TTErrorTypes.Exception));
-                                Logging.Log(LogLevel.Error, ThreadName + "GetMachineIdAnswer Error :" + e1.Message);
-                                return (0);
-                            }
-                        }
-                        return (0);
 
                     case "ENCRYPTUSINGPRIVATEKEY":
                         try
@@ -888,128 +612,6 @@ namespace IFS2.Equipment.TicketingRules
 
                         return (0);
 
-                    case "GETCSCRELOADERSTATUS":
-                        try
-                        {
-                            if (!_IsReaderLoaded) ReloadReader();
-                            Communication.SendMessage(ThreadName, "Answer", "GetCSCReloaderStatusAnswer", ConstructCscStatus(), Convert.ToString((int)_cscReloaderMetaStatus.Value));
-                        }
-                        catch (Exception)
-                        {
-                            _cscReloader_FrontOrOnly_Failure.SetAlarm(true);
-                            _cscReloader_FrontNRear_Failure.SetAlarm(true);
-                            _cscReloaderMetaStatus.UpdateMetaStatus();
-                            if (IFSEventsList.SaveIfHasChangedSinceLastSave("CSCReloaderDriver"))
-                                SendMessage(ThreadName, "", "CSCReloaderMetaStatus", Convert.ToString((int)_cscReloaderMetaStatus.AlarmLevel), ConstructCscStatus());
-                        }
-                        return 0;
-                    case "GETCSCRELOADERMETASTATUS":
-                        try
-                        {
-                            SendMessage(ThreadName, "", "CSCReloaderMetaStatus", Convert.ToString((int)_cscReloaderMetaStatus.Value), ConstructCscStatus());
-                        }
-                        catch (Exception)
-                        {
-                        }
-                        return 0;
-                    case "RESETCSCRELOADER":
-                        try
-                        {
-                            //First if reader not already loaded. Make a standard Reload
-                            if (!_IsReaderLoaded) ReloadReader();
-                            else
-                            {
-                                //Try to make reset ùmore quick as possible. To call minimum commands
-                                //ResetAlreadyStartedReader(); This take too much time
-                                //SmartFunctions.Instance.Init();
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Logging.Log(LogLevel.Error, "TTMain.TreatMessageReceived Cannot Reset CSC Reader :" + e.Message);
-                        }
-                        return 0;
-
-                    case "GETSAMSTATUS":
-
-                        CertData CACertificate = new CertData();
-                        CertData EQCertificate = new CertData();
-
-                        try
-                        {
-                            //Remove ResetReader. Resetting reader is made on the reset command or if it has not ben initialised
-                            if (!_IsReaderLoaded) ReloadReader();
-                            if (_IsReaderLoaded)
-                            {
-                                if (_delhiCCHSSAMUsage)
-                                {
-                                    if (mCCHSSAMMgr != null)
-                                    {
-                                        _dataSecurityModuleDeviceNumber.SetValue(SharedData.EquipmentNumber);
-                                        _dataSecurityModuleSerialNumber.SetEvent(mCCHSSAMMgr.DSMId.ToString());
-
-                                        //_cchsSAMType 
-                                        _cchsSAMType.SetEvent(mCCHSSAMMgr.mCCHSStatusInfo.SAMType.ToString());
-                                        _dataSecurityModuleFirmwareVersion.SetEvent(mCCHSSAMMgr.mCCHSStatusInfo.SAMAppVersion.ToString());
-                                    }
-                                }
-                                else
-                                {
-                                    bool b = cFlex.IsSAMBlocked(DEST_TYPE.DEST_SAM1);
-                                    _dataSecurityModuleLocked.SetAlarm(b);
-
-                                    cFlex.GetDataFromCert(cFlex.GetCertificate(DEST_TYPE.DEST_SAM1, CERT_TYPE.CA_CERT), out CACertificate);
-
-                                    cFlex.GetDataFromCert(cFlex.GetCertificate(DEST_TYPE.DEST_SAM1, CERT_TYPE.LOCAL_CERT), out EQCertificate);
-                                    _dataSecurityModuleDeviceNumber.SetValue(cFlex.GetEQPLocalId(DEST_TYPE.DEST_SAM1));
-                                    _dataSecurityModuleSerialNumber.SetEvent(cFlex.GetSAMSerialNbr(DEST_TYPE.DEST_SAM1).ToString());
-                                }
-                                _dataSecurityModuleFailure.SetAlarm(false);
-                                _dataSecurityModuleMetaStatus.UpdateMetaStatus();
-                                IFSEventsList.SaveIfHasChangedSinceLastSave("DSMDriver");
-                                string s2 = ConstructSAMStatus(CACertificate, EQCertificate);
-                                Communication.SendMessage(ThreadName, "Answer", "GetSAMStatusAnswer", s2, ((int)_dataSecurityModuleMetaStatus.Value).ToString());
-                            }
-                            else
-                            {
-                                _dataSecurityModuleFailure.SetAlarm(true);
-                                _dataSecurityModuleMetaStatus.UpdateMetaStatus();
-                                IFSEventsList.SaveIfHasChangedSinceLastSave("DSMDriver");
-                                Communication.SendMessage(ThreadName, "Answer", "GetSAMStatusAnswer", ConstructSAMStatusError(), ((int)_dataSecurityModuleMetaStatus.Value).ToString());
-                                Logging.Log(LogLevel.Error, ThreadName + "GetSAMStatusAnswer : Error reloading reader ");
-                            }
-                            return 0;
-
-                        }
-                        catch (Exception e1)
-                        {
-                            Communication.SendMessage(ThreadName, "Answer", "GetSAMStatusAnswer", ConstructSAMStatusError(), "");
-                            Logging.Log(LogLevel.Error, ThreadName + "GetSAMStatusAnswer Error :" + e1.Message);
-                            return (0);
-                        }
-                    case "GETALLEVENTS":
-                        {
-#if !WindowsCE
-                            string s = IFSEventsList.GetBulkReadString("TTComponent");
-                            s += IFSEventsList.GetBulkReadString("CSCReloaderDriver");
-                            s += IFSEventsList.GetBulkReadString("DSMDriver");
-#else
-                    string s = IFSEventsList.GetStringForCC("TTComponent");
-                    s += IFSEventsList.GetStringForCC("CSCReloaderDriver");
-                    s += IFSEventsList.GetStringForCC("DSMDriver");
-#endif
-                            SendCommand("GetAllEventsAnswer", "TTApplication", s);
-                        }
-                        return 0;
-
-                    case "SETLOGLEVEL":
-                        {
-                            if (eventMessage.Attribute == "TT")
-                            {
-                                SetMyLogLevel.Set(Utility.ParseEnum<LogLevel>(eventMessage.Message));
-                            }
-                            break;
-                        }
                     case "STARTTOKENDISTRIBUTION":
                         {
                             Handle_StartTokenDistribution(eventMessage);
@@ -1102,18 +704,206 @@ namespace IFS2.Equipment.TicketingRules
                     case "DETAILSOFMEDIATOBEREAD":
                         Handle_DetailsOfMediaToBeRead(eventMessage);
                         break;
-                    case "AGENTLOGGEDIN":
-                        Handle_AgentLoggedIn(eventMessage);
-                        break;
-                    case "AGENTLOGGEDOUT":
-                        Handle_AgentLoggedOut();
-                        break;
                     case "CANCELPUTTOKENUNDERRWACK":
                         Handle_CancelPutTokenUnderRWAck();
                         break;
                     case "DOOPFORUNREADABLECSC":
                         Handle_DoOpForUnreadableCSC(eventMessage._par);
                         break;
+                    case "GETSAMSTATUS":
+
+                        CertData CACertificate = new CertData();
+                        CertData EQCertificate = new CertData();
+
+                        try
+                        {
+                            //Remove ResetReader. Resetting reader is made on the reset command or if it has not ben initialised
+                            if (!_IsReaderLoaded) ReloadReader();
+                            if (_IsReaderLoaded)
+                            {
+                                if (_delhiCCHSSAMUsage)
+                                {
+                                    if (mCCHSSAMMgr != null)
+                                    {
+                                        _dataSecurityModuleDeviceNumber.SetValue(SharedData.EquipmentNumber);
+                                        _dataSecurityModuleSerialNumber.SetEvent(mCCHSSAMMgr.DSMId.ToString());
+
+                                        //_cchsSAMType 
+                                        _cchsSAMType.SetEvent(mCCHSSAMMgr.mCCHSStatusInfo.SAMType.ToString());
+                                        _dataSecurityModuleFirmwareVersion.SetEvent(mCCHSSAMMgr.mCCHSStatusInfo.SAMAppVersion.ToString());
+                                    }
+                                }
+                                else
+                                {
+                                    bool b = cFlex.IsSAMBlocked(DEST_TYPE.DEST_SAM1);
+                                    _dataSecurityModuleLocked.SetAlarm(b);
+
+                                    cFlex.GetDataFromCert(cFlex.GetCertificate(DEST_TYPE.DEST_SAM1, CERT_TYPE.CA_CERT), out CACertificate);
+
+                                    cFlex.GetDataFromCert(cFlex.GetCertificate(DEST_TYPE.DEST_SAM1, CERT_TYPE.LOCAL_CERT), out EQCertificate);
+                                    _dataSecurityModuleDeviceNumber.SetValue(cFlex.GetEQPLocalId(DEST_TYPE.DEST_SAM1));
+                                    _dataSecurityModuleSerialNumber.SetEvent(cFlex.GetSAMSerialNbr(DEST_TYPE.DEST_SAM1).ToString());
+                                }
+                                _dataSecurityModuleFailure.SetAlarm(false);
+                                _dataSecurityModuleMetaStatus.UpdateMetaStatus();
+                                IFSEventsList.SaveIfHasChangedSinceLastSave("DSMDriver");
+                                string s2 = ConstructSAMStatus(CACertificate, EQCertificate);
+                                Communication.SendMessage(ThreadName, "Answer", "GetSAMStatusAnswer", s2, ((int)_dataSecurityModuleMetaStatus.Value).ToString());
+                            }
+                            else
+                            {
+                                _dataSecurityModuleFailure.SetAlarm(true);
+                                _dataSecurityModuleMetaStatus.UpdateMetaStatus();
+                                IFSEventsList.SaveIfHasChangedSinceLastSave("DSMDriver");
+                                Communication.SendMessage(ThreadName, "Answer", "GetSAMStatusAnswer", ConstructSAMStatusError(), ((int)_dataSecurityModuleMetaStatus.Value).ToString());
+                                Logging.Log(LogLevel.Error, ThreadName + "GetSAMStatusAnswer : Error reloading reader ");
+                            }
+                            return 0;
+
+                        }
+                        catch (Exception e1)
+                        {
+                            Communication.SendMessage(ThreadName, "Answer", "GetSAMStatusAnswer", ConstructSAMStatusError(), "");
+                            Logging.Log(LogLevel.Error, ThreadName + "GetSAMStatusAnswer Error :" + e1.Message);
+                            return 0;
+                        }
+                    case "GETCSCRELOADERSTATUS":
+                        try
+                        {
+                            if (!_IsReaderLoaded) ReloadReader();
+                            Communication.SendMessage(ThreadName, "Answer", "GetCSCReloaderStatusAnswer", ConstructCscStatus(), Convert.ToString((int)_cscReloaderMetaStatus.Value));
+                        }
+                        catch (Exception)
+                        {
+                            _cscReloader_FrontOrOnly_Failure.SetAlarm(true);
+                            _cscReloader_FrontNRear_Failure.SetAlarm(true);
+                            _cscReloaderMetaStatus.UpdateMetaStatus();
+                            if (IFSEventsList.SaveIfHasChangedSinceLastSave("CSCReloaderDriver"))
+                                SendMessage(ThreadName, "", "CSCReloaderMetaStatus", Convert.ToString((int)_cscReloaderMetaStatus.AlarmLevel), ConstructCscStatus());
+                        }
+                        return 0;
+                    case "RESETCSCRELOADER":
+                        try
+                        {
+                            //First if reader not already loaded. Make a standard Reload
+                            if (!_IsReaderLoaded) ReloadReader();
+                            else
+                            {
+                                //Try to make reset ùmore quick as possible. To call minimum commands
+                                //ResetAlreadyStartedReader(); This take too much time
+                                //SmartFunctions.Instance.Init();
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Logging.Log(LogLevel.Error, "TTMain.TreatMessageReceived Cannot Reset CSC Reader :" + e.Message);
+                        }
+                        return 0;
+                    case "AGENTLOGGEDOUT":
+                        Handle_AgentLoggedOut();
+                        return 0;
+                    case "GETCSCRELOADERMETASTATUS":
+                        try
+                        {
+                            SendMessage(ThreadName, "", "CSCReloaderMetaStatus", Convert.ToString((int)_cscReloaderMetaStatus.Value), ConstructCscStatus());
+                        }
+                        catch (Exception)
+                        {
+                        }
+                        return 0;
+                    case "GETMACHINEID":
+                        {
+                            try
+                            {
+                                uint result = 0;
+                                string addResult = "";
+                                if (_readEquipmentNumberInFile)
+                                {
+                                    try
+                                    {
+                                        string s = FileUtility.ReadContext("DeviceID");
+                                        s = Utility.SearchSimpleCompleteTag(s, "Data");
+                                        s = Crypto.DecryptString2(s, "LeonettiJeanIFS2.Ticketing_113*_");
+                                        result = Convert.ToUInt32(s);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Logging.Log(LogLevel.Error, "SharedData: Saving Context File Error " + e.Message);
+                                        Communication.SendMessage(ThreadName, "Answer", "GetMachineIdAnswer", "0", Convert.ToString((int)TTErrorTypes.Exception));    // As per specification if TT does not get proper machine ID then it should send error code in message else message value =0                                
+                                        return 0;
+                                    }
+
+                                }
+                                else if (_cryptoflexSAMUsage)
+                                {
+                                    result = (uint)cFlex.GetEQPLocalId(DEST_TYPE.DEST_SAM1);
+                                }
+                                else if (_readDeviceIDInCCHSSAM && _delhiCCHSSAMUsage)
+                                {
+                                    //Data have been already read normalli
+                                    GetDataFromDSM eqp = new GetDataFromDSM();
+                                    string s10 = "";
+                                    for (int i = 0; i < 15 && mCCHSSAMMgr.mCCHSDSMInfo.ucIPaddress[i] != 0; i++) s10 += (char)mCCHSSAMMgr.mCCHSDSMInfo.ucIPaddress[i];
+                                    s10 = s10.TrimEnd(' ');
+                                    eqp.Location.IPAddress = s10;
+                                    s10 = "";
+                                    for (int i = 0; i < 10 && mCCHSSAMMgr.mCCHSDSMInfo.ucDeviceID[i] != 0; i++) s10 += (char)mCCHSSAMMgr.mCCHSDSMInfo.ucDeviceID[i];
+                                    eqp.Location.ServiceProvider = Convert.ToInt32(s10.Substring(0, 2));
+                                    eqp.Definition.EquipmentType = Convert.ToInt32(s10.Substring(2, 2));
+                                    eqp.Definition.EquipmentSubType = Convert.ToInt32(s10.Substring(4, 1));
+                                    eqp.Definition.DeviceID = (Convert.ToInt32(eqp.Definition.EquipmentType) << 16) + Convert.ToInt32(s10.Substring(5, 5));
+                                    eqp.Definition.EquipmentNumber = eqp.Definition.DeviceID;
+                                    eqp.Definition.EquipmentIndex = eqp.Definition.DeviceID & 0xFFFF;
+                                    eqp.Definition.DSM = Convert.ToString(mCCHSSAMMgr.mCCHSDSMInfo.ulDSMid);
+                                    s10 = "";
+                                    for (int i = 0; i < 20 && mCCHSSAMMgr.mCCHSDSMInfo.ucUniqueInfo[i] != 0; i++) s10 += (char)mCCHSSAMMgr.mCCHSDSMInfo.ucUniqueInfo[i];
+                                    eqp.Location.LineNumber = Convert.ToInt32(s10.Substring(0, 2));
+                                    eqp.Location.StationNumber = Convert.ToInt32(s10.Substring(2, 3));
+                                    eqp.Location.LocationNumber = Convert.ToInt32(s10.Substring(5, 5));
+                                    eqp.Location.LocationName = s10.Substring(10);
+                                    eqp.Location.LocationName.TrimEnd(' ');
+                                    //We can make now string to send back data
+                                    result = Convert.ToUInt32(eqp.Definition.DeviceID);
+                                    addResult = SerializeHelper<GetDataFromDSM>.XMLSerialize(eqp);
+                                    //foreach (cSAMConf samcnf in SharedData.mSAMUsed)
+                                    //{
+                                    //    if (samcnf.mSAMType == CONSTANT.CCHSSAMType.ISAM)
+                                    //    {
+                                    //        Err = (CSC_API_ERROR)mCCHSSAMMgr.SAMInstallCard((DEST_TYPE)samcnf.SAM_Slot);
+                                    //        if (Err == CSC_API_ERROR.ERR_NONE)
+                                    //        {
+                                    //            /// Configure CCHS SAM and Switch to mode 2
+                                    //            Err = mCCHSSAMMgr.ConfigCCHSSAM((DEST_TYPE)samcnf.SAM_Slot);
+                                    //            SharedData.TransactionSeqNo = mCCHSSAMMgr.TxnSeqenceNo;
+                                    //            result = mCCHSSAMMgr.DSMId;
+                                    //            //TODO: to be checked whether we need sam status info.... now ??? it is already avaialble with CCHSSAM Manager class
+                                    //        }
+                                    //    }
+                                    //}                                    
+                                }
+
+                                if (result > 0)
+                                {
+                                    SharedData.EquipmentNumber = (int)result;
+                                    SharedData.EquipmentType = (EquipmentFamily)(result >> 16);
+                                    if (addResult == "")
+                                        Communication.SendMessage(ThreadName, "Answer", "GetMachineIdAnswer", result.ToString(), "1");// As TVM SC interface is treating message=1 as good so changing it to 1 form 0 
+                                    else
+                                        Communication.SendMessage(ThreadName, "Answer", "GetMachineIdAnswer", result.ToString(), "1", addResult);// As TVM SC interface is treating message=1 as good so changing it to 1 form 0 
+                                }
+                                else
+                                {
+                                    Communication.SendMessage(ThreadName, "Answer", "GetMachineIdAnswer", "0", "0");
+                                }
+                            }
+                            catch (Exception e1)
+                            {
+                                Communication.SendMessage(ThreadName, "Answer", "GetMachineIdAnswer", "0", Convert.ToString((int)TTErrorTypes.Exception));
+                                Logging.Log(LogLevel.Error, ThreadName + "GetMachineIdAnswer Error :" + e1.Message);
+                                return 0;
+                            }
+                        }
+                        return 0;
                     case "SHUTDOWN":
                         Communication.RemoveAllEvents(ThreadName);
                         return (-1); //To terminate the process
@@ -1223,6 +1013,12 @@ namespace IFS2.Equipment.TicketingRules
             }
         }
 
+        private void Handle_AgentLoggedOut()
+        {
+            SharedData._agentShift = null;
+            _mediaUpdate = _mediaUpdateLast = null;
+        }
+
         private void Handle_UseAntenna(int antennaId)
         {
             if (antennaId != 1 && antennaId != 2)
@@ -1327,11 +1123,6 @@ namespace IFS2.Equipment.TicketingRules
             _mediaUpdateLast.UpdateMediaRollbackOp();
         }
 
-        private void Handle_AgentLoggedOut()
-        {
-            SharedData._agentShift = null;
-            _mediaUpdate = _mediaUpdateLast = null;
-        }
 
         private void Handle_MEDIANOTFOUNDFITFOROPERATIONACKED()
         {
@@ -1559,19 +1350,6 @@ namespace IFS2.Equipment.TicketingRules
             SetReadPurpose(readDataFor);
         }
 
-        private void Handle_AgentLoggedIn(EventMessage eventMessage)
-        {
-            if (eventMessage._par.Length == 1)
-            {
-                if (eventMessage._par[0] == "-1")
-                    SharedData._agentShift = null;
-            }
-            int shiftId = Convert.ToInt32(eventMessage._par[1]);
-            int agentId = Convert.ToInt32(eventMessage._par[0]);
-            AgentProfile profile = (AgentProfile)(Convert.ToInt32(eventMessage._par[2]));
-
-            SharedData._agentShift = new AgentShift(shiftId, agentId, profile);
-        }
 
         private void Handle_StartMaintenanceTokenDistribution(EventMessage eventMessage)
         {
@@ -1993,7 +1771,7 @@ namespace IFS2.Equipment.TicketingRules
                     else
                     {
                         // Periodic check-up
-                        CSC_API_ERROR err = SmartFunctions.Instance.PingReader();
+                        CSC_API_ERROR err = Reader.PingReader(_ReaderType, _hRw);
                         if (err == CSC_API_ERROR.ERR_NONE)
                         {
                             _cscReloader_FrontOrOnly_IsOffLine.SetAlarm(false);
@@ -2332,7 +2110,7 @@ namespace IFS2.Equipment.TicketingRules
 
         public void GetReaderHandle(out CSC_READER_TYPE readerType, out int hRw)
         {
-            readerType = (CSC_READER_TYPE)_ReaderType;
+            readerType = _ReaderType;
             hRw = _hRw;
         }
 
@@ -2360,7 +2138,7 @@ namespace IFS2.Equipment.TicketingRules
 
             try
             {
-                Err = Reader.ReloadReader((CSC_READER_TYPE)_ReaderType, _ReaderComm, out _hRw, out _FirmwareInfo);
+                Err = Reader.ReloadReader(_ReaderType, _ReaderComm, out _hRw, out _FirmwareInfo);
 
                 Logging.Log(LogLevel.Verbose, ThreadName + "ReloadReader : Err State is : " + Convert.ToString((int)(CSC_API_ERROR)Err));
 
@@ -2374,11 +2152,11 @@ namespace IFS2.Equipment.TicketingRules
                     //Load the Crypto Instance
                     cFlex = null;
                     if (_cryptoflexSAMUsage)
-                        cFlex = new CryptoFlexFunctions((CSC_READER_TYPE)_ReaderType, _hRw);
+                        cFlex = new CryptoFlexFunctions(_ReaderType, _hRw);
                     //SecurityMgr.Instance.SetTokenKey(0, new byte[]{0, 1, 2, 3, 4, 5, 6, 7});
                     if (_delhiCCHSSAMUsage)
                     {
-                        mCCHSSAMMgr = new CCHSSAMManger((CSC_READER_TYPE)_ReaderType, _hRw);
+                        mCCHSSAMMgr = new CCHSSAMManger(_ReaderType, _hRw);
                         Err = ResetCCHSSAM();
 
                         Logging.Log(Err == CSC_API_ERROR.ERR_NONE ? LogLevel.Verbose : LogLevel.Error, "ResetCCHSSAM returned " + Err.ToString());
@@ -2517,7 +2295,7 @@ namespace IFS2.Equipment.TicketingRules
                     pSamCardParams.iCardParam.xSamParam.ulTimeOut = 60 * 1000; // TODO: check the unit. assuming it in ms for now.
                     pSamCardParams.iCardParam.xSamParam.acOptionString = new string('\0', CONSTANT.MAX_SAM_OPTION_STRING_LEN + 1);//CHECK +1 REMOVED IN AVM-TT            
 
-                    Err = Reader.InstallCard((CSC_READER_TYPE)_ReaderType,
+                    Err = Reader.InstallCard(_ReaderType,
                               _hRw,
                               (DEST_TYPE)smcnf.SAM_Slot,
                               pSamCardParams);
@@ -2570,192 +2348,15 @@ namespace IFS2.Equipment.TicketingRules
             }
             return Err;
         }
-
-        private void InitializeEODParams()
-        {
-            try
-            {
-                try
-                {
-                    AgentList.Initialise();
-                    AgentList._agentListMissing.SetAlarm(false);
-                    AgentList._agentListActivation.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("AgentList", 1);
-                }
-                catch
-                {
-                    AgentList._agentListMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("AgentList", 0);
-                }
-
-                try
-                {
-                    MediaDenyList.Initialise();
-                    MediaDenyList._mediaDenyListMissing.SetAlarm(false);
-                    MediaDenyList._mediaDenyListActivation.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("MediaDenyList", 1);
-                }
-                catch
-                {
-                    MediaDenyList._mediaDenyListMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("MediaDenyList", 0);
-                }
-
-                try
-                {
-                    RangeDenyList.Initialise();
-                    RangeDenyList._rangeDenyListMissing.SetAlarm(false);
-                    RangeDenyList._rangeDenyListActivation.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("RangeDenyList", 1);
-                }
-                catch
-                {
-                    RangeDenyList._rangeDenyListMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("RangeDenyList", 0);
-                }
-
-                try
-                {
-                    EquipmentDenyList.Initialise();
-                    EquipmentDenyList._equipmentDenyListMissing.SetAlarm(false);
-                    EquipmentDenyList._equipmentDenyListActivation.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("EquipmentDenyList", 1);
-                }
-                catch
-                {
-                    EquipmentDenyList._equipmentDenyListMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("EquipmentDenyList", 0);
-                }
-
-                try
-                {
-                    TopologyParameters.Initialise();
-                    TopologyParameters._topologyMissing.SetAlarm(false);
-                    TopologyParameters._topologyActivation.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("TopologyParameters", 1);
-                }
-                catch
-                {
-                    TopologyParameters._topologyMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("TopologyParameters", 0);
-                }
-
-                try
-                {
-                    OverallParameters.Initialise();
-                    OverallParameters._overallMissing.SetAlarm(false);
-                    OverallParameters._overallActivation.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("OverallParameters", 1);
-                }
-                catch
-                {
-                    OverallParameters._overallMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("OverallParameters", 0);
-                }
-                //Initialise additional data
-
-                BasicParameterFile.Instance("PenaltyParameters").Load();
-                BasicParameterFile.Instance("ParkingParameters").Load();
-                BasicParameterFile.Instance("AdditionalProducts").Load();
-                BasicParameterFile.Instance("TopologyBusParameters").Load();
-                BasicParameterFile.Instance("FareBusParameters").Load();
-                BasicParameterFile.Instance("HighSecurityList").Load();
-                BasicParameterFile.Instance("MaxiTravelTime").Load();
-                BasicParameterFile.Instance("LocalAgentList").Load();
-
-                if (Config._bTreatTVMEquipmentParametersInEOD)
-                {
-                    try
-                    {
-                        TVMEquipmentParameters.Initialise();
-                        TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(false);
-                        TVMEquipmentParameters._equipmentParametersActivation.SetAlarm(false);
-                        EODFileStatusList.UpdateStatus("EquipmentParameters", 1);
-                    }
-                    catch
-                    {
-                        TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(true);
-                        EODFileStatusList.UpdateStatus("EquipmentParameters", 0);
-                    }
-                }
-                else
-                {
-                    TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("EquipmentParameters", 1);
-                }
-                if (Config._bTreatTicketSaleParameterInEOD)
-                {
-                    Logging.Trace("TtMain.InitialiseEOD. Ticket Sale Parameters in EOD");
-                    try
-                    {
-                        Logging.Trace("TtMain.InitialiseEOD.before Ticket Sale Parameters");
-                        FareProductSpecs.Load(false);
-                        Logging.Trace("TtMain.InitialiseEOD.after Ticket Sale Parameters");
-                        SharedData._fpSpecsRepository = FareProductSpecs.GetInstance();
-                        TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(false);
-                        TicketsSaleParameters._ticketSaleParametersActivation.SetAlarm(false);
-                        EODFileStatusList.UpdateStatus("TicketSaleParamters", 1);
-                    }
-                    catch (Exception e6)
-                    {
-                        Logging.Log(LogLevel.Error, "TTMain.InitialiseEOD.TicketSaleParameters Exception " + e6.Message);
-                        TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(true);
-                        EODFileStatusList.UpdateStatus("TicketSaleParamters", 0);
-                    }
-                    Logging.Trace("TtMain.InitialiseEOD  Ticket Sale Parameters terminated");
-                }
-                else
-                {
-                    FareProductSpecs.Load(true);
-                    SharedData._fpSpecsRepository = FareProductSpecs.GetInstance();
-                    TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("TicketSaleParamters", 1);
-                }
-
-                try
-                {
-                    FareParameters.Initialise();
-                    FareParameters._faresMissing.SetAlarm(false);
-                    FareParameters._faresActivation.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("FareParameters", 1);
-                }
-                catch
-                {
-                    FareParameters._faresMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("FareParameters", 0);
-                }
-
-                //Update different levels
-                _parametersMissing.UpdateMetaAlarm();
-                _parametersError.UpdateMetaAlarm();
-                _parametersActivationError.UpdateMetaAlarm();
-                _parametersMetaStatus.UpdateMetaStatus();
-                _globalMetaStatus.UpdateMetaStatus();
-                Communication.SendMessage(ThreadName, "Status", "EODMetaStatus", Convert.ToString(_parametersMetaStatus.Value), EODFileStatusList.EODMetaStatus());
-
-
-                IFSEventsList.SaveIfHasChangedSinceLastSave("TTComponent");
-            }
-            catch (Exception e)
-            {
-                Logging.Log(LogLevel.Critical, "TTMain Cannot Load Parameters File " + e.Message);
-            }
-        }
+        
         public override void OnBegin()
         {
-            InitializeEODParams();//SKS:01/09/2014 Shifted here because of TT is taking much time to read and configure form big EOD xml files
-            try
-            {
-                Directory.CreateDirectory(Disk.BaseDataDirectory + @"\CurrentXmlParameters\");
-            }
-            catch { }
-
             if (SharedData.EquipmentType == EquipmentFamily.TOM)
                 Communication.SendMessage(ThreadName, "", "GetFareMode");
 
-            hwCsc = new DelhiDesfireEV0();
+            hwCsc = new DelhiDesfireEV0(null);
             hwCsc.Reset();
-            hwToken = new DelhiTokenUltralight();
+            hwToken = new DelhiTokenUltralight(null, 0);
 
             _ReaderCommRearReader = new ReaderComm();
             if (_bMediaDispensingUsingRearReader)
@@ -2841,7 +2442,7 @@ namespace IFS2.Equipment.TicketingRules
 
             if (Reader.ReloadReaderPlain(CSC_READER_TYPE.V4_READER, _ReaderCommRearReader, out _hRwRearReaderAtTokenDispenser, out firmware, Config._rfPowerRearReader) == CSC_API_ERROR.ERR_NONE)
             {
-                if (SmartFunctions.Instance.InitRearReader(_hRwRearReaderAtTokenDispenser) == CSC_API_ERROR.ERR_NONE)
+                if (Reader.InitRearReader(_hRwRearReaderAtTokenDispenser) == CSC_API_ERROR.ERR_NONE)
                     _IsRearReaderLoaded = true;
                 // Send status.
             }
@@ -2869,7 +2470,7 @@ namespace IFS2.Equipment.TicketingRules
                 }
                 if (sk != null)
                 {
-                    SecurityMgr.Instance.LoadKeyList((CSC_READER_TYPE)_ReaderType, _hRw, sk);
+                    SecurityMgr.Instance.LoadKeyList(_ReaderType, _hRw, sk);
                     _ticketKeysError.SetAlarm(false);
                 }
             }

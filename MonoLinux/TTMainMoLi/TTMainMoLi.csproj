@@ -137,6 +137,9 @@
     <Compile Include="..\..\Main\TTMain\TTMain.cs">
       <Link>TTMain.cs</Link>
     </Compile>
+    <Compile Include="..\..\Main\TTMain\TTMainCommon.cs">
+      <Link>TTMainCommon.cs</Link>
+    </Compile>
     <Compile Include="..\..\Main\TTMain\UpdateMedia.cs">
       <Link>UpdateMedia.cs</Link>
     </Compile>

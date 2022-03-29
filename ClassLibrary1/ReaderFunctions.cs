@@ -566,15 +566,6 @@ namespace IFS2.Equipment.CSCReader
             pFirmware.Fpga1 = "XXX_NO_INFO_XXX";
             pFirmware.Fpga2 = "XXX_NO_INFO_XXX";
 
-            //Install SAM1 Card 
-            InstallCard pSamCardParams = new InstallCard();
-
-            pSamCardParams.xCardType = (int)(CSC_TYPE.CARD_SAM);
-            pSamCardParams.iCardParam.xSamParam.ucSamSelected = (byte)(DEST_TYPE.DEST_SAM1);
-            pSamCardParams.iCardParam.xSamParam.ucProtocolType = CONSTANT.SAM_PROTOCOL_T0;
-            pSamCardParams.iCardParam.xSamParam.ulTimeOut = 60 * 1000; // TODO: check the unit. assuming it in ms for now.
-            pSamCardParams.iCardParam.xSamParam.acOptionString = new string('\0', CONSTANT.MAX_SAM_OPTION_STRING_LEN + 1);//CHECK +1 REMOVED IN AVM-TT            
-
             try
             {
                 unsafe
@@ -600,6 +591,15 @@ namespace IFS2.Equipment.CSCReader
 
                         if (_cryptoflexSAMUsage)
                         {
+                            //Install SAM1 Card 
+                            InstallCard pSamCardParams = new InstallCard();
+
+                            pSamCardParams.xCardType = (int)(CSC_TYPE.CARD_SAM);
+                            pSamCardParams.iCardParam.xSamParam.ucSamSelected = (byte)(DEST_TYPE.DEST_SAM1);
+                            pSamCardParams.iCardParam.xSamParam.ucProtocolType = CONSTANT.SAM_PROTOCOL_T0;
+                            pSamCardParams.iCardParam.xSamParam.ulTimeOut = 60 * 1000; // TODO: check the unit. assuming it in ms for now.
+                            pSamCardParams.iCardParam.xSamParam.acOptionString = new string('\0', CONSTANT.MAX_SAM_OPTION_STRING_LEN + 1);//CHECK +1 REMOVED IN AVM-TT            
+
                         Err = Reader.InstallCard(pReaderType,
                                           phRw,
                                           DEST_TYPE.DEST_SAM1,
@@ -884,6 +884,13 @@ namespace IFS2.Equipment.CSCReader
                         _lastErrorCode = V4Adaptor.sCscPingEx(_hRw, MINPINGSIZE, MINPONGSIZE);
                         return (CSC_API_ERROR)_lastErrorCode;
                     }
+            case CSC_READER_TYPE.V3_READER:
+                    {
+                        StatusCSC statusCSC = new StatusCSC();
+                        var x = StatusCheck(CSC_READER_TYPE.V3_READER, _hRw, ref statusCSC);
+                        _lastErrorCode = (int)x;
+                        return x;
+                    }
 #if !WindowsCE && !MonoLinux && !NoVirtualReader
                 case CSC_READER_TYPE.VIRTUAL_READER:
                     {
@@ -932,6 +939,37 @@ namespace IFS2.Equipment.CSCReader
                 default:
                     return CSC_API_ERROR.ERR_API;
             }
+        }
+
+        static public CSC_API_ERROR InitRearReader(int hRw)
+        {
+            CSC_API_ERROR Err = CSC_API_ERROR.ERR_DEVICE;
+            InstallCard pCscCardParams = new InstallCard();
+
+            pCscCardParams.xCardType = (int)(CSC_TYPE.CARD_MIFARE1);
+            pCscCardParams.iCardParam.xMifParam.sSize = 0;
+
+            Err = Reader.InstallCard(CSC_READER_TYPE.V4_READER,
+                                     hRw,
+                                     DEST_TYPE.DEST_CARD,
+                                     pCscCardParams);
+
+            if (Err == CSC_API_ERROR.ERR_NONE)
+            {
+                var pScenarioPolling = new ScenarioPolling[1];
+
+                pScenarioPolling[0].xCardType = (int)(CSC_TYPE.CARD_MIFARE1);
+                pScenarioPolling[0].ucAntenna = CONSTANT.SMART_ANTENNA_1;
+                pScenarioPolling[0].ucRepeatNumber = 1;
+
+#if _HHD_ && _BLUEBIRD_
+                throw new NotImplementedException();
+#else
+                Err = Reader.ConfigureForPolling(CSC_READER_TYPE.V4_READER, hRw, pScenarioPolling, Scenario.SCENARIO_1);
+#endif
+            }
+
+            return Err;
         }
     }
 }

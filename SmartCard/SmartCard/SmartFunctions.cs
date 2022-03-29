@@ -17,28 +17,31 @@ namespace IFS2.Equipment.TicketingRules
 {
     public sealed class SmartFunctions
     {
-        private int _ReaderType;
+        private CSC_READER_TYPE _ReaderType;
         private int _hRw;
 
         private byte _currentKeySet = 0;
 
         static readonly SmartFunctions _sFunc = new SmartFunctions();
-        static bool _delhiCCHSSAMUsage = false;
-        static bool _cryptoflexSAMUsage = true;
-        public static bool _IsNFCCardDetected = false;
+        public bool _delhiCCHSSAMUsage = false;
+        public bool _cryptoflexSAMUsage = true;
+        public bool _IsNFCCardDetected = false;
         private bool _isSAMConfigured=false;
 
         static SmartFunctions()
         {
-            _delhiCCHSSAMUsage = (bool)Configuration.ReadParameter("DelhiCCHSSAMUsage", "bool", "false");
-            _cryptoflexSAMUsage = (bool)Configuration.ReadParameter("CryptoflexSAMUsage", "bool", "true");
-
             pStatusCSC.ucAntenna = 0x00;
             pStatusCSC.ucATR = new byte[CONSTANT.MAX_ATR_SIZE];
             pStatusCSC.ucLgATR = 0x00;
             pStatusCSC.ucNbDetectedCard = 0x00;
             pStatusCSC.ucStatCSC = 0x00;
             pStatusCSC.xCardType = (int)CSC_TYPE.CARD_NONE;
+        }
+
+        public SmartFunctions()
+        {
+            _delhiCCHSSAMUsage = (bool)Configuration.ReadParameter("DelhiCCHSSAMUsage", "bool", "false");
+            _cryptoflexSAMUsage = (bool)Configuration.ReadParameter("CryptoflexSAMUsage", "bool", "true");
         }
 
         public static SmartFunctions Instance
@@ -70,7 +73,7 @@ namespace IFS2.Equipment.TicketingRules
             pCscCardParams.iCardParam.xMifParam.sSize = 0;
 
 
-            Err = Reader.InstallCard((CSC_READER_TYPE)_ReaderType,
+            Err = Reader.InstallCard(_ReaderType,
                                      _hRw,
                                      DEST_TYPE.DEST_CARD,
                                      pCscCardParams);
@@ -97,7 +100,7 @@ namespace IFS2.Equipment.TicketingRules
                     if (IsCCHSSAMInstalled == true)
                     {
                         /// install virtual Desfile Card for CCHS SAM
-                        Err = Reader.InstallCard((CSC_READER_TYPE)_ReaderType,
+                        Err = Reader.InstallCard(_ReaderType,
                                          _hRw,
                                          DEST_TYPE.DEST_SAM_DESFIRE,
                                          pCscCardParams);
@@ -115,50 +118,6 @@ namespace IFS2.Equipment.TicketingRules
             return Err;
         }
 
-        public CSC_API_ERROR InitRearReader(int hRw)
-        {
-            CSC_API_ERROR Err = CSC_API_ERROR.ERR_DEVICE;
-            InstallCard pCscCardParams = new InstallCard();
-
-            pCscCardParams.xCardType = (int)(CSC_TYPE.CARD_MIFARE1);
-            pCscCardParams.iCardParam.xMifParam.sSize = 0;
-
-            Err = Reader.InstallCard(CSC_READER_TYPE.V4_READER,
-                                     hRw,
-                                     DEST_TYPE.DEST_CARD,
-                                     pCscCardParams);
-
-            if (Err == CSC_API_ERROR.ERR_NONE)
-            {
-                var pScenarioPolling = new ScenarioPolling[1];
-
-                pScenarioPolling[0].xCardType = (int)(CSC_TYPE.CARD_MIFARE1);
-                pScenarioPolling[0].ucAntenna = CONSTANT.SMART_ANTENNA_1;
-                pScenarioPolling[0].ucRepeatNumber = 1;
-
-#if _HHD_ && _BLUEBIRD_
-                throw new NotImplementedException();
-#else
-                Err = Reader.ConfigureForPolling(CSC_READER_TYPE.V4_READER, hRw, pScenarioPolling, Scenario.SCENARIO_1);
-#endif
-            }
-
-            return Err;
-        }
-
-        public CSC_API_ERROR PingReader()
-        {
-            if (_ReaderType == 4)
-                return Reader.PingReader(CSC_READER_TYPE.V4_READER, _hRw);
-            else if (_ReaderType == 3)
-            {
-                StatusCSC statusCSC = new StatusCSC();
-                return Reader.StatusCheck(CSC_READER_TYPE.V3_READER, _hRw, ref statusCSC);
-            }
-            else
-                throw new NotImplementedException();
-        }
-
         public Utility.StatusListenerDelegate listenerCardProduced = null, listenerCardRemoved = null;
 
         private bool ConfigureForPolling()
@@ -173,7 +132,7 @@ namespace IFS2.Equipment.TicketingRules
             pScenarioPolling[0].ucAntenna = (byte)(Configuration.ReadBoolParameter("UsePrimaryAntenna", true) ? CONSTANT.SMART_ANTENNA_1 : CONSTANT.SMART_ANTENNA_2);
             pScenarioPolling[0].ucRepeatNumber = 1;
 
-            Err = Reader.ConfigureForPolling((CSC_READER_TYPE)_ReaderType, _hRw, pScenarioPolling, Scenario.SCENARIO_1);
+            Err = Reader.ConfigureForPolling(_ReaderType, _hRw, pScenarioPolling, Scenario.SCENARIO_1);
 
             if (Err != CSC_API_ERROR.ERR_NONE)
                 return false;
@@ -185,7 +144,7 @@ namespace IFS2.Equipment.TicketingRules
             pScenarioPolling[0].ucRepeatNumber = 1;
 
 
-            Err = Reader.ConfigureForPolling((CSC_READER_TYPE)_ReaderType, _hRw, pScenarioPolling, Scenario.SCENARIO_2);
+            Err = Reader.ConfigureForPolling(_ReaderType, _hRw, pScenarioPolling, Scenario.SCENARIO_2);
 #endif
             return (Err == CSC_API_ERROR.ERR_NONE);
         }
@@ -241,7 +200,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             CSC_API_ERROR Err = CSC_API_ERROR.ERR_NOEXEC;
 
-            Err = Reader.StartPolling((CSC_READER_TYPE)_ReaderType,
+            Err = Reader.StartPolling(_ReaderType,
                                        hRw, (byte)scenario, listener
             );
 
@@ -258,7 +217,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             CSC_API_ERROR Err = CSC_API_ERROR.ERR_NOEXEC;
 
-            Err = Reader.StartPolling((CSC_READER_TYPE)_ReaderType,
+            Err = Reader.StartPolling(_ReaderType,
                                        _hRw, (byte)scenario, listener
             );
 
@@ -281,7 +240,7 @@ namespace IFS2.Equipment.TicketingRules
             status = new StatusCSC();
 #if _HHD_ && _BLUEBIRD_
 #else
-            Err = Reader.StatusCheck((CSC_READER_TYPE)_ReaderType, _hRw, ref status);
+            Err = Reader.StatusCheck(_ReaderType, _hRw, ref status);
 #endif
             if (Err != CSC_API_ERROR.ERR_NONE)
                 return false;
@@ -300,7 +259,7 @@ namespace IFS2.Equipment.TicketingRules
         public int SmartSyncDetectOk()
         {
             StatusCSC statusCSC = new StatusCSC();
-            var Err = Reader.StatusCheck((CSC_READER_TYPE)_ReaderType, _hRw, ref statusCSC);
+            var Err = Reader.StatusCheck(_ReaderType, _hRw, ref statusCSC);
             if (Err != CSC_API_ERROR.ERR_NONE)
                 return -1;
             else
@@ -327,7 +286,7 @@ namespace IFS2.Equipment.TicketingRules
             try
             {
                 ClearStatusCSC();
-                Err = Reader.StatusCheck((CSC_READER_TYPE)_ReaderType, _hRw, ref SmartFunctions.pStatusCSC);
+                Err = Reader.StatusCheck(_ReaderType, _hRw, ref SmartFunctions.pStatusCSC);
 
                 if (Err != CSC_API_ERROR.ERR_NONE)
                     return;
@@ -374,7 +333,7 @@ namespace IFS2.Equipment.TicketingRules
                             StartPolling(bUseAsynch ? listenerCardProduced : null, scenario);
                             {
                                 Thread.Sleep(40);// TODO: See if it can be pushed to configuration. Also, put more optimum value for it.
-                                Err = Reader.StatusCheck((CSC_READER_TYPE)_ReaderType, _hRw, ref pStatusCSC);
+                                Err = Reader.StatusCheck(_ReaderType, _hRw, ref pStatusCSC);
                                 switch (pStatusCSC.ucStatCSC)
                                 {
                                     case CONSTANT.ST_CARDON:
@@ -427,7 +386,7 @@ namespace IFS2.Equipment.TicketingRules
             //bSameMedia = false;
 
             ClearStatusCSC();
-            Err = Reader.StatusCheck((CSC_READER_TYPE)_ReaderType, _hRw, ref statusCSC);
+            Err = Reader.StatusCheck(_ReaderType, _hRw, ref statusCSC);
 
             if (Err != CSC_API_ERROR.ERR_NONE)
                 throw GetExceptionForCode(Err, _hRw);
@@ -448,7 +407,7 @@ namespace IFS2.Equipment.TicketingRules
             bSameMedia = false;
 
             ClearStatusCSC();
-            Err = Reader.StatusCheck((CSC_READER_TYPE)_ReaderType, _hRw, ref SmartFunctions.pStatusCSC);
+            Err = Reader.StatusCheck(_ReaderType, _hRw, ref SmartFunctions.pStatusCSC);
 
             if (Err != CSC_API_ERROR.ERR_NONE)
                 throw GetExceptionForCode(Err, _hRw);
@@ -687,7 +646,7 @@ namespace IFS2.Equipment.TicketingRules
            return Reader.SwitchToDetectionRemoval();
             
 #else
-            return (Reader.SwitchToDetectRemovalState((CSC_READER_TYPE)_ReaderType, _hRw, listenerCardRemoved) == CSC_API_ERROR.ERR_NONE);
+            return (Reader.SwitchToDetectRemovalState(_ReaderType, _hRw, listenerCardRemoved) == CSC_API_ERROR.ERR_NONE);
 #endif
         }
 
@@ -696,7 +655,7 @@ namespace IFS2.Equipment.TicketingRules
 #if _HHD_ && _BLUEBIRD_
             
 #else
-            CSC_API_ERROR error = Reader.SwitchToDetectRemovalState((CSC_READER_TYPE)_ReaderType, _hRw, listenerCardRemoved);
+            CSC_API_ERROR error = Reader.SwitchToDetectRemovalState(_ReaderType, _hRw, listenerCardRemoved);
             if (error != CSC_API_ERROR.ERR_NONE)
                 throw GetExceptionForCode(error, _hRw);
 #endif
@@ -717,7 +676,7 @@ namespace IFS2.Equipment.TicketingRules
             return CSC_API_ERROR.ERR_NONE;
 #else
             // when in ST_INIT, it returns ERR_NOEXEC
-            return Reader.SwitchToCardOnState((CSC_READER_TYPE)_ReaderType, _hRw);
+            return Reader.SwitchToCardOnState(_ReaderType, _hRw);
 #endif
         }
 
@@ -730,7 +689,7 @@ namespace IFS2.Equipment.TicketingRules
             // If Reader is in ST_INIT, even then it returns ERR_NONE
             // If Reader is in ST_CARDON, even then it returns ERR_NONE
             // Even when field is OFF, it returns ERR_NONE
-            Err = Reader.StopPolling((CSC_READER_TYPE)_ReaderType,
+            Err = Reader.StopPolling(_ReaderType,
                                         _hRw);
 #endif
             if (Err != CSC_API_ERROR.ERR_NONE)
@@ -762,7 +721,7 @@ namespace IFS2.Equipment.TicketingRules
 #if _BLUEBIRD_
             return Reader.HaltCard();
 #else
-            return Reader.HaltCard((CSC_READER_TYPE)_ReaderType, _hRw);
+            return Reader.HaltCard(_ReaderType, _hRw);
 #endif
         }
        
@@ -795,7 +754,7 @@ namespace IFS2.Equipment.TicketingRules
                 if (ret)
                 {
 
-                    Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                    Err_Glo = Reader.IsoCommand(_ReaderType,
                                                 _hRw,
                                                 DEST_TYPE.DEST_PICC_TRANSPARENT,
                                                  CFunctions.getApdu(ISOCONSTANTS.DESFIRE_CLA, ISOCONSTANTS.DESFIRE_GETVAL_INS, 0x00, 0x00, fileid, 0x00),
@@ -828,7 +787,7 @@ namespace IFS2.Equipment.TicketingRules
                         mDesfireCardlayout.CurrentKeyCardNumber,
                         mDesfireCardlayout.CurrentCommunicationByte };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_GETV_INS, 0x40, 0x22, pDataIn),
@@ -852,7 +811,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                 _hRw,
                                                 DEST_TYPE.DEST_CARD,
                                                 CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_GETV_INS, CONSTANT.NULL, 0x22, pDataIn),
@@ -905,7 +864,7 @@ namespace IFS2.Equipment.TicketingRules
                 if (ret)
                 {
 
-                    Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                    Err_Glo = Reader.IsoCommand(_ReaderType,
                                                 _hRw,
                                                 DEST_TYPE.DEST_PICC_TRANSPARENT,
                                                  CFunctions.getApdu(ISOCONSTANTS.DESFIRE_CLA, ISOCONSTANTS.DESFIRE_GETVAL_INS, 0x00, 0x00, fileid, 0x00),
@@ -933,7 +892,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentKeyCardNumber,
                 mDesfireCardlayout.CurrentCommunicationByte };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_GETV_INS, 0x40, 0x21, pDataIn),
@@ -953,7 +912,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                 _hRw,
                                                 DEST_TYPE.DEST_CARD,
                                                 CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_GETV_INS, CONSTANT.NULL, 0x21, pDataIn),
@@ -1017,7 +976,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentCommunicationByte,
                 0x00,0x00,(byte)pNbrOfRecords};
 
-                            Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                            Err_Glo = Reader.IsoCommand(_ReaderType,
                                                      _hRw,
                                                      DEST_TYPE.DEST_CARD,
                                                      CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, 0x40, 0x43, pDataIn),
@@ -1037,7 +996,7 @@ namespace IFS2.Equipment.TicketingRules
                         {
                             byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00, 0x00, 0x00, (byte)pNbrOfRecords };
 
-                            Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                            Err_Glo = Reader.IsoCommand(_ReaderType,
                                             _hRw,
                                             DEST_TYPE.DEST_CARD,
                                             CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, CONSTANT.NULL, 0x43, pDataIn),
@@ -1102,7 +1061,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentCommunicationByte,
                 0x00,0x00,0x20}; // TODO : in TOM nbyte is 0x1B 
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, 0x40, 0x15, pDataIn),
@@ -1120,7 +1079,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00, 0x00, 0x00, 0x20 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                             _hRw,
                                             DEST_TYPE.DEST_CARD,
                                             CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, CONSTANT.NULL, 0x15, pDataIn),
@@ -1182,7 +1141,7 @@ namespace IFS2.Equipment.TicketingRules
                 0x00,0x00,0x20};
                         // byte[] idata = new byte[] { 0x82, 0xB2, 0x40, 0x16, 0x08, 0x81, 0x01, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, 0x40, 0x16, pDataIn),
@@ -1202,7 +1161,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00, 0x00, 0x00, 0x20 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                         _hRw,
                                         DEST_TYPE.DEST_CARD,
                                         CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, CONSTANT.NULL, 0x16, pDataIn),
@@ -1263,7 +1222,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentCommunicationByte,
                 0x00,0x00,12};
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                  _hRw,
                                  DEST_TYPE.DEST_CARD,
                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, 0x40, 0x10, pDataIn),
@@ -1279,7 +1238,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00, 0x00, 0x00, 0x20 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                             _hRw,
                                             DEST_TYPE.DEST_CARD,
                                             CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, CONSTANT.NULL, 0x10, pDataIn),
@@ -1340,7 +1299,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentCommunicationByte,
                 0x00,0x00,15};
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                  _hRw,
                                  DEST_TYPE.DEST_CARD,
                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, 0x40, 0x10, pDataIn),
@@ -1356,7 +1315,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00, 0x00, 0x00, 0x20 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                             _hRw,
                                             DEST_TYPE.DEST_CARD,
                                             CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, CONSTANT.NULL, 0x10, pDataIn),
@@ -1419,7 +1378,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentCommunicationByte,
                 0x00,0x00,0x20};// in TOm it is 0x14
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, 0x40, 0x08, pDataIn),
@@ -1436,7 +1395,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00, 0x00, 0x00, 0x20 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                             _hRw,
                                             DEST_TYPE.DEST_CARD,
                                             CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, CONSTANT.NULL, 0x08, pDataIn),
@@ -1497,7 +1456,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentCommunicationByte,
                 0x00,0x00,0x20}; //in TOM it nbyte is 0x1F
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, 0x40, 0x09, pDataIn),
@@ -1515,7 +1474,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00, 0x00, 0x00, 0x20 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                             _hRw,
                                             DEST_TYPE.DEST_CARD,
                                             CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, CONSTANT.NULL, 0x09, pDataIn),
@@ -1577,7 +1536,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentCommunicationByte,
                 0x00,0x00,0x20};
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, 0x40, 0x11, pDataIn),
@@ -1595,7 +1554,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00, 0x00, 0x00, 0x20 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                _hRw,
                                                DEST_TYPE.DEST_CARD,
                                                CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, CONSTANT.NULL, 0x11, pDataIn),
@@ -1659,7 +1618,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentCommunicationByte,
                 0x00,0x00,0x20};
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, 0x40, 0x12, pDataIn),
@@ -1677,7 +1636,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00, 0x00, 0x00, 0x20 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                _hRw,
                                                DEST_TYPE.DEST_CARD,
                                                CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, CONSTANT.NULL, 0x12, pDataIn),
@@ -1742,7 +1701,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentCommunicationByte,
                 0x00,0x00,0x20};
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, 0x40, 0x13, pDataIn),
@@ -1760,7 +1719,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00, 0x00, 0x00, 0x20 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                _hRw,
                                                DEST_TYPE.DEST_CARD,
                                                CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, CONSTANT.NULL, 0x13, pDataIn),
@@ -1822,7 +1781,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentCommunicationByte,
                 0x00,0x00,0x20};
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, 0x40, 0x08, pDataIn),
@@ -1840,7 +1799,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         byte[] pDataIn = new byte[] { pKeyRef, pKeyNum, 0x00, 0x00, 0x00, 0x20 };
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                               _hRw,
                                               DEST_TYPE.DEST_CARD,
                                               CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_READ_INS, CONSTANT.NULL, 0x08, pDataIn),
@@ -1914,7 +1873,7 @@ namespace IFS2.Equipment.TicketingRules
                         mDesfireCardlayout.CurrentCommunicationByte,
                         blockData[0],blockData[1],blockData[2],blockData[3]};
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, IsForCredit ? CONSTANT.MIFARE_ADDV_INS : CONSTANT.MIFARE_DEBV_INS, 0x40, 0x22, pDataIn),
@@ -1940,7 +1899,7 @@ namespace IFS2.Equipment.TicketingRules
 
                     Array.Copy(blockData, 0, pDataIn, 3, blockData.Length);
 
-                    Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                    Err_Glo = Reader.IsoCommand(_ReaderType,
                                           _hRw,
                                           DEST_TYPE.DEST_CARD,
                                           CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA,
@@ -1992,7 +1951,7 @@ namespace IFS2.Equipment.TicketingRules
                 mDesfireCardlayout.CurrentCommunicationByte,
                 blockData[0],blockData[1],blockData[2],blockData[3]};
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_DEBV_INS, 0x40, 0x21, pDataIn),
@@ -2017,7 +1976,7 @@ namespace IFS2.Equipment.TicketingRules
 
                     Array.Copy(blockData, 0, pDataIn, 3, blockData.Length);
 
-                    Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                    Err_Glo = Reader.IsoCommand(_ReaderType,
                                           _hRw,
                                           DEST_TYPE.DEST_CARD,
                                           CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_DEBV_INS, CONSTANT.NULL, 0x21, pDataIn),
@@ -2077,7 +2036,7 @@ namespace IFS2.Equipment.TicketingRules
                         pDataIn[7] = (byte)numBytes;
                         Array.Copy(pDataBuffer, 0, pDataIn, 8, pDataBuffer.Length);
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_WRIT_INS, 0x40, (byte)pFileNbr, pDataIn),
@@ -2105,7 +2064,7 @@ namespace IFS2.Equipment.TicketingRules
 
                     Array.Copy(pDataBuffer, 0, pDataIn, 6, pDataBuffer.Length);
 
-                    Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                    Err_Glo = Reader.IsoCommand(_ReaderType,
                                            _hRw,
                                            DEST_TYPE.DEST_CARD,
                                            CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_WRIT_INS, CONSTANT.NULL, (byte)pFileNbr, pDataIn),
@@ -2172,7 +2131,7 @@ namespace IFS2.Equipment.TicketingRules
                         pDataIn[7] = (byte)numBytes;
                         Array.Copy(pDataBuffer, 0, pDataIn, 8, pDataBuffer.Length);
 
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                                  _hRw,
                                                  DEST_TYPE.DEST_CARD,
                                                  CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_WRIT_INS, 0x40, (byte)pFileNbr, pDataIn),
@@ -2202,7 +2161,7 @@ namespace IFS2.Equipment.TicketingRules
 
                     Array.Copy(pDataBuffer, 0, pDataIn, 6, pDataBuffer.Length);
 
-                    Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                    Err_Glo = Reader.IsoCommand(_ReaderType,
                                            _hRw,
                                            DEST_TYPE.DEST_CARD,
                                            CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_WRIT_INS, CONSTANT.NULL, (byte)pFileNbr, pDataIn),
@@ -2235,7 +2194,7 @@ namespace IFS2.Equipment.TicketingRules
             }
             else
             {
-                Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                Err_Glo = Reader.IsoCommand(_ReaderType,
                                       _hRw,
                                       DEST_TYPE.DEST_CARD,
                                       CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_COMT_INS, CONSTANT.NULL, CONSTANT.NULL, CONSTANT.NULL),
@@ -2266,7 +2225,7 @@ namespace IFS2.Equipment.TicketingRules
             }
             else
             {
-                Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                Err_Glo = Reader.IsoCommand(_ReaderType,
                                       _hRw,
                                       DEST_TYPE.DEST_CARD,
                                       CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_COMT_INS, 0x01, CONSTANT.NULL, CONSTANT.NULL),
@@ -2298,7 +2257,7 @@ namespace IFS2.Equipment.TicketingRules
             byte[] pDataIn = new byte[] { 0x44, 0x4D, pAppNbr };
             if (_IsNFCCardDetected)
             {
-                 Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                 Err_Glo = Reader.IsoCommand(_ReaderType,
                                     _hRw,
                                     DEST_TYPE.DEST_PICC_TRANSPARENT,
                                     CFunctions.getApdu(ISOCONSTANTS.DESFIRE_CLA, ISOCONSTANTS.DESFIRE_SELA_INS, CONSTANT.NULL, CONSTANT.NULL, pDataIn,CONSTANT.NULL),
@@ -2310,7 +2269,7 @@ namespace IFS2.Equipment.TicketingRules
             }
             else
             {
-            Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+            Err_Glo = Reader.IsoCommand(_ReaderType,
                                     _hRw,
                                     DEST_TYPE.DEST_CARD,
                                     CFunctions.getApdu(CONSTANT.MIFARE_DESFIRE_CLA, CONSTANT.MIFARE_SELA_INS, CONSTANT.NULL, CONSTANT.NULL, pDataIn),
@@ -2337,7 +2296,7 @@ namespace IFS2.Equipment.TicketingRules
 #endif
         }
 
-        public void SetReaderType(int pReaderType, int phRw)
+        public void SetReaderType(CSC_READER_TYPE pReaderType, int phRw)
         {
             _ReaderType = pReaderType;
             _hRw = phRw;
@@ -2349,7 +2308,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             return ComposeCCHSTxn.TreatXDRCompatibility(logMedia, out xdrStr,
                 Txntype,
-                SharedData.TransactionSeqNo, Amount, _hRw, (CSC_READER_TYPE)_ReaderType, bWTE, bTest, bAsPartOfIssueOp, null);
+                SharedData.TransactionSeqNo, Amount, _hRw, _ReaderType, bWTE, bTest, bAsPartOfIssueOp, null);
         }
         public bool GetTDforCCHS(LogicalMedia logMedia, TransactionType Txntype, int TxnSequenceNo, int Amount, out string xdrStr)
         {
@@ -2360,7 +2319,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             return ComposeCCHSTxn.TreatXDRCompatibility(logMedia, out xdrStr,
                 TransactionType.TXN_CSC_ADD_VALUE_EFT,
-                SharedData.TransactionSeqNo, Amount, _hRw, (CSC_READER_TYPE)_ReaderType, false, false, false, bankTopupDetails);
+                SharedData.TransactionSeqNo, Amount, _hRw, _ReaderType, false, false, false, bankTopupDetails);
         }
 
         public bool GetTDforCCHSUnreadable(TransactionType Txntype, int TxnSequenceNo, long physicalId, int owner, int deposit, int fareProduct, object pars, out string xdrStr)
@@ -2391,7 +2350,7 @@ namespace IFS2.Equipment.TicketingRules
                 case TransactionType.InitialiseBankTopup:
                 case TransactionType.TPurseDeduction:
                 case TransactionType.BusCheckOutWithTPurse:
-                    ComposeCCHSTxn.TreatXDRCompatibility2(logMedia, out result, Txntype, SharedData.TransactionSeqNo, _hRw, (CSC_READER_TYPE)_ReaderType, bWTE, bTest, pars);
+                    ComposeCCHSTxn.TreatXDRCompatibility2(logMedia, out result, Txntype, SharedData.TransactionSeqNo, _hRw, _ReaderType, bWTE, bTest, pars);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -2405,7 +2364,7 @@ namespace IFS2.Equipment.TicketingRules
         public void StopField()
         {
             // This command always stops field, and shifts R/W to ST_INIT, irrespective of which state the R/W is currently in
-            CSC_API_ERROR err = Reader.StopField((CSC_READER_TYPE)_ReaderType, _hRw);
+            CSC_API_ERROR err = Reader.StopField(_ReaderType, _hRw);
             if (err != CSC_API_ERROR.ERR_NONE)
                 throw GetExceptionForCode(err, _hRw);
         }
@@ -2420,7 +2379,7 @@ namespace IFS2.Equipment.TicketingRules
 
         public void StartField()
         {
-            CSC_API_ERROR err = Reader.StartField((CSC_READER_TYPE)_ReaderType, _hRw);
+            CSC_API_ERROR err = Reader.StartField(_ReaderType, _hRw);
             if (err != CSC_API_ERROR.ERR_NONE && err != CSC_API_ERROR.ERR_NOEXEC)
                 throw GetExceptionForCode(err, _hRw);
         }
@@ -2498,7 +2457,7 @@ namespace IFS2.Equipment.TicketingRules
 
             //log("APDU Command : " + hex);
 
-            Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+            Err_Glo = Reader.IsoCommand(_ReaderType,
                                     _hRw,
                                     DEST_TYPE.DEST_PICC_TRANSPARENT,
                                     apdu,
@@ -2589,7 +2548,7 @@ namespace IFS2.Equipment.TicketingRules
 
             //log("APDU Command : " + hex);
 
-            Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+            Err_Glo = Reader.IsoCommand(_ReaderType,
                                     _hRw,
                                     DEST_TYPE.DEST_PICC_TRANSPARENT,
                                     apdu,
@@ -2662,7 +2621,7 @@ namespace IFS2.Equipment.TicketingRules
            // string hex = BitConverter.ToString(cmd_auth2).Replace("-", string.Empty);
             
            // log("APDU Command : " + hex);
-            Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+            Err_Glo = Reader.IsoCommand(_ReaderType,
                                     _hRw,
                                     destType,
                                    cmd_auth2,
@@ -2711,7 +2670,7 @@ namespace IFS2.Equipment.TicketingRules
             #if !_BLUEBIRD_
             if (_delhiCCHSSAMUsage)
             {
-                CCHSSAMManger mCCHSSamManger = new CCHSSAMManger((CSC_READER_TYPE)_ReaderType, _hRw);
+                CCHSSAMManger mCCHSSamManger = new CCHSSAMManger(_ReaderType, _hRw);
                 foreach (cSAMConf samcnf in SharedData.mSAMUsed)
                 {
                     if (samcnf.mSAMType == CONSTANT.SAMType.ISAM)
@@ -2751,7 +2710,7 @@ namespace IFS2.Equipment.TicketingRules
 
             Array.Copy(nLengthbytes, 0, cmd_buff, index, nLengthbytes.Length - 1);
 
-            Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+            Err_Glo = Reader.IsoCommand(_ReaderType,
                                    _hRw,
                                    DEST_TYPE.DEST_PICC_TRANSPARENT,
                                   cmd_buff,
@@ -2798,7 +2757,7 @@ namespace IFS2.Equipment.TicketingRules
             byte[] cmd_buff = { ISOCONSTANTS.DESFIRE_CLA, ISOCONSTANTS.DESFIRE_MOREDATA_INS, 0x00, 0x00, 0x00 };
 
            // bRet = base.ExchangeAPDU((byte)cmd_buff.Length, cmd_buff, out m_response, out nbRead, out pSw1, out pSw2);
-            Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+            Err_Glo = Reader.IsoCommand(_ReaderType,
                                   _hRw,
                                   destType,
                                  cmd_buff,
@@ -2856,7 +2815,7 @@ namespace IFS2.Equipment.TicketingRules
 
             Array.Copy(nLengthbytes, 0, cmd_ReadData, index, nLengthbytes.Length - 1);
 
-            Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+            Err_Glo = Reader.IsoCommand(_ReaderType,
                                    _hRw,
                                    DEST_TYPE.DEST_PICC_TRANSPARENT,
                                   cmd_ReadData,
@@ -2947,7 +2906,7 @@ namespace IFS2.Equipment.TicketingRules
                     Array.Copy(abyWriteData, 0, cmd_buff, index, MaxDatatobeSent);
                 }
 
-                Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                Err_Glo = Reader.IsoCommand(_ReaderType,
                                        _hRw,
                                        DEST_TYPE.DEST_PICC_TRANSPARENT,
                                       cmd_buff,
@@ -2975,7 +2934,7 @@ namespace IFS2.Equipment.TicketingRules
                         Array.Copy(abyWriteData, 32, cmd_buff2, 5, (nDataLen - MaxDatatobeSent));
 
                         //bRet = base.ExchangeAPDU((byte)cmd_buff2.Length, cmd_buff2, out m_response, out nbytesRead, out pSw1, out pSw2);
-                        Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                        Err_Glo = Reader.IsoCommand(_ReaderType,
                                        _hRw,
                                        DEST_TYPE.DEST_PICC_TRANSPARENT,
                                       cmd_buff,
@@ -3050,7 +3009,7 @@ namespace IFS2.Equipment.TicketingRules
                 Array.Copy(blockData, 0, cmd_buff, index, blockData.Length);
                 cmd_buff[index + blockData.Length] = 0x00;
 
-                Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+                Err_Glo = Reader.IsoCommand(_ReaderType,
                                   _hRw,
                                   DEST_TYPE.DEST_PICC_TRANSPARENT,
                                  cmd_buff,
@@ -3082,7 +3041,7 @@ namespace IFS2.Equipment.TicketingRules
             pSw2 = 0xFF;
             #if !_BLUEBIRD_
             byte[] cmd_buff = {0x90,0xC7,0x00,0x00,0x00};
-            Err_Glo = Reader.IsoCommand((CSC_READER_TYPE)_ReaderType,
+            Err_Glo = Reader.IsoCommand(_ReaderType,
                                   _hRw,
                                   DEST_TYPE.DEST_PICC_TRANSPARENT,
                                  cmd_buff,

@@ -81,7 +81,7 @@ namespace IFS2.Equipment.TicketingRules
                 }
             }
 
-            DelhiTokenUltralight ul = new DelhiTokenUltralight();
+            DelhiTokenUltralight ul = new DelhiTokenUltralight(null, 0);
 
             _logicalMediaReference.Media.ChipSerialNumber = _mediaSrNbr;
             _logicalMediaReference.TTag.SerialNumber = logMediaNow.TTag.SerialNumber;

@@ -172,7 +172,7 @@ namespace IFS2.Equipment.TicketingRules.TTMain
 
             ////SecurityMgr.Instance.LoadUltraLightKey(pTokenKey);
 
-            SmartFunctions.Instance.SetReaderType(_ReaderType, phRw);
+            SmartFunctions.Instance.SetReaderType((CSC_READER_TYPE)_ReaderType, phRw);
             ////TokenFunctions sToken = new TokenFunctions((CSC_READER_TYPE)_ReaderType, phRw);
 
             byte pSW1 = 0xFF;

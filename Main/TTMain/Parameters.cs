@@ -6,13 +6,30 @@ using System.Text;
 using IFS2.Equipment.Common;
 using IFS2.Equipment.TicketingRules;
 using IFS2.Equipment.Parameters;
+using System.IO;
 
 namespace IFS2.Equipment.TicketingRules
 {
     public partial class MainTicketingRules
     {
+        public static OneEvent _fpStatus = null;
+        public static OneEvent _fpError = null;
+        public static OneEvent _fpMetaStatus = null;
+        public static OneEvent _prgStatus = null;
+        public static OneEvent _prgError = null;
+        public static OneEvent _prgMetaStatus = null;
+
+        public static OneEvent _parametersMissing = null;
+        public static OneEvent _parametersError = null;
+        public static OneEvent _parametersActivationError = null;
+        public static OneEvent _parametersMetaStatus = null;
+        public static OneEvent _globalMetaStatus = null;
+
+
         public bool TreatParametersMessageReceived(EventMessage eventMessage)
         {
+            if (eventMessage.EventID == null || eventMessage.EventID == string.Empty)
+                return false;
             switch (eventMessage.EventID.ToUpper())
             {
                 case "GETSINGLETICKETPRICE":
@@ -668,5 +685,438 @@ namespace IFS2.Equipment.TicketingRules
             return false;
         }
 
+        private void InitParameterRelated()
+        {
+            RegisterMessages_ForParameters();
+            try
+            {
+                Directory.CreateDirectory(Disk.BaseDataDirectory + @"\CurrentXmlParameters\");
+            }
+            catch { }
+
+            //We need to create the static from the parameters
+            FareParameters.Start();
+            TopologyParameters.Start();
+            MediaDenyList.Start();
+            EquipmentDenyList.Start();
+            RangeDenyList.Start();
+            AgentList.Start();
+            OverallParameters.Start();
+            TVMEquipmentParameters.Start();
+            TicketsSaleParameters.Start();
+
+            BasicParameterFile.Register(new PenaltyParameters());
+            BasicParameterFile.Register(new ParkingParameters());
+            BasicParameterFile.Register(new AdditionalProductsParameters());
+            BasicParameterFile.Register(new TopologyBusParameters());
+            BasicParameterFile.Register(new FareBusParameters());
+            BasicParameterFile.Register(new HighSecurityList());
+            BasicParameterFile.Register(new MaxiTravelTime());
+            BasicParameterFile.Register(new LocalAgentList());
+
+            _fpStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 4, "FpStatus", "OFPMIS", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
+            _fpError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 5, "FpError", "OFPDEC", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
+            _fpMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 6, "FpMetaStatus", "FPMMET", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
+            _fpMetaStatus.SetMetaStatusLinkage("", "FpStatus;FpError");
+
+            _prgStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 7, "PrgStatus", "PROMIS", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
+            _prgError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 8, "PrgError", "PRODEC", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
+            _prgMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 9, "PrgMetaStatus", "PROMET", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
+            _prgMetaStatus.SetMetaStatusLinkage("", "PrgStatus;PrgError");
+
+            _parametersMissing = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 34, "ParametersMissing", "PARMIS", AlarmStatus.Alarm, OneEvent.OneEventType.MetaAlarm);
+// TODO: remove these unnecessary #if's
+#if ! _HHD_
+            _parametersMissing.SetMetaAlarmLinkage(Configuration.ReadStringParameter("SetParametersMissing", "AgentListMissing;MediaDenyListMissing;RangeDenyListMissing;EquipmentDenyListMissing;TopologyMissing;FaresMissing;OverallMissing;EquipmentParametersMissing;TicketSaleParametersMissing"));
+#else
+            _parametersMissing.SetMetaAlarmLinkage("AgentListMissing;MediaDenyListMissing;RangeDenyListMissing;EquipmentDenyListMissing;TopologyMissing;FaresMissing;OverallMissing;EquipmentParametersMissing");
+#endif
+
+            _parametersError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 35, "ParametersError", "PARDEC", AlarmStatus.Alarm, OneEvent.OneEventType.MetaAlarm);
+#if ! _HHD_
+            _parametersError.SetMetaAlarmLinkage(Configuration.ReadStringParameter("SetParametersError", "AgentListError;MediaDenyListError;RangeDenyListError;EquipmentDenyListError;TopologyError;FaresError;OverallError;EquipmentParametersError;TicketSaleParametersError"));
+#else
+            _parametersError.SetMetaAlarmLinkage("AgentListError;MediaDenyListError;RangeDenyListError;EquipmentDenyListError;TopologyError;FaresError;OverallError;EquipmentParametersError");
+#endif
+
+            _parametersActivationError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 37, "ParametersActivationError", "EODFAI", AlarmStatus.Alarm, OneEvent.OneEventType.MetaAlarm);
+#if ! _HHD_
+            _parametersActivationError.SetMetaAlarmLinkage("AgentListActivationError;MediaDenyListActivationError;RangeDenyListActivationError;EquipmentDenyListActivationError;TopologyActivationError;FaresActivationError;OverallActivationError;EquipmentParametersActivationError");            
+#else
+            _parametersActivationError.SetMetaAlarmLinkage(Configuration.ReadStringParameter("SetParametersActivationError", "AgentListActivationError;MediaDenyListActivationError;RangeDenyListActivationError;EquipmentDenyListActivationError;TopologyActivationError;FaresActivationError;OverallActivationError;EquipmentParametersActivationError;TicketSaleParametersActivationError"));
+#endif
+
+            _parametersMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 36, "ParametersMetaStatus", "PARMET", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
+            _parametersMetaStatus.SetMetaStatusLinkage("", Configuration.ReadStringParameter("SetParametersMetaStatus", "ParametersMissing;ParametersError;ParametersActivationError"));
+
+
+            _globalMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 38, "EODMetaStatus", "METEOD", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
+            _globalMetaStatus.SetMetaStatusLinkage("", Configuration.ReadStringParameter("SetGlobalEODMetaStatus", "ParametersMissing;ParametersError;ParametersActivationError;TicketKeysMissing;TicketKeysError;FpStatus;FpError;PrgStatus;PrgError"));
+
+            if (!Config._bTreatTicketSaleParameterInEOD)
+            {
+                TicketsSaleParameters._ticketSaleParametersActivation.SetAlarm(false);
+                TicketsSaleParameters._ticketSaleParametersError.SetAlarm(false);
+                TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(false);
+            }
+            if (!Config._bTreatTVMEquipmentParametersInEOD)
+            {
+                TVMEquipmentParameters._equipmentParametersActivation.SetAlarm(false);
+                TVMEquipmentParameters._equipmentParametersError.SetAlarm(false);
+                TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(false);
+            }
+            InitializeEODParams();
+        }
+
+        private void RegisterMessages_ForParameters()
+        {
+            string MMIChannel = "MMIChannel";
+            string CoreChannel = "CoreChannel";
+
+            Communication.AddEventsToReceive(ThreadName, "GetListParkingLines;GetListParkingStations;GetListBusLines;GetListBusStations;GetSingleTicketPrice;GetTravelDurationFromFareTiers", this);
+            Communication.AddEventToReceive(ThreadName, "GetListLines;GetListStations;GetListProducts;GetListPenalties;GetListAdditionalProducts;GetParkingDurationPrice;GetListParkingProducts", this);
+            Communication.AddEventsToReceive(ThreadName, "GetListPricesOnRestOfLine;GetEODMetaStatus", this);
+            Communication.AddEventToReceive(ThreadName, "ActivateNewParameterFile", this);
+
+            Communication.AddEventsToExternal("GetListLinesAnswer;GetListStationsAnswer;GetListProductsAnswer;GetListPenaltiesAnswer;GetListAdditionalProductsAnswer;GetListParkingProductsAnswer", MMIChannel);
+            Communication.AddEventsToExternal("GetParkingDurationPriceAnswer;GetListParkingLinesAnswer;GetListParkingStationsAnswer;GetListBusLinesAnswer;GetListBusStationsAnswer", MMIChannel);
+            Communication.AddEventsToExternal("GetSingleTicketPriceAnswer;GetTravelDurationFromFareTiersAnswer;GetListPricesOnRestOfLineAnswer", MMIChannel);
+
+            Communication.AddEventToExternal("ActivateNewParameterFileAnswer", CoreChannel);
+
+            Communication.AddEventsToExternal("EODMetaStatus;EquipmentParams", MMIChannel);
+            Communication.AddEventsToExternal("TopologyParametersUpdated;ParametersUpdated", MMIChannel);
+        }
+#if _HHD_
+        private void InitializeEODParams()
+        {
+            try
+            {
+                try
+                {
+                    AgentList.Initialise();
+                    AgentList._agentListMissing.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("AgentList", 1);
+                }
+                catch
+                {
+                    AgentList._agentListMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("AgentList", 0);
+                }
+
+                try
+                {
+                    MediaDenyList.Initialise();
+                    MediaDenyList._mediaDenyListMissing.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("MediaDenyList", 1);
+                }
+                catch
+                {
+                    MediaDenyList._mediaDenyListMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("MediaDenyList", 0);
+                }
+
+                try
+                {
+                    RangeDenyList.Initialise();
+                    RangeDenyList._rangeDenyListMissing.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("RangeDenyList", 1);
+                }
+                catch
+                {
+                    RangeDenyList._rangeDenyListMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("RangeDenyList", 0);
+                }
+
+                try
+                {
+                    EquipmentDenyList.Initialise();
+                    EquipmentDenyList._equipmentDenyListMissing.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("EquipmentDenyList", 1);
+                }
+                catch
+                {
+                    EquipmentDenyList._equipmentDenyListMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("EquipmentDenyList", 0);
+                }
+
+                try
+                {
+                    TopologyParameters.Initialise();
+                    TopologyParameters._topologyMissing.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("TopologyParameters", 1);
+                }
+                catch
+                {
+                    TopologyParameters._topologyMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("TopologyParameters", 0);
+                }
+
+                try
+                {
+                    OverallParameters.Initialise();
+                    OverallParameters._overallMissing.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("OverallParameters", 1);
+                }
+                catch
+                {
+                    OverallParameters._overallMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("OverallParameters", 0);
+                }
+
+
+
+                //try
+                //{
+                //    TVMEquipmentParameters.Initialise();
+                //    TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(false);
+                //    EODFileStatusList.UpdateStatus("EquipmentParameters", 1);
+                //}
+                //catch
+                //{
+                //    TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(true);
+                //    EODFileStatusList.UpdateStatus("EquipmentParameters", 0);
+                //}
+                //  Debug.Assert(false);
+                TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(false);
+
+                if (Config._bTreatTicketSaleParameterInEOD)
+                {
+                    Logging.Trace("TtMain.InitialiseEOD. Ticket Sale Parameters in EOD");
+                    try
+                    {
+                        Logging.Trace("TtMain.InitialiseEOD.before Ticket Sale Parameters");
+                        FareProductSpecs.Load(false);
+                        Logging.Trace("TtMain.InitialiseEOD.after Ticket Sale Parameters");
+                        SharedData._fpSpecsRepository = FareProductSpecs.GetInstance();
+                        TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(false);
+                        EODFileStatusList.UpdateStatus("TicketSaleParamters", 1);
+                    }
+                    catch (Exception e6)
+                    {
+                        Logging.Log(LogLevel.Error, "TTMain.InitialiseEOD.TicketSaleParameters Exception " + e6.Message);
+                        TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(true);
+                        EODFileStatusList.UpdateStatus("TicketSaleParamters", 0);
+                    }
+                    Logging.Trace("TtMain.InitialiseEOD  Ticket Sale Parameters terminated");
+                }
+                else
+                {
+                    FareProductSpecs.Load(true);
+                    SharedData._fpSpecsRepository = FareProductSpecs.GetInstance();
+                    TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("TicketSaleParamters", 1);
+                }
+
+                try
+                {
+                    FareParameters.Initialise();
+                    FareParameters._faresMissing.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("FareParameters", 1);
+                }
+                catch
+                {
+                    FareParameters._faresMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("FareParameters", 0);
+                }
+
+                //Initialise additional data
+                BasicParameterFile.Instance("PenaltyParameters").Load();
+                BasicParameterFile.Instance("ParkingParameters").Load();
+                BasicParameterFile.Instance("AdditionalProducts").Load();
+                BasicParameterFile.Instance("TopologyBusParameters").Load();
+                BasicParameterFile.Instance("FareBusParameters").Load();
+                BasicParameterFile.Instance("HighSecurityList").Load();
+                BasicParameterFile.Instance("MaxiTravelTime").Load();
+                BasicParameterFile.Instance("LocalAgentList").Load();
+
+                //Update different levels
+                _parametersMissing.UpdateMetaAlarm();
+                _parametersError.UpdateMetaAlarm();
+                _parametersActivationError.UpdateMetaAlarm();
+                _parametersMetaStatus.UpdateMetaStatus();
+                _globalMetaStatus.UpdateMetaStatus();
+                Communication.SendMessage(ThreadName, "Status", "EODMetaStatus", Convert.ToString(_parametersMetaStatus.Value), EODFileStatusList.EODMetaStatus());
+
+
+                IFSEventsList.SaveIfHasChangedSinceLastSave("TTComponent");
+            }
+            catch (Exception e)
+            {
+                Logging.Log(LogLevel.Critical, "TTMain Cannot Load Parameters File " + e.Message);
+            }
+        }
+#else
+        private void InitializeEODParams()
+        {
+            try
+            {
+                try
+                {
+                    AgentList.Initialise();
+                    AgentList._agentListMissing.SetAlarm(false);
+                    AgentList._agentListActivation.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("AgentList", 1);
+                }
+                catch
+                {
+                    AgentList._agentListMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("AgentList", 0);
+                }
+
+                try
+                {
+                    MediaDenyList.Initialise();
+                    MediaDenyList._mediaDenyListMissing.SetAlarm(false);
+                    MediaDenyList._mediaDenyListActivation.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("MediaDenyList", 1);
+                }
+                catch
+                {
+                    MediaDenyList._mediaDenyListMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("MediaDenyList", 0);
+                }
+
+                try
+                {
+                    RangeDenyList.Initialise();
+                    RangeDenyList._rangeDenyListMissing.SetAlarm(false);
+                    RangeDenyList._rangeDenyListActivation.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("RangeDenyList", 1);
+                }
+                catch
+                {
+                    RangeDenyList._rangeDenyListMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("RangeDenyList", 0);
+                }
+
+                try
+                {
+                    EquipmentDenyList.Initialise();
+                    EquipmentDenyList._equipmentDenyListMissing.SetAlarm(false);
+                    EquipmentDenyList._equipmentDenyListActivation.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("EquipmentDenyList", 1);
+                }
+                catch
+                {
+                    EquipmentDenyList._equipmentDenyListMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("EquipmentDenyList", 0);
+                }
+
+                try
+                {
+                    TopologyParameters.Initialise();
+                    TopologyParameters._topologyMissing.SetAlarm(false);
+                    TopologyParameters._topologyActivation.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("TopologyParameters", 1);
+                }
+                catch
+                {
+                    TopologyParameters._topologyMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("TopologyParameters", 0);
+                }
+
+                try
+                {
+                    OverallParameters.Initialise();
+                    OverallParameters._overallMissing.SetAlarm(false);
+                    OverallParameters._overallActivation.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("OverallParameters", 1);
+                }
+                catch
+                {
+                    OverallParameters._overallMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("OverallParameters", 0);
+                }
+                //Initialise additional data
+
+                BasicParameterFile.Instance("PenaltyParameters").Load();
+                BasicParameterFile.Instance("ParkingParameters").Load();
+                BasicParameterFile.Instance("AdditionalProducts").Load();
+                BasicParameterFile.Instance("TopologyBusParameters").Load();
+                BasicParameterFile.Instance("FareBusParameters").Load();
+                BasicParameterFile.Instance("HighSecurityList").Load();
+                BasicParameterFile.Instance("MaxiTravelTime").Load();
+                BasicParameterFile.Instance("LocalAgentList").Load();
+
+                if (Config._bTreatTVMEquipmentParametersInEOD)
+                {
+                    try
+                    {
+                        TVMEquipmentParameters.Initialise();
+                        TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(false);
+                        TVMEquipmentParameters._equipmentParametersActivation.SetAlarm(false);
+                        EODFileStatusList.UpdateStatus("EquipmentParameters", 1);
+                    }
+                    catch
+                    {
+                        TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(true);
+                        EODFileStatusList.UpdateStatus("EquipmentParameters", 0);
+                    }
+                }
+                else
+                {
+                    TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("EquipmentParameters", 1);
+                }
+                if (Config._bTreatTicketSaleParameterInEOD)
+                {
+                    Logging.Trace("TtMain.InitialiseEOD. Ticket Sale Parameters in EOD");
+                    try
+                    {
+                        Logging.Trace("TtMain.InitialiseEOD.before Ticket Sale Parameters");
+                        FareProductSpecs.Load(false);
+                        Logging.Trace("TtMain.InitialiseEOD.after Ticket Sale Parameters");
+                        SharedData._fpSpecsRepository = FareProductSpecs.GetInstance();
+                        TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(false);
+                        TicketsSaleParameters._ticketSaleParametersActivation.SetAlarm(false);
+                        EODFileStatusList.UpdateStatus("TicketSaleParamters", 1);
+                    }
+                    catch (Exception e6)
+                    {
+                        Logging.Log(LogLevel.Error, "TTMain.InitialiseEOD.TicketSaleParameters Exception " + e6.Message);
+                        TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(true);
+                        EODFileStatusList.UpdateStatus("TicketSaleParamters", 0);
+                    }
+                    Logging.Trace("TtMain.InitialiseEOD  Ticket Sale Parameters terminated");
+                }
+                else
+                {
+                    FareProductSpecs.Load(true);
+                    SharedData._fpSpecsRepository = FareProductSpecs.GetInstance();
+                    TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("TicketSaleParamters", 1);
+                }
+
+                try
+                {
+                    FareParameters.Initialise();
+                    FareParameters._faresMissing.SetAlarm(false);
+                    FareParameters._faresActivation.SetAlarm(false);
+                    EODFileStatusList.UpdateStatus("FareParameters", 1);
+                }
+                catch
+                {
+                    FareParameters._faresMissing.SetAlarm(true);
+                    EODFileStatusList.UpdateStatus("FareParameters", 0);
+                }
+
+                //Update different levels
+                _parametersMissing.UpdateMetaAlarm();
+                _parametersError.UpdateMetaAlarm();
+                _parametersActivationError.UpdateMetaAlarm();
+                _parametersMetaStatus.UpdateMetaStatus();
+                _globalMetaStatus.UpdateMetaStatus();
+                Communication.SendMessage(ThreadName, "Status", "EODMetaStatus", Convert.ToString(_parametersMetaStatus.Value), EODFileStatusList.EODMetaStatus());
+
+
+                IFSEventsList.SaveIfHasChangedSinceLastSave("TTComponent");
+            }
+            catch (Exception e)
+            {
+                Logging.Log(LogLevel.Critical, "TTMain Cannot Load Parameters File " + e.Message);
+            }
+        }
+#endif
     }
 }

@@ -2324,44 +2324,6 @@ namespace IFS2.Equipment.TicketingRules
                     }
                     return true;
 
-                case "VERIFYAGENTDATA":
-
-                    try
-                    {
-                        //To add password and to test result of function.
-                        //bool bAgentCard;
-                        //string stations;
-                        EOD_OneAgent agent;
-                        AgentProfile agentProfile;
-                        if (Configuration.ReadBoolParameter("Parameters_LocalAgentListToUse", false))
-                        {
-                            EOD_OneLocalAgent agt;
-                            agentProfile = ((LocalAgentList)BasicParameterFile.Instance("LocalAgentList")).VerifyAgent(Convert.ToInt32(eventMessage.Attribute), eventMessage.Message, out agent);
-                            if (agentProfile != AgentProfile.NotKnown)
-                            {
-                                Communication.SendMessage(ThreadName, "Answer", "VerifyAgentDataAnswer", "0", ((int)agentProfile).ToString(), agent.AgentCard.ToString(), agent.Stations, SerializeHelper<EOD_OneAgent>.XMLSerialize(agent));
-                                return true;
-                            }
-                        }
-                            
-                        agentProfile = AgentList.VerifyAgent(Convert.ToInt32(eventMessage.Attribute), eventMessage.Message, out agent);
-                        if (agentProfile == AgentProfile.NotKnown)
-                        {
-                            //Agent is not Authorised
-                            Communication.SendMessage(ThreadName, "Answer", "VerifyAgentDataAnswer", Convert.ToString((int)TTErrorTypes.BadAgentData), "");
-                        }
-                        else
-                        {
-                            Communication.SendMessage(ThreadName, "Answer", "VerifyAgentDataAnswer", "0", ((int)agentProfile).ToString(), agent.AgentCard.ToString(), agent.Stations,SerializeHelper<EOD_OneAgent>.XMLSerialize(agent));
-                        }
-                    }
-                    catch (Exception e1)
-                    {
-                        Communication.SendMessage(ThreadName, "Answer", "VerifyAgentDataAnswer", Convert.ToString((int)TTErrorTypes.BadAgentData), "");
-                        Logging.Log(LogLevel.Error, ThreadName + "_VerifyAgentData Error :" + e1.Message);
-                        break;
-                    }
-                    return true;
             }
             return false;
         }

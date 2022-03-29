@@ -43,18 +43,6 @@ namespace IFS2.Equipment.TicketingRules
         public static OneEvent _ticketKeysMissing = null;
         public static OneEvent _ticketKeysError = null;
         public static OneEvent _ticketKeysMetaStatus = null;
-        public static OneEvent _fpStatus = null;
-        public static OneEvent _fpError = null;
-        public static OneEvent _fpMetaStatus = null;
-        public static OneEvent _prgStatus = null;
-        public static OneEvent _prgError = null;
-        public static OneEvent _prgMetaStatus = null;
-
-        public static OneEvent _parametersMissing = null;
-        public static OneEvent _parametersError = null;
-        public static OneEvent _parametersActivationError = null;
-        public static OneEvent _parametersMetaStatus = null;
-        public static OneEvent _globalMetaStatus = null;
 
         public static OneEvent _cscReloaderFailure = null, _cscReloaderFailure2 = null;
         public static OneEvent _cscReloaderIsOffLine = null, _cscReloaderIsOffLine2 = null;
@@ -94,19 +82,7 @@ namespace IFS2.Equipment.TicketingRules
         private int? _readDataForAddVal_RechargeValueRequested = null;
 
         SmartFunctions inst;
-        static bool _bLastMediaDetectedUsingCallback = false;
-        
-        public enum Timers
-        {
-            PutTokenUnderRW,
-            ThrowToken,
-            TimeoutToGiveChanceForLastOpWTEToComplete,
-            TimeoutSinceLastMediaGotDetected_SoAsToClearUselessMediasCache,
-            TimeoutCancelPutTokenUnderRWAckNotRecvd,
-            NoTokenDetectedPost_Positive_PutTokenUnderRWAck,
-            TimeoutNoMediaDetectedPostLastMediaWasHalted,
-            TimoutMediaStillMaybeInFieldPostRTEOrWTE
-        }
+        static bool _bLastMediaDetectedUsingCallback = false;        
 
         const int FareMode_Incident = 3;
         private RegisterEquipmentStatus _eqptStatus = null;
@@ -199,23 +175,7 @@ namespace IFS2.Equipment.TicketingRules
                 _prgStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 7, "PrgStatus", "PROMIS", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
                 _prgError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 8, "PrgError", "PRODEC", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
                 _prgMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 9, "PrgMetaStatus", "PROMET", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
-                _prgMetaStatus.SetMetaStatusLinkage("", "PrgStatus;PrgError");
-
-                _parametersMissing = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 34, "ParametersMissing", "PARMIS", AlarmStatus.Alarm, OneEvent.OneEventType.MetaAlarm);
-                _parametersMissing.SetMetaAlarmLinkage("AgentListMissing;MediaDenyListMissing;RangeDenyListMissing;EquipmentDenyListMissing;TopologyMissing;FaresMissing;OverallMissing;EquipmentParametersMissing");
-
-                _parametersError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 35, "ParametersError", "PARDEC", AlarmStatus.Alarm, OneEvent.OneEventType.MetaAlarm);
-                _parametersError.SetMetaAlarmLinkage("AgentListError;MediaDenyListError;RangeDenyListError;EquipmentDenyListError;TopologyError;FaresError;OverallError;EquipmentParametersError");
-
-                _parametersActivationError = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 37, "ParametersActivationError", "EODFAI", AlarmStatus.Alarm, OneEvent.OneEventType.MetaAlarm);
-                _parametersActivationError.SetMetaAlarmLinkage("AgentListActivationError;MediaDenyListActivationError;RangeDenyListActivationError;EquipmentDenyListActivationError;TopologyActivationError;FaresActivationError;OverallActivationError;EquipmentParametersActivationError");
-
-                _parametersMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 36, "ParametersMetaStatus", "PARMET", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
-                _parametersMetaStatus.SetMetaStatusLinkage("", "ParametersMissing;ParametersError;ParametersActivationError");
-
-                _globalMetaStatus = new OneEvent((int)StatusConsts.TTComponent, "TTComponent", 38, "EODMetaStatus", "METEOD", AlarmStatus.Alarm, OneEvent.OneEventType.MetaStatus);
-                _globalMetaStatus.SetMetaStatusLinkage("", "ParametersMissing;ParametersError;ParametersActivationError;TicketKeysMissing;TicketKeysError;FpStatus;FpError;PrgStatus;PrgError");
-
+                _prgMetaStatus.SetMetaStatusLinkage("", "PrgStatus;PrgError");                
 
                 //Tags for CSC Reloader Management                
                 _cscReloaderIsOffLine = new OneEvent((int)StatusConsts.CSCReloaderDriver, "CSCReloaderDriver", 1, "IsOffLine", "CS1COM", AlarmStatus.Alarm, OneEvent.OneEventType.Alarm);
@@ -597,11 +557,6 @@ namespace IFS2.Equipment.TicketingRules
                             }
                             break;
                         }
-                    case "DELAYN":
-                        {
-                            HandleDelay(eventMessage);
-                            break;
-                        }
                     case "READMEDIAAGAIN":
                         Handle_ReadMediaAgain(eventMessage);
                         break;
@@ -631,70 +586,6 @@ namespace IFS2.Equipment.TicketingRules
                 return base.TreatMessageReceived(eventMessage);
 
             }
-        }
-
-        internal void SetLastMediaDetectedWithoutCallback()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal void SetWaitingForCancelPutTokenUnderRWAck()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void HandleDelay(EventMessage eventMessage)
-        {
-            var sTimerId = eventMessage._par[0];
-            int nTimerId;
-            try
-            {
-                nTimerId = Convert.ToInt32(sTimerId);
-            }
-            catch
-            {
-                return;
-            }
-            var timer = (Timers)nTimerId;
-      /*      switch (timer)
-            {
-                case Timers.PutTokenUnderRW:
-                    {
-                        Debug.Assert(false); // Token dispenser should have responded yet?? hence assert.
-                        SendMsg.TokenError();
-                        _curTokenTransaction = null;
-
-                        TokenTxn_RestorePollingAtFront_TVM();
-                        break;
-                    }
-                case Timers.ThrowToken:
-                    {
-                        Debug.Assert(false); // Token dispenser should have responded yet?? hence assert.
-                        SendMsg.TokenError();
-                        _curTokenTransaction = null;
-
-                        TokenTxn_RestorePollingAtFront_TVM();
-
-                        break;
-                    }
-                case Timers.TimeoutToGiveChanceForLastOpWTEToComplete:
-                    {
-                        _mediaUpdate = null;
-                        SendMsg.UpdateMedia_Terminating();
-                        break;
-                    }
-                case Timers.TimeoutSinceLastMediaGotDetected_SoAsToClearUselessMediasCache:
-                    {
-                        Console.WriteLine("TimeoutSinceLastMediaGotDetected_SoAsToClearUselessMediasCache ticked");
-                        _bTimeoutSinceLastMediaGotDetected_SoAsToClearUselessMediasCache_Ticking = false;
-                        if (_curTokenTransaction == null)
-                        {
-                            Console.WriteLine("_UselessmediasThatMayBeInRFField cleared");
-                            _UselessmediasThatMayBeInRFField.Clear();
-                        }
-                        break;
-                    }
-            }*/
         }
 
         #endregion "TreatMessageReceived"
@@ -1145,7 +1036,7 @@ namespace IFS2.Equipment.TicketingRules
 
                 if (Err == CSC_API_ERROR.ERR_NONE)
                 {
-                    SmartFunctions.Instance.SetReaderType(_ReaderType, 0);
+                    SmartFunctions.Instance.SetReaderType((CSC_READER_TYPE)_ReaderType, 0);
                     // SKS:fill CSC firmware version info
                     _firmwareVersion.SetEvent(_FirmwareInfo.AppCSC);
                     _cscChargeurVersion.SetEvent(_FirmwareInfo.Chargeur);
@@ -1256,165 +1147,6 @@ namespace IFS2.Equipment.TicketingRules
             return _IsReaderLoaded;
         }
 
-        private void InitializeEODParams()
-        {
-            try
-            {
-                try
-                {
-                    AgentList.Initialise();
-                    AgentList._agentListMissing.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("AgentList", 1);
-                }
-                catch
-                {
-                    AgentList._agentListMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("AgentList", 0);
-                }
-
-                try
-                {
-                    MediaDenyList.Initialise();
-                    MediaDenyList._mediaDenyListMissing.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("MediaDenyList", 1);
-                }
-                catch
-                {
-                    MediaDenyList._mediaDenyListMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("MediaDenyList", 0);
-                }
-
-                try
-                {
-                    RangeDenyList.Initialise();
-                    RangeDenyList._rangeDenyListMissing.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("RangeDenyList", 1);
-                }
-                catch
-                {
-                    RangeDenyList._rangeDenyListMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("RangeDenyList", 0);
-                }
-
-                try
-                {
-                    EquipmentDenyList.Initialise();
-                    EquipmentDenyList._equipmentDenyListMissing.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("EquipmentDenyList", 1);
-                }
-                catch
-                {
-                    EquipmentDenyList._equipmentDenyListMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("EquipmentDenyList", 0);
-                }
-
-                try
-                {
-                    TopologyParameters.Initialise();
-                    TopologyParameters._topologyMissing.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("TopologyParameters", 1);
-                }
-                catch
-                {
-                    TopologyParameters._topologyMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("TopologyParameters", 0);
-                }
-
-                try
-                {
-                    OverallParameters.Initialise();
-                    OverallParameters._overallMissing.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("OverallParameters", 1);
-                }
-                catch
-                {
-                    OverallParameters._overallMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("OverallParameters", 0);
-                }
-
-
-
-                //try
-                //{
-                //    TVMEquipmentParameters.Initialise();
-                //    TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(false);
-                //    EODFileStatusList.UpdateStatus("EquipmentParameters", 1);
-                //}
-                //catch
-                //{
-                //    TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(true);
-                //    EODFileStatusList.UpdateStatus("EquipmentParameters", 0);
-                //}
-                //  Debug.Assert(false);
-                TVMEquipmentParameters._equipmentParametersMissing.SetAlarm(false);
-
-                if (Config._bTreatTicketSaleParameterInEOD)
-                {
-                    Logging.Trace("TtMain.InitialiseEOD. Ticket Sale Parameters in EOD");
-                    try
-                    {
-                        Logging.Trace("TtMain.InitialiseEOD.before Ticket Sale Parameters");
-                        FareProductSpecs.Load(false);
-                        Logging.Trace("TtMain.InitialiseEOD.after Ticket Sale Parameters");
-                        SharedData._fpSpecsRepository = FareProductSpecs.GetInstance();
-                        TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(false);
-                        EODFileStatusList.UpdateStatus("TicketSaleParamters", 1);
-                    }
-                    catch (Exception e6)
-                    {
-                        Logging.Log(LogLevel.Error, "TTMain.InitialiseEOD.TicketSaleParameters Exception " + e6.Message);
-                        TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(true);
-                        EODFileStatusList.UpdateStatus("TicketSaleParamters", 0);
-                    }
-                    Logging.Trace("TtMain.InitialiseEOD  Ticket Sale Parameters terminated");
-                }
-                else
-                {
-                    FareProductSpecs.Load(true);
-                    SharedData._fpSpecsRepository = FareProductSpecs.GetInstance();
-                    TicketsSaleParameters._ticketSaleParametersMissing.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("TicketSaleParamters", 1);
-                }
-
-                try
-                {
-                    FareParameters.Initialise();
-                    FareParameters._faresMissing.SetAlarm(false);
-                    EODFileStatusList.UpdateStatus("FareParameters", 1);
-                }
-                catch
-                {
-                    FareParameters._faresMissing.SetAlarm(true);
-                    EODFileStatusList.UpdateStatus("FareParameters", 0);
-                }
-
-                //Initialise additional data
-                BasicParameterFile.Instance("PenaltyParameters").Load();
-                BasicParameterFile.Instance("ParkingParameters").Load();
-                BasicParameterFile.Instance("AdditionalProducts").Load();
-                BasicParameterFile.Instance("TopologyBusParameters").Load();
-                BasicParameterFile.Instance("FareBusParameters").Load();
-                BasicParameterFile.Instance("HighSecurityList").Load();
-                BasicParameterFile.Instance("MaxiTravelTime").Load();
-                BasicParameterFile.Instance("LocalAgentList").Load();
-
-                //Update different levels
-                _parametersMissing.UpdateMetaAlarm();
-                _parametersError.UpdateMetaAlarm();
-                _parametersActivationError.UpdateMetaAlarm();
-                _parametersMetaStatus.UpdateMetaStatus();
-                _globalMetaStatus.UpdateMetaStatus();
-                Communication.SendMessage(ThreadName, "Status", "EODMetaStatus", Convert.ToString(_parametersMetaStatus.Value), EODFileStatusList.EODMetaStatus());
-
-
-                IFSEventsList.SaveIfHasChangedSinceLastSave("TTComponent");
-            }
-            catch (Exception e)
-            {
-                Logging.Log(LogLevel.Critical, "TTMain Cannot Load Parameters File " + e.Message);
-            }
-        }
-
         public override void OnBegin()
         {
             InitializeEODParams();//SKS:01/09/2014 Shifted here because of TT is taking much time to read and configure form big EOD xml files
@@ -1425,11 +1157,11 @@ namespace IFS2.Equipment.TicketingRules
             catch { }
             CSC_API_ERROR Err;
 
-            hwCsc = new DelhiDesfireEV0();
+            hwCsc = new DelhiDesfireEV0(null);
             hwCsc.Reset();
 
             /// DelhiToken ...
-            hwToken = new DelhiTokenUltralight();
+            hwToken = new DelhiTokenUltralight(null, 0);
             /// end 
             //Load the logical medias for Storage
             _logMediaReloader = new LogicalMedia();
@@ -1560,38 +1292,6 @@ namespace IFS2.Equipment.TicketingRules
         {
             return _delhiCCHSSAMUsage;
         }
-
-        private void SetMediaUpdateConcluded()
-        {
-            throw new NotImplementedException();
-        }
-        internal string GetIdOfToken(long p)
-        {
-            throw new NotImplementedException();
-        }
-        internal void PollForAnyMediaAtMoment_ThenStopPolling(Scenario scenario)
-        {
-            throw new NotImplementedException();
-        }
-        internal void StartTimer(Timers timers)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal void StopTimer(Timers timers)
-        {
-            throw new NotImplementedException();
-        }
-        internal void SetMediaKeptOnReaderWasLastUpdatedInThisVeryCycle()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal bool IsTimerActive(Timers timers)
-        {
-            throw new NotImplementedException();
-        }
-
 
         bool _bTicketDataStructuresSynchedWithTicketData = false;
 

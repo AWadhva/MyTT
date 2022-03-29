@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
+    <Compile Include="TTMainCommon.cs" />
     <Compile Include="MediaOpReqCSCReplacement.cs" />
     <Compile Include="IMessageSenderForIssueTxn.cs" />
     <Compile Include="MediaOpReqNewProduct.cs" />

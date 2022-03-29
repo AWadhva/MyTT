@@ -111,3 +111,4 @@ IFS2.Equipment.TicketingRules.Start.vshost.exe.config
 Outputs/*.*
 SAM/CCHSSAM/Outputs/*.*
 
+ThalesCscApi.log

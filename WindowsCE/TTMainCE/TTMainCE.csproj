@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{14E17A58-BF38-42E9-A383-847BFA75C30B}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -181,6 +181,9 @@
       <Link>TokenTxn.cs</Link>
     </Compile>
     <Compile Include="..\..\Main\TTMain\TTMain.cs" />
+    <Compile Include="..\..\Main\TTMain\TTMainCommon.cs">
+      <Link>TTMainCommon.cs</Link>
+    </Compile>
     <Compile Include="..\..\Main\TTMain\UpdateMedia.cs">
       <Link>UpdateMedia.cs</Link>
     </Compile>

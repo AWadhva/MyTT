@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{05B5339E-EC84-48A8-8D4C-0FE59F8C1F93}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IFS2.Equipment.TicketingRules</RootNamespace>
+    <AssemblyName>TTMain_Gate</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NoVirtualReader</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NoVirtualReader</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="IFS2.Equipment.Common.CommonDataStructures, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Common\Outputs\IFS2.Equipment.Common.CommonDataStructures.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.Common.FareProductSpecs, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CoreCommon\Outputs\IFS2.Equipment.Common.FareProductSpecs.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.Common.ThalesLibrary, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Common\Outputs\IFS2.Equipment.Common.ThalesLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.Common.UtilitiesWin, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Common\Outputs\IFS2.Equipment.Common.UtilitiesWin.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.EODParameters, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CoreCommon\Outputs\IFS2.Equipment.EODParameters.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\ClassLibrary1\ReaderFunctions.cs">
+      <Link>ReaderFunctions.cs</Link>
+    </Compile>
+    <Compile Include="..\CryptoflexFunctions\CryptoFlexFunctions.cs">
+      <Link>CryptoFlexFunctions.cs</Link>
+    </Compile>
+    <Compile Include="..\Main\TTMain\Config.cs">
+      <Link>Config.cs</Link>
+    </Compile>
+    <Compile Include="..\Main\TTMain\Parameters.cs">
+      <Link>Parameters.cs</Link>
+    </Compile>
+    <Compile Include="..\Main\TTMain\TTMainCommon.cs">
+      <Link>TTMainCommon.cs</Link>
+    </Compile>
+    <Compile Include="..\Rules\CommonRules\SharedData.cs">
+      <Link>SharedData.cs</Link>
+    </Compile>
+    <Compile Include="..\SAM\CCHSSAM\CCSHSAM\CCHSSAMManger.cs">
+      <Link>CCHSSAMManger.cs</Link>
+    </Compile>
+    <Compile Include="ConnectionMonitor\V4ReaderConf.cs" />
+    <Compile Include="IReader.cs" />
+    <Compile Include="IV4ReaderApi.cs" />
+    <Compile Include="MainTicketingRules.cs" />
+    <Compile Include="MediaMonitor\V4ReaderMediaMonitor.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ConnectionMonitor\ReaderConnectionMonitor.cs" />
+    <Compile Include="MyTimer.cs" />
+    <Compile Include="MediaMonitor\ReaderMediaMonitor.cs" />
+    <Compile Include="SecurityModule\CryptoFlexOnThalesReader.cs" />
+    <Compile Include="SecurityModule\ISAMOnThalesReader.cs" />
+    <Compile Include="SecurityModule\SAM.cs" />
+    <Compile Include="SecurityModule\ThalesSAMOnThalesReader.cs" />
+    <Compile Include="ThalesReader.cs" />
+    <Compile Include="V4ReaderApi.cs" />
+    <Compile Include="ConnectionMonitor\ThalesReaderConnectionMonitor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{CD865DB0-9C54-4E66-AA47-1CFC75E30075}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Constants\Constants.csproj">
+      <Project>{676BCED4-EF06-4D30-AF3A-E69C1AB62490}</Project>
+      <Name>Constants</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CSCv4Adapter\CSCv4Adapter.csproj">
+      <Project>{B68D9102-04B1-4122-B3F8-32BFA314B694}</Project>
+      <Name>CSCv4Adapter</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Parameters\OverallParameters\EODParametersW.csproj">
+      <Project>{6C8ECD60-4CA2-479A-9962-C3D739FA35AD}</Project>
+      <Name>EODParametersW</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SmartCard\SmartCard\SmartFunctions.csproj">
+      <Project>{D3D88159-0B54-44F1-8456-495D57CA8180}</Project>
+      <Name>SmartFunctions</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

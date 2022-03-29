@@ -517,7 +517,7 @@ namespace IFS2.Equipment.TicketingRules
 
             bool bMediaRead = false;
             LogicalMedia logMedia = new LogicalMedia();
-            CommonHwMedia hwCsc = new DelhiDesfireEV0();
+            CommonHwMedia hwCsc = new DelhiDesfireEV0(null);
 
             bMediaRead = hwCsc.ReadMediaData(logMedia, MediaDetectionTreatment.TOM_AnalysisForCSCIssue);
             if (!bMediaRead)
@@ -665,7 +665,7 @@ namespace IFS2.Equipment.TicketingRules
 
             bool bMediaRead = false;
             LogicalMedia logMedia = new LogicalMedia();
-            CommonHwMedia hwCsc = new DelhiDesfireEV0();
+            CommonHwMedia hwCsc = new DelhiDesfireEV0(null);
 
             bMediaRead = hwCsc.ReadMediaData(logMedia, MediaDetectionTreatment.TOM_AnalysisForRefund);
             if (!bMediaRead)
@@ -712,7 +712,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             SmartFunctions inst = SmartFunctions.Instance;
             int hRw = GetReaderHandleInvolvedWithTokenDispensing();
-            DelhiTokenUltralight ul = new DelhiTokenUltralight(hRw);
+            DelhiTokenUltralight ul = new DelhiTokenUltralight(null, hRw);
             SmartFunctions.MediaDetected mediaDetected;
             byte[] _pTokenData = null;
             LogicalMedia tmpMedia = null;
