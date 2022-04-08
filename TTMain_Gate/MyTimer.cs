@@ -14,7 +14,7 @@ namespace IFS2.Equipment.TicketingRules
             context = context_;
             act = act_;
 
-            timer = new Timer(new TimerCallback(Timeout));
+            timer = new Timer(new TimerCallback(Timeout), null, System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
         }
 
         private void Timeout(Object stateInfo)
