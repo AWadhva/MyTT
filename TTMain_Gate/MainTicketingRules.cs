@@ -8,6 +8,7 @@ using IFS2.Equipment.TicketingRules.ConnectionMonitor;
 using IFS2.Equipment.TicketingRules.SecurityModuleInitializer;
 using IFS2.Equipment.TicketingRules.CommonTT;
 using Common;
+using IFS2.Equipment.TicketingRules.MediaTreatment;
 
 namespace IFS2.Equipment.TicketingRules
 {
@@ -15,7 +16,8 @@ namespace IFS2.Equipment.TicketingRules
     {
         public MainTicketingRules()
             : base("MainTicketingRules")
-        {
+        {            
+            InitParameterRelated();
             V4ReaderConf conf = new V4ReaderConf();
             conf.readerTyp = CSC_READER_TYPE.V4_READER;
             conf.rfPower = 2;
@@ -56,67 +58,18 @@ namespace IFS2.Equipment.TicketingRules
                 sc2.ucRepeatNumber = 1;
                 sc2.xCardType = (int)(CSC_TYPE.CARD_MIFARE1);
 
-                mediaMonitor = new V4ReaderMediaMonitor(this, reader.handle, CSC_READER_TYPE.V4_READER, new List<int> { conf.slotId }, new List<ScenarioPolling> { sc1 }, new List<ScenarioPolling> { sc2 });
-                Poller poller = new Poller(mediaMonitor, CSC_READER_TYPE.V4_READER, reader.handle);
+                V4ReaderMediaMonitor.V4ReaderAssembly rdr = new V4ReaderMediaMonitor.V4ReaderAssembly();
+                rdr.handle = reader.handle;
+                rdr.isamSlots = new List<int> { conf.slotId };
+                rdr.rwTyp = CSC_READER_TYPE.V4_READER;
+                rdr.scenario1 = new List<ScenarioPolling> { sc1 };
+                rdr.scenario2 = new List<ScenarioPolling> { sc2 };
+                mediaMonitor = new V4ReaderMediaMonitor(this, rdr);
+
+                Poller poller = new Poller(mediaMonitor, CSC_READER_TYPE.V4_READER, reader.handle, new CheckOutTreatement(CSC_READER_TYPE.V4_READER, reader.handle));
                 poller.Start();
             }
         }
-
-        class Poller
-        {
-            ReaderMediaMonitor mediaMonitor;
-            CSC_READER_TYPE rwTyp;
-            int hRw;
-
-            public Poller(ReaderMediaMonitor mediaMonitor_, CSC_READER_TYPE rwTyp_, int hRw_)
-            {
-                mediaMonitor = mediaMonitor_;
-                rwTyp = rwTyp_;
-                hRw = hRw_;
-            }
-
-            public void MediaProduced(StatusCSCEx status, DateTime dt)
-            {
-                SmartFunctions sf = new SmartFunctions();
-                
-                sf._delhiCCHSSAMUsage = true;
-                sf._cryptoflexSAMUsage = false;
-
-                sf.SetReaderType(rwTyp, hRw);
-                sf.SetSerialNbr(status.SerialNumber);
-
-                if (status.IsNFC)
-                    if (Configuration.ReadBoolParameter("NFCFunctionality", false))
-                        sf._IsNFCCardDetected = true;
-                
-                LogicalMedia logMedia = new LogicalMedia();
-                if (status.IsDesFire)
-                {
-                    DelhiDesfireEV0 csc = new DelhiDesfireEV0(sf);
-                    csc.ReadTPurseData(logMedia, MediaDetectionTreatment.Gate_CheckIn);
-                }
-                else if (status.IsUltraLight)
-                {
-                    DelhiTokenUltralight token = new DelhiTokenUltralight(sf, 0);
-                    token.SetRWHandle(hRw);
-                    token.ReadMediaData(logMedia, MediaDetectionTreatment.Gate_CheckIn);
-                }
-                mediaMonitor.DoneReadWriteWithThisMedia(MediaRemoved);
-            }
-            public void MediaRemoved(StatusCSCEx status, DateTime dt)
-            {
-                mediaMonitor.StartPolling(1, MediaProduced);
-            }
-            public void Start()
-            {
-                mediaMonitor.StartPolling(1, MediaProduced);
-            }
-        }
-
-        //private void DummyPollCycle()
-        //{
-        //    mediaMonitor.StartPolling(1, (x, y) => { Console.WriteLine(x.ToString() + " " + y.ToString()); });
-        //}
 
         void ReaderDisconnected(object obj)
         {

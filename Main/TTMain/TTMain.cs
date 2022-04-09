@@ -450,9 +450,11 @@ namespace IFS2.Equipment.TicketingRules
                 {
                     case "GETFAREMODEREPLY": // used exclusively by TOM
                         _eqptStatus = SerializeHelper<RegisterEquipmentStatus>.XMLDeserialize(eventMessage._par[0]);
+                        ValidationRules.SetFareMode((FareMode)_eqptStatus.FareMode);
                         break;
                     case "REGISTEREQUIPMENTSTATUS": // used exclusively by TOM
                         _eqptStatus = SerializeHelper<RegisterEquipmentStatus>.XMLDeserialize(eventMessage._par[0]);
+                        ValidationRules.SetFareMode((FareMode)_eqptStatus.FareMode);
                         break;
                     case "USEANTENNA":
                         Handle_UseAntenna(Convert.ToInt32(eventMessage._par[0]));

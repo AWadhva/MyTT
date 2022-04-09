@@ -39,6 +39,7 @@ namespace IFS2.Equipment.TicketingRules
 
             MainTicketingRules main = null;
             Thread mainThread = null;
+            ValidationRules.SetMacCalculator(new MacCalculator());
 
             try
             {

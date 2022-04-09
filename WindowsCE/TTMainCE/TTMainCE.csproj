@@ -196,6 +196,9 @@
     <Compile Include="..\..\Main\TTMain\V4Reader.cs">
       <Link>V4Reader.cs</Link>
     </Compile>
+    <Compile Include="..\..\Rules\CommonRules\ValidationRules2.cs">
+      <Link>ValidationRules2.cs</Link>
+    </Compile>
     <Compile Include="..\..\Start\Program.cs" />
     <Compile Include="MediaOpReqAdjustCSCNonPurse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

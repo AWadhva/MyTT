@@ -161,7 +161,7 @@ namespace IFS2.Equipment.TicketingRules
                 {
                     // Attempt writing DM1
                     if (!hwCsc.UpdateTPurseData(_logicalMediaUpdatedForCurrentOp, 
-                        -_logicalMediaPriorToOperation.Purse.TPurse.Balance, // balance can be either +ve or -ve. It would be taken care by the function whether to credit/debit
+                        -_logicalMediaPriorToOperation.Purse.TPurse.BalanceRead, // balance can be either +ve or -ve. It would be taken care by the function whether to credit/debit
                         false)
                         || !hwCsc.WriteMainSaleData(_logicalMediaUpdatedForCurrentOp))
                         return ResultLastAttempt.MediaCouldntBeWritten;

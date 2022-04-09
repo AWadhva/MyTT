@@ -71,6 +71,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Common\Output_WinCE\IFS2.Equipment.Common.UtilitiesCE.dll</HintPath>
     </Reference>
+    <Reference Include="IFS2.Equipment.EODParametersCE, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\CoreCommon\OutputsCE\IFS2.Equipment.EODParametersCE.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="OpenNETCF, Version=2.3.12004.0, Culture=neutral, PublicKeyToken=e60dbea84bb431b7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -114,6 +118,9 @@
     <Compile Include="..\..\Rules\CommonRules\CommonRules.cs">
       <Link>CommonRules.cs</Link>
     </Compile>
+    <Compile Include="..\..\Rules\CommonRules\Config.cs">
+      <Link>Config.cs</Link>
+    </Compile>
     <Compile Include="..\..\Rules\CommonRules\Errors.cs">
       <Link>Errors.cs</Link>
     </Compile>
@@ -128,9 +135,6 @@
     </Compile>
     <Compile Include="..\..\Rules\CommonRules\SharedData.cs">
       <Link>SharedData.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Rules\CommonRules\ValidationRules.cs">
-      <Link>ValidationRules.cs</Link>
     </Compile>
     <Compile Include="..\..\SAM\CCHSSAM\CCSHSAM\CCHSSAMManger.cs">
       <Link>CCHSSAMManger.cs</Link>

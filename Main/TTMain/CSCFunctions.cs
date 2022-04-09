@@ -204,7 +204,7 @@ namespace IFS2.Equipment.TicketingRules
             else
             {
                 int ActualFareTier;
-                ActualPrice = SalePriceCalculation.CalculatePriceSiteBased(fp, entryStationCode, SharedData.StationNumber, out ActualFareTier);
+                ActualPrice = SalePriceCalculation.CalculatePriceSiteBased(fp, entryStationCode, SharedData.StationNumber, DateTime.Now, out ActualFareTier);
             }
 
             int fareTierForWhichTokenWasSold = logMedia.Application.LocalLastAddValue.FareTiers;
@@ -223,15 +223,6 @@ namespace IFS2.Equipment.TicketingRules
             bool bFound = Config._VirtualSiteId.TryGetValue(siteId, out result);
             return result;
         }
-
-        private readonly Dictionary<TTErrorCodeOnMedia, Common.FareProductSpecs.SurchargeTyp> _diErrorCodeVsSurcharge = new Dictionary<TTErrorCodeOnMedia, Common.FareProductSpecs.SurchargeTyp>()
-        {
-            {TTErrorCodeOnMedia.ExitMismatch, Common.FareProductSpecs.SurchargeTyp.EntryExitMismatch},
-            {TTErrorCodeOnMedia.ExitNotDone, Common.FareProductSpecs.SurchargeTyp.EntryExitMismatch},
-            {TTErrorCodeOnMedia.NoEntryFound, Common.FareProductSpecs.SurchargeTyp.EntryExitMismatch},
-            {TTErrorCodeOnMedia.ExcessTripTime, Common.FareProductSpecs.SurchargeTyp.OverStay},
-            {TTErrorCodeOnMedia.AmountTooLow, Common.FareProductSpecs.SurchargeTyp.UnderFare},
-        };
 
         public void SetReadPurpose(MediaDetectionTreatment readDataFor)
         {
@@ -509,7 +500,7 @@ namespace IFS2.Equipment.TicketingRules
             if (_readDataFor != MediaDetectionTreatment.TOM_PutNewProductInExistingMedia)
                 return;
             LogicalMedia logMedia = GetLogicalDataOfMediaAtFront();
-            int purseValueExisting = logMedia.Purse.TPurse.Balance;
+            int purseValueExisting = logMedia.Purse.TPurse.BalanceRead;
             if (purseValueExisting > 0 && ProductParameters.GetProductFamily((int)_readDataForPutNewProductInExistingMedia_ProductTypeRequested) != 60)
                 _errorCurMedia = TTErrorTypes.VendNewProductInExistingCSC_OnlySVsWithNonZeroPurseBalanceAllowed;
 #endif
@@ -696,25 +687,6 @@ namespace IFS2.Equipment.TicketingRules
                 _errorCurMedia = TTErrorTypes.InvalidOperationForMediaType;
         }
 
-        private int EF_EOD_GetAdjustmentCharge(int fp, TTErrorCodeOnMedia rejectCode)
-        {
-            return FareParameters._surcharges[SharedData._fpSpecsRepository.GetSurchargeIdx(fp, _diErrorCodeVsSurcharge[rejectCode])].Price;
-        }
-        
-        private TimeSpan EF_EOD_GetMaxPaidTime(int entrySite)
-        {
-            int durationInMinutes = 0;
-#if !WindowsCE
-            Logging.Log(LogLevel.Verbose, "EF_EOD_GetMaxPaidTime called with " + entrySite);
-            if (GetVirtualSiteId(entrySite) == GetVirtualSiteId(SharedData.StationNumber))
-                return new TimeSpan(0, 0, FareParameters.ShortestReturnTripDuration);
-            
-            int FareTier = FareParameters.GetFareTier(entrySite, SharedData.StationNumber);
-            durationInMinutes = ((MaxiTravelTime)BasicParameterFile.Instance("MaxiTravelTime")).Duration(FareTier);
-#endif
-            return new TimeSpan(0, durationInMinutes, 0);
-        }
-
         private void CheckForAdjustment()
         {
             if (_errorCurMedia != TTErrorTypes.NoError) 
@@ -749,14 +721,14 @@ namespace IFS2.Equipment.TicketingRules
                         {
                             case TTErrorCodeOnMedia.ExitNotDone:
                                 {
-                                    adjustmentAmt = EF_EOD_GetAdjustmentCharge(fp, rejectCode);
+                                    adjustmentAmt = CommonRules.EF_EOD_GetAdjustmentCharge(fp, rejectCode);
                                     entryExitBitPostAdjustment = CONSTANT.MBC_GateExit;
                                     break;
                                 }
                             case TTErrorCodeOnMedia.ExitMismatch:
                             case TTErrorCodeOnMedia.NoEntryFound:
                                 {
-                                    adjustmentAmt = EF_EOD_GetAdjustmentCharge(fp, rejectCode);
+                                    adjustmentAmt = CommonRules.EF_EOD_GetAdjustmentCharge(fp, rejectCode);
                                     rejectCodePostAdjustment = TTErrorCodeOnMedia.RequiredExit;
                                     entryExitStationCodePostAdjustment = SharedData.StationNumber;
                                     entryExitBitPostAdjustment = (int)CONSTANT.MBC_GateEntry;
@@ -779,14 +751,14 @@ namespace IFS2.Equipment.TicketingRules
                         {
                             case TTErrorCodeOnMedia.ExitNotDone:
                                 {
-                                    adjustmentAmt = EF_EOD_GetAdjustmentCharge(fp, rejectCode);
+                                    adjustmentAmt = CommonRules.EF_EOD_GetAdjustmentCharge(fp, rejectCode);
                                     entryExitBitPostAdjustment = CONSTANT.MBC_GateExit;
                                     break;
                                 }
                             case TTErrorCodeOnMedia.ExitMismatch:
                             case TTErrorCodeOnMedia.NoEntryFound:
                                 {
-                                    adjustmentAmt = EF_EOD_GetAdjustmentCharge(fp, rejectCode);
+                                    adjustmentAmt = CommonRules.EF_EOD_GetAdjustmentCharge(fp, rejectCode);
                                     rejectCodePostAdjustment = TTErrorCodeOnMedia.RequiredExit;
                                     entryExitStationCodePostAdjustment = SharedData.StationNumber;
                                     entryExitBitPostAdjustment = CONSTANT.MBC_GateEntry;
@@ -825,7 +797,7 @@ namespace IFS2.Equipment.TicketingRules
                             case TTErrorCodeOnMedia.ExitMismatch:
                             case TTErrorCodeOnMedia.NoEntryFound:
                                 {
-                                    adjustmentAmt = EF_EOD_GetAdjustmentCharge(fp, rejectCode);                                    
+                                    adjustmentAmt = CommonRules.EF_EOD_GetAdjustmentCharge(fp, rejectCode);                                    
                                     entryExitBitPostAdjustment = CONSTANT.MBC_GateEntry;
 
                                     break;
@@ -838,7 +810,7 @@ namespace IFS2.Equipment.TicketingRules
                                         return;
                                     }
                                     // ANUJ: Copied as it is from base code. But not sure that this error code should ever gets written on SJT. Remove it, if it is found to have bad impact.
-                                    adjustmentAmt = EF_EOD_GetAdjustmentCharge(fp, rejectCode);
+                                    adjustmentAmt = CommonRules.EF_EOD_GetAdjustmentCharge(fp, rejectCode);
                                     entryExitBitPostAdjustment = CONSTANT.MBC_GateExit;
                                     break;
                                 }
@@ -858,7 +830,7 @@ namespace IFS2.Equipment.TicketingRules
                                     }
                                     else
                                     {
-                                        adjustmentAmt = EF_EOD_GetAdjustmentCharge(fp, rejectCode) + EF_GetAdjustmentDifferenceForExcessDistance();
+                                        adjustmentAmt = CommonRules.EF_EOD_GetAdjustmentCharge(fp, rejectCode) + EF_GetAdjustmentDifferenceForExcessDistance();
                                         SalePriceCalculation.CalculateTokenPriceSiteBased(logMedia.Application.Validation.LocationRead, SharedData.StationNumber, out fareTier);
                                         if (fareTier == -1)
                                         {
@@ -909,14 +881,7 @@ namespace IFS2.Equipment.TicketingRules
                 Debug.Assert(false);
                 return 0;
             }
-            TimeSpan maxPaidAreaTimeAllowed = EF_EOD_GetMaxPaidTime(entrySite);
-            if (durationSinceEntry < maxPaidAreaTimeAllowed)
-                return 0;
-
-            int amtPerHour = EF_EOD_GetAdjustmentCharge(fp, rejectCode);
-            int ExcessHours = (int)(Math.Ceiling((durationSinceEntry - maxPaidAreaTimeAllowed).TotalHours));
-            
-            return ExcessHours*amtPerHour;
+            return CommonRules.CalculateAdjustmentChargesForExcessTripTime(rejectCode, fp, entrySite, durationSinceEntry);
         }
 
         void CheckforAutoTopupEnable()
@@ -2029,7 +1994,7 @@ namespace IFS2.Equipment.TicketingRules
                         //Update Values of tPurse
                         SalesRules.PurseDeductionUpdate(_logMediaReloader, pValue, PaymentMethods.StoreValue);
                         OperationTypeValues ridetype = OperationTypeValues.BuyTicketFromEpurse;
-                        SalesRules.AddTrasactionHistoryRecord(_logMediaReloader, ridetype, pValue, false);
+                        SalesRules.AddTrasactionHistoryRecord(_logMediaReloader, ridetype, pValue);
                         //SalesRules.AddTrasactionHistoryRecord(_logMediaReloader, /*OperationTypeValues.Penalty*/ (OperationTypeValues)opType, pValue, true);
                         SharedData.CSC_oldEndOfValidityDate = _logMediaReloader.Application.Products.Product(0).EndOfValidity; // SKS: to put count into CCHS Txn TPURSE Header
                         if (hwCsc.UpdateTPurseData(_logMediaReloader, -pValue, false)
@@ -2101,7 +2066,7 @@ namespace IFS2.Equipment.TicketingRules
 
                         //Update Values of tPurse
                         SalesRules.PurseDeductionUpdate(_logMediaReloader, pValue, PaymentMethods.StoreValue);
-                        SalesRules.AddTrasactionHistoryRecord(_logMediaReloader, ridetype, pValue, false);
+                        SalesRules.AddTrasactionHistoryRecord(_logMediaReloader, ridetype, pValue);
 
 
                         if (hwCsc.UpdateTPurseData(_logMediaReloader, -pValue, false)
@@ -2146,7 +2111,7 @@ namespace IFS2.Equipment.TicketingRules
                         
                         OperationTypeValues ridetype  = (OperationTypeValues)Convert.ToInt32(msg_splitted[1]);
                         
-                        SalesRules.AddTrasactionHistoryRecord(_logMediaReloader, ridetype, pValue, false);
+                        SalesRules.AddTrasactionHistoryRecord(_logMediaReloader, ridetype, pValue);
                         if (hwCsc.UpdateTPurseData(_logMediaReloader, pValue, false)
                                 && hwCsc.AppendCommonAreaPurseHistoryRecord(_logMediaReloader)                                
                                 && hwCsc._CommitModifications())

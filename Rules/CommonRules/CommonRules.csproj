@@ -55,20 +55,81 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Common\Outputs\IFS2.Equipment.Common.UtilitiesWin.dll</HintPath>
     </Reference>
+    <Reference Include="IFS2.Equipment.EODParameters, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\CoreCommon\Outputs\IFS2.Equipment.EODParameters.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IMacCalcultor.cs" />
+    <Compile Include="Rules\CheckIn\Common.cs" />
+    <Compile Include="Rules\CheckIn\Fam010\AllModes.cs" />
+    <Compile Include="Rules\CheckIn\Fam010\Common.cs" />
+    <Compile Include="Rules\CheckIn\Fam010\EEO.cs" />
+    <Compile Include="Rules\CheckIn\Fam010\Incident.cs" />
+    <Compile Include="Rules\CheckIn\Fam010\Normal.cs" />
+    <Compile Include="Rules\CheckIn\Fam010\TMO.cs" />
+    <Compile Include="Rules\CheckIn\Fam040\AllModes.cs" />
+    <Compile Include="Rules\CheckIn\Fam040\EEO.cs" />
+    <Compile Include="Rules\CheckIn\Fam040\Incident.cs" />
+    <Compile Include="Rules\CheckIn\Fam040\Normal.cs" />
+    <Compile Include="Rules\CheckIn\Fam040\TMO.cs" />
+    <Compile Include="Rules\CheckIn\Fam060\AllModes.cs" />
+    <Compile Include="Rules\CheckIn\Fam060\Common.cs" />
+    <Compile Include="Rules\CheckIn\Fam060\EEO.cs" />
+    <Compile Include="Rules\CheckIn\Fam060\Incident.cs" />
+    <Compile Include="Rules\CheckIn\Fam060\Normal.cs" />
+    <Compile Include="Rules\CheckIn\Fam060\TMO.cs" />
+    <Compile Include="Rules\CheckIn\Fam080\AllModes.cs" />
+    <Compile Include="Rules\CheckIn\Fam080\Common.cs" />
+    <Compile Include="Rules\CheckIn\Fam080\EEO.cs" />
+    <Compile Include="Rules\CheckIn\Fam080\Incident.cs" />
+    <Compile Include="Rules\CheckIn\Fam080\Normal.cs" />
+    <Compile Include="Rules\CheckIn\Fam080\TMO.cs" />
     <Compile Include="CommonRules.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="Rules\CheckIn\AllFamilies.cs" />
     <Compile Include="Errors.cs" />
     <Compile Include="InformationRules.cs" />
     <Compile Include="PriceCalculation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rules\AllPurpose.cs" />
+    <Compile Include="Rules\Common.cs" />
+    <Compile Include="Rules\CheckOut\AllFamilies.cs" />
+    <Compile Include="Rules\CheckOut\Common.cs" />
+    <Compile Include="Rules\CheckOut\Fam010\AllModes.cs" />
+    <Compile Include="Rules\CheckOut\Fam010\Common.cs" />
+    <Compile Include="Rules\CheckOut\Fam010\EEO.cs" />
+    <Compile Include="Rules\CheckOut\Fam010\Incident.cs" />
+    <Compile Include="Rules\CheckOut\Fam010\Normal.cs" />
+    <Compile Include="Rules\CheckOut\Fam010\TMO.cs" />
+    <Compile Include="Rules\CheckOut\Fam040\AllModes.cs" />
+    <Compile Include="Rules\CheckOut\Fam040\EEO.cs" />
+    <Compile Include="Rules\CheckOut\Fam040\Incident.cs" />
+    <Compile Include="Rules\CheckOut\Fam040\Normal.cs" />
+    <Compile Include="Rules\CheckOut\Fam040\TMO.cs" />
+    <Compile Include="Rules\CheckOut\Fam060\AllModes.cs" />
+    <Compile Include="Rules\CheckOut\Fam060\Common.cs" />
+    <Compile Include="Rules\CheckOut\Fam060\EEO.cs" />
+    <Compile Include="Rules\CheckOut\Fam060\Incident.cs" />
+    <Compile Include="Rules\CheckOut\Fam060\Normal.cs" />
+    <Compile Include="Rules\CheckOut\Fam060\TMO.cs" />
+    <Compile Include="Rules\CheckOut\Fam080\AllModes.cs" />
+    <Compile Include="Rules\CheckOut\Fam080\Common.cs" />
+    <Compile Include="Rules\CheckOut\Fam080\EEO.cs" />
+    <Compile Include="Rules\CheckOut\Fam080\Incident.cs" />
+    <Compile Include="Rules\CheckOut\Fam080\Normal.cs" />
+    <Compile Include="Rules\CheckOut\Fam080\TMO.cs" />
     <Compile Include="SalesRules.cs" />
     <Compile Include="SharedData.cs" />
     <Compile Include="ValidationRules.cs" />
+    <Compile Include="ValidationRules2.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Common.csproj">

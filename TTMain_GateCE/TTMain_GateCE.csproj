@@ -102,9 +102,6 @@
     <Compile Include="..\Common\StatusCSCEx.cs">
       <Link>StatusCSCEx.cs</Link>
     </Compile>
-    <Compile Include="..\CSCv4Adapter\V4Adaptor.cs">
-      <Link>V4Adaptor.cs</Link>
-    </Compile>
     <Compile Include="..\Main\TTMain\Config.cs">
       <Link>Config.cs</Link>
     </Compile>
@@ -114,9 +111,6 @@
     <Compile Include="..\Main\TTMain\TTMainCommon.cs">
       <Link>TTMainCommon.cs</Link>
     </Compile>
-    <Compile Include="..\SAM\CCHSSAM\CCSHSAM\CCHSSAMManger.cs">
-      <Link>CCHSSAMManger.cs</Link>
-    </Compile>
     <Compile Include="..\TTMain_Gate\ConnectionMonitor\ReaderConnectionMonitor.cs">
       <Link>ConnectionMonitor\ReaderConnectionMonitor.cs</Link>
     </Compile>
@@ -125,9 +119,6 @@
     </Compile>
     <Compile Include="..\TTMain_Gate\ConnectionMonitor\V4ReaderConf.cs">
       <Link>V4ReaderConf.cs</Link>
-    </Compile>
-    <Compile Include="..\TTMain_Gate\IReader.cs">
-      <Link>IReader.cs</Link>
     </Compile>
     <Compile Include="..\TTMain_Gate\IV4ReaderApi.cs">
       <Link>IV4ReaderApi.cs</Link>
@@ -141,8 +132,17 @@
     <Compile Include="..\TTMain_Gate\MediaMonitor\V4ReaderMediaMonitor.cs">
       <Link>MediaMonitor\V4ReaderMediaMonitor.cs</Link>
     </Compile>
+    <Compile Include="..\TTMain_Gate\MediaTreatment\EntrySideTreatement.cs">
+      <Link>MediaTreatment\EntrySideTreatement.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\MediaTreatment\IMediaTreatment.cs">
+      <Link>MediaTreatment\IMediaTreatment.cs</Link>
+    </Compile>
     <Compile Include="..\TTMain_Gate\MyTimer.cs">
       <Link>MyTimer.cs</Link>
+    </Compile>
+    <Compile Include="..\TTMain_Gate\Poller.cs">
+      <Link>Poller.cs</Link>
     </Compile>
     <Compile Include="..\TTMain_Gate\Program.cs">
       <Link>Program.cs</Link>

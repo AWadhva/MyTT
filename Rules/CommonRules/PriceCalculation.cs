@@ -11,10 +11,10 @@ namespace IFS2.Equipment.TicketingRules
     {
         public static int CalculateTokenPriceSiteBased(int pOrigin, int pDestination, out int pFareTier)
         {
-            return CalculatePriceSiteBased(1, pOrigin, pDestination, out pFareTier);
+            return CalculatePriceSiteBased(1, pOrigin, pDestination, DateTime.Now, out pFareTier);
         }
 
-        public static int CalculatePriceSiteBased(int TicketType, int pOrigin, int pDestination, out int pFareTier)
+        public static int CalculatePriceSiteBased(int TicketType, int pOrigin, int pDestination, DateTime startTime, out int pFareTier)
         {            
             int serviveProvider = 2; //DMRC
             int DayType;
@@ -30,13 +30,11 @@ namespace IFS2.Equipment.TicketingRules
             if (FareType <= 0) return -1;
             //Determination of DayType
             //Current day type. There is only one calendar at this moment
-            
-            DayType = TimeParameters.GetDayType(1, DateTime.Now);
-            // Don't check me in
-            //DayType = 1;
+
+            DayType = TimeParameters.GetDayType(1, startTime);
             if (DayType < 0) return -1;
             //Determination of Interval type
-            int Interval = TimeParameters.GetIntervalType(1, DateTime.Now);
+            int Interval = TimeParameters.GetIntervalType(1, startTime);
             if (Interval < 0) return -1;
             //Determination of FareGroup
             FareGroup = FareParameters.GetFareGroup(FareType, DayType, Interval);

@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 
 using IFS2.Equipment.Common;
+using IFS2.Equipment.TicketingRules.Rules;
+using IFS2.Equipment.Parameters;
 
 namespace IFS2.Equipment.TicketingRules
 {
     public static class CommonRules
     {
-
-
         static public TTErrorTypes CheckAgentData(LogicalMedia logMedia)
         {
             try
@@ -79,7 +79,7 @@ namespace IFS2.Equipment.TicketingRules
                 //Check if Media is in Blacklist
                 Logging.Log(LogLevel.Verbose, "Check Media " + logMedia.Media.ChipSerialNumber.ToString() + " Type:" + ((int)logMedia.Media.HardwareType).ToString());
                 if (MediaDenyList.VerifyMedia((int)logMedia.Media.HardwareType, logMedia.Media.ChipSerialNumber))
-                    return TTErrorTypes.MediaInDenyList;                
+                    return TTErrorTypes.MediaInDenyList;
                 if (!EquipmentDenyList.VerifyEquipment(logMedia.Purse.LastAddValue.EquipmentNumber, 0))
                     return TTErrorTypes.LastAddValueDeviceBlacklisted;
 
@@ -90,6 +90,27 @@ namespace IFS2.Equipment.TicketingRules
                 Logging.Log(LogLevel.Error, "CommonRules_CheckMediaData " + e.Message);
                 return TTErrorTypes.Exception;
             }
+        }
+
+        static public TimeSpan EF_EOD_GetMaxPaidTime(int entrySite)
+        {
+            int durationInMinutes = 0;
+
+            Logging.Log(LogLevel.Verbose, "EF_EOD_GetMaxPaidTime called with " + entrySite);
+            if (GetVirtualSiteId(entrySite) == GetVirtualSiteId(SharedData.StationNumber))
+                return new TimeSpan(0, 0, FareParameters.ShortestReturnTripDuration);
+
+            int FareTier = FareParameters.GetFareTier(entrySite, SharedData.StationNumber);
+            durationInMinutes = ((MaxiTravelTime)BasicParameterFile.Instance("MaxiTravelTime")).Duration(FareTier);
+
+            return new TimeSpan(0, durationInMinutes, 0);
+        }
+
+        static internal int GetVirtualSiteId(int siteId)
+        {
+            int result = siteId;
+            bool bFound = Config._VirtualSiteId.TryGetValue(siteId, out result);
+            return result;
         }
 
         static bool _bCheckForMediaExpiry;
@@ -185,11 +206,37 @@ namespace IFS2.Equipment.TicketingRules
             }
         }
 
+        static public int CalculateAdjustmentChargesForExcessTripTime(TTErrorCodeOnMedia rejectCode, int fp, int entrySite, TimeSpan durationSinceEntry)
+        {
+            TimeSpan maxPaidAreaTimeAllowed = CommonRules.EF_EOD_GetMaxPaidTime(entrySite);
+            if (durationSinceEntry < maxPaidAreaTimeAllowed)
+                return 0;
+
+            int amtPerHour = EF_EOD_GetAdjustmentCharge(fp, rejectCode);
+            int ExcessHours = (int)(Math.Ceiling((durationSinceEntry - maxPaidAreaTimeAllowed).TotalHours));
+
+            return ExcessHours * amtPerHour;
+        }
+
+        static public int EF_EOD_GetAdjustmentCharge(int fp, TTErrorCodeOnMedia rejectCode)
+        {
+            return FareParameters._surcharges[SharedData._fpSpecsRepository.GetSurchargeIdx(fp, _diErrorCodeVsSurcharge[rejectCode])].Price;
+        }
+
+        static readonly Dictionary<TTErrorCodeOnMedia, Common.FareProductSpecs.SurchargeTyp> _diErrorCodeVsSurcharge = new Dictionary<TTErrorCodeOnMedia, Common.FareProductSpecs.SurchargeTyp>()
+        {
+            {TTErrorCodeOnMedia.ExitMismatch, Common.FareProductSpecs.SurchargeTyp.EntryExitMismatch},
+            {TTErrorCodeOnMedia.ExitNotDone, Common.FareProductSpecs.SurchargeTyp.EntryExitMismatch},
+            {TTErrorCodeOnMedia.NoEntryFound, Common.FareProductSpecs.SurchargeTyp.EntryExitMismatch},
+            {TTErrorCodeOnMedia.ExcessTripTime, Common.FareProductSpecs.SurchargeTyp.OverStay},
+            {TTErrorCodeOnMedia.AmountTooLow, Common.FareProductSpecs.SurchargeTyp.UnderFare},
+        };
+
+
         static public TTErrorTypes IsFareProductOpen(LogicalMedia logMedia)
         {
             try
-            {
-                // TODO: Anuj: I am not sure what multiple products mean for us. Writing only to improve the function, but not finish it on this aspect
+            {                
                 foreach (OneProduct p in logMedia.Application.Products.List)
                 {                    
                     if (_inst.IsOpen(p.Type)) return TTErrorTypes.NoError;
@@ -203,7 +250,9 @@ namespace IFS2.Equipment.TicketingRules
             }
         }
 
-
-
+        public static void SetRejectCode(LogicalMedia logMedia, TTErrorCodeOnMedia code)
+        {
+            logMedia.Application.Validation.RejectCode = (short)code;
+        }
     }
 }

@@ -91,23 +91,26 @@
     <Compile Include="..\Main\TTMain\Config.cs">
       <Link>Config.cs</Link>
     </Compile>
+    <Compile Include="..\Main\TTMain\MacCalculator.cs">
+      <Link>MacCalculator.cs</Link>
+    </Compile>
     <Compile Include="..\Main\TTMain\Parameters.cs">
       <Link>Parameters.cs</Link>
     </Compile>
     <Compile Include="..\Main\TTMain\TTMainCommon.cs">
       <Link>TTMainCommon.cs</Link>
     </Compile>
-    <Compile Include="..\Rules\CommonRules\SharedData.cs">
-      <Link>SharedData.cs</Link>
-    </Compile>
     <Compile Include="..\SAM\CCHSSAM\CCSHSAM\CCHSSAMManger.cs">
       <Link>CCHSSAMManger.cs</Link>
     </Compile>
     <Compile Include="ConnectionMonitor\V4ReaderConf.cs" />
-    <Compile Include="IReader.cs" />
     <Compile Include="IV4ReaderApi.cs" />
     <Compile Include="MainTicketingRules.cs" />
     <Compile Include="MediaMonitor\V4ReaderMediaMonitor.cs" />
+    <Compile Include="MediaTreatment\CheckOutTreatement.cs" />
+    <Compile Include="MediaTreatment\CheckInTreatement.cs" />
+    <Compile Include="MediaTreatment\IMediaTreatment.cs" />
+    <Compile Include="Poller.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ConnectionMonitor\ReaderConnectionMonitor.cs" />
@@ -137,6 +140,14 @@
     <ProjectReference Include="..\Parameters\OverallParameters\EODParametersW.csproj">
       <Project>{6C8ECD60-4CA2-479A-9962-C3D739FA35AD}</Project>
       <Name>EODParametersW</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rules\CommonRules\CommonRules.csproj">
+      <Project>{F47E39D9-3A57-4D4B-B36C-002295FF5519}</Project>
+      <Name>CommonRules</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SecurityMgr\SecurityMgr\SecurityMgr.csproj">
+      <Project>{7E202DED-A1AE-4FD4-B2C5-30C28EA091D7}</Project>
+      <Name>SecurityMgr %28SecurityMgr\SecurityMgr%29</Name>
     </ProjectReference>
     <ProjectReference Include="..\SmartCard\SmartCard\SmartFunctions.csproj">
       <Project>{D3D88159-0B54-44F1-8456-495D57CA8180}</Project>

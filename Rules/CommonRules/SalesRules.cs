@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace IFS2.Equipment.TicketingRules
 {
-    public static partial class SalesRules
+    public static class SalesRules
     {
         public static bool TokenSaleUpdate(LogicalMedia logMedia, int amount, int origin, int destination, short fareTier)
         {
@@ -68,22 +68,12 @@ namespace IFS2.Equipment.TicketingRules
             }
         }
 
-        public static bool AddTrasactionHistoryRecord(LogicalMedia logMedia,OperationTypeValues mRideType,int amount, bool increaseSequence)
-        {
-           
+        public static bool AddTrasactionHistoryRecord(LogicalMedia logMedia,OperationTypeValues mRideType,int amount)
+        {           
             OneTransaction trans = new OneTransaction();
             try
             {
-                //int j = index * 32 * 8;
-                if (increaseSequence)
-                {
-                    trans.SequenceNumberRead = logMedia.Application.TransportApplication.SequenceNumber - 1;
-                }
-                else
-                {
-                    trans.SequenceNumberRead = logMedia.Application.TransportApplication.SequenceNumber + 1;
-                }
-                //  logMedia.Application.TransportApplication.SequenceNumber
+                trans.SequenceNumber = logMedia.Application.TransportApplication.SequenceNumberRead + 1;                
                 trans.Amount = amount;
                 trans.DateTime = DateTime.Now;
                 trans.EquipmentNumber = SharedData.EquipmentNumber;
@@ -133,12 +123,12 @@ namespace IFS2.Equipment.TicketingRules
             {                
                 AddTrasactionHistoryRecord(logMedia,
                     OperationTypeValues.Penalty, // TODO: At the moment, it is arbitrary and not mentioned in document. It needs to be made official. In case it doesn't get approved, we can simply assign OperationTypeValues.Penalty to one of the existing values
-                    (int)purseValToDecrement,
-                    false);
+                    (int)purseValToDecrement
+                    );
                 // Order is important as AddTrasactionHistoryRecord uses purse's balance, TransApp::SeqNumb
-                logMedia.Purse.TPurse.Balance -= (int)purseValToDecrement;
-                logMedia.Purse.TPurse.SequenceNumber--;
-                logMedia.Application.TransportApplication.SequenceNumber = Math.Abs(logMedia.Purse.TPurse.SequenceNumber);
+                logMedia.Purse.TPurse.Balance = logMedia.Purse.TPurse.BalanceRead - (int)purseValToDecrement;
+                logMedia.Purse.TPurse.SequenceNumber = logMedia.Purse.TPurse.SequenceNumberRead - 1;
+                logMedia.Application.TransportApplication.SequenceNumber = Math.Abs(logMedia.Purse.TPurse.SequenceNumberRead - 1);
             }
             logMedia.DESFireDelhiLayout.Reset();
         }
@@ -150,12 +140,11 @@ namespace IFS2.Equipment.TicketingRules
                 //if (increaseSequence)                
                 //    logMedia.Purse.TPurse.SequenceNumber++;                
                 //else               
-                logMedia.Purse.TPurse.SequenceNumber--;
+                logMedia.Purse.TPurse.SequenceNumber = logMedia.Purse.TPurse.SequenceNumberRead - 1;
+                
+                logMedia.Application.TransportApplication.SequenceNumber = Math.Abs(logMedia.Purse.TPurse.SequenceNumberRead - 1);
 
-                // ANUJ: Not sure that it is correct, but at least it keeps TOM happy.
-                logMedia.Application.TransportApplication.SequenceNumber = Math.Abs(logMedia.Purse.TPurse.SequenceNumber);//SKS: 13-11-2014 Modified in the ReadSequenceNbrFile function for this //(logMedia.Purse.TPurse.SequenceNumber+1)*(-1);
-
-                logMedia.Purse.TPurse.Balance -= amount;
+                logMedia.Purse.TPurse.Balance = logMedia.Purse.TPurse.BalanceRead - amount;
                 Logging.Log(LogLevel.Verbose, "logMedia.Purse.TPurse.Balance" + amount);
 
                 return true;
@@ -172,25 +161,19 @@ namespace IFS2.Equipment.TicketingRules
         {            
             try
             {
-                //if (increaseSequence)                
-                //    logMedia.Purse.TPurse.SequenceNumber++;                
-                //else               
-                    logMedia.Purse.TPurse.SequenceNumber--;
-                
-                // ANUJ: Not sure that it is correct, but at least it keeps TOM happy.
-                logMedia.Application.TransportApplication.SequenceNumber = Math.Abs(logMedia.Purse.TPurse.SequenceNumber);//SKS: 13-11-2014 Modified in the ReadSequenceNbrFile function for this //(logMedia.Purse.TPurse.SequenceNumber+1)*(-1);
+                logMedia.Purse.TPurse.SequenceNumber = logMedia.Purse.TPurse.SequenceNumberRead - 1;
+                logMedia.Application.TransportApplication.SequenceNumber = Math.Abs(logMedia.Purse.TPurse.SequenceNumberRead - 1);
 
-                logMedia.Purse.TPurse.Balance += amount;
-
+                logMedia.Purse.TPurse.Balance = logMedia.Purse.TPurse.BalanceRead + amount;
 
                 logMedia.Application.LocalLastAddValue.Amount = amount;
                 logMedia.Application.LocalLastAddValue.DateTime = DateTime.Now;
                 logMedia.Application.LocalLastAddValue.EquipmentNumber = SharedData.EquipmentNumber;
                 logMedia.Application.LocalLastAddValue.EquipmentType = SharedData.EquipmentType;
                 logMedia.Application.LocalLastAddValue.Location = SharedData.StationNumber;
-                logMedia.Application.LocalLastAddValue.NewBalance = logMedia.Purse.TPurse.Balance;
+                logMedia.Application.LocalLastAddValue.NewBalance = logMedia.Purse.TPurse.BalanceRead + amount;
                 logMedia.Application.LocalLastAddValue.ServiceProvider = SharedData.ServiceProvider;
-                logMedia.Application.LocalLastAddValue.SequenceNumber = logMedia.Application.TransportApplication.SequenceNumber;                
+                logMedia.Application.LocalLastAddValue.SequenceNumber = Math.Abs(logMedia.Purse.TPurse.SequenceNumberRead - 1);
                 if (payment==PaymentMethods.BankCard)
                     logMedia.Application.LocalLastAddValue.OperationType = LocalLastAddValue.OperationTypeValues.BankCard;
                 else
@@ -212,8 +195,8 @@ namespace IFS2.Equipment.TicketingRules
                     default:
                         throw new NotImplementedException();
                 }
-                
-                logMedia.Purse.LastAddValue.SequenceNumber = logMedia.Purse.TPurse.SequenceNumber;
+
+                logMedia.Purse.LastAddValue.SequenceNumber = logMedia.Purse.TPurse.SequenceNumberRead - 1;
                 logMedia.Purse.LastAddValue.ServiceProvider = SharedData.ServiceProvider;
 
                 //logMedia.DESFireDelhiLayout.Reset();
@@ -303,9 +286,11 @@ namespace IFS2.Equipment.TicketingRules
 
                 long purseSeq;
                 if (bSellOnlyProduct)
-                    purseSeq = --logMedia.Purse.TPurse.SequenceNumber;
-                else                
-                    purseSeq = logMedia.Purse.TPurse.SequenceNumber = 0;
+                    logMedia.Purse.TPurse.SequenceNumber = logMedia.Purse.TPurse.SequenceNumberRead - 1;
+                else
+                    logMedia.Purse.TPurse.SequenceNumber = 0;
+
+                purseSeq = logMedia.Purse.TPurse.SequenceNumber;
 
                 // DM1 Personalization can't be and need not be edited by TOM.
 
@@ -348,7 +333,7 @@ namespace IFS2.Equipment.TicketingRules
                 if (!bSellOnlyProduct)
                     lcav.NewBalance = 0;
                 else
-                    lcav.NewBalance = logMedia.Purse.TPurse.Balance;
+                    lcav.NewBalance = logMedia.Purse.TPurse.BalanceRead;
 
                 if (payment == PaymentMethods.BankCard)
                     lcav.OperationType = LocalLastAddValue.OperationTypeValues.BankCard;
@@ -479,13 +464,13 @@ namespace IFS2.Equipment.TicketingRules
 
             // TODO: Adapt what is given inside EF_TOM_BS21C_MigrationUpdate            
             
-            logMedia.Purse.TPurse.SequenceNumber--;
+            logMedia.Purse.TPurse.SequenceNumber = logMedia.Purse.TPurse.SequenceNumberRead - 1;
             logMedia.Purse.TPurse.Balance = 0;
             logMedia.EquipmentData.SequenceNumber = SharedData.TransactionSeqNo+1;
             logMedia.Media.Status = Media.StatusValues.Refunded;
 
             var ta = logMedia.Application.TransportApplication;
-            ta.SequenceNumber--;
+            ta.SequenceNumber = ta.SequenceNumberRead - 1;
             ta.Deposit = 0;
             ta.Status = TransportApplication.StatusValues.Refunded; // To check
 
@@ -578,14 +563,9 @@ namespace IFS2.Equipment.TicketingRules
         public static void AddValueCancelUpdate(LogicalMedia logMedia, int _purseValueAdded//, bool increaseSequence
             )
         {
-            //if (increaseSequence)            
-            //    logMedia.Purse.TPurse.SequenceNumber++;            
-            //else            
-                logMedia.Purse.TPurse.SequenceNumber--;
-
-
-            logMedia.Purse.TPurse.Balance -= _purseValueAdded;
-            logMedia.Application.TransportApplication.SequenceNumber = Math.Abs(logMedia.Purse.TPurse.SequenceNumber);
+            logMedia.Purse.TPurse.SequenceNumber = logMedia.Purse.TPurse.SequenceNumberRead - 1;
+            logMedia.Purse.TPurse.Balance = logMedia.Purse.TPurse.BalanceRead - _purseValueAdded;
+            logMedia.Application.TransportApplication.SequenceNumber = Math.Abs(logMedia.Purse.TPurse.SequenceNumberRead - 1);
             logMedia.EquipmentData.SequenceNumber = SharedData.TransactionSeqNo + 1;
             // TODO: See if logMedia.Application.TransportApplication.SequenceNumber has to be affected
             // TODO: See if logMedia.Purse.LastAddValue has to be restored back            
@@ -605,7 +585,7 @@ namespace IFS2.Equipment.TicketingRules
 
             var product = logicalMediaOldCSC.Application.Products.Product(0);
             pLogicalMedia.Application.Products.Add(product);
-            lcav.Amount = logicalMediaOldCSC.Purse.TPurse.Balance;
+            lcav.Amount = logicalMediaOldCSC.Purse.TPurse.BalanceRead;
             ta.ExpiryDate = product.EndOfValidity;
             ta.OperationalType = TransportApplication.OperationalTypeValues.Passenger;
             ta.Status = TransportApplication.StatusValues.Issued;
@@ -617,7 +597,7 @@ namespace IFS2.Equipment.TicketingRules
             m.Type = Media.TypeValues.CSC;
 
             var purse = pLogicalMedia.Purse;
-            purse.TPurse.Balance = logicalMediaOldCSC.Purse.TPurse.Balance;
+            purse.TPurse.Balance = logicalMediaOldCSC.Purse.TPurse.BalanceRead;
         }
     }
 }

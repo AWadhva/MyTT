@@ -529,7 +529,7 @@ namespace IFS2.Equipment.TicketingRules
             bool bMediaFitForOperation = (
                 (logMedia.Media.Status == Media.StatusValues.Initialised
                 || (logMedia.Media.Status == Media.StatusValues.Refunded && Config.ALLOW_REFUNDED_CSC_BEISSUED))
-                && logMedia.Purse.TPurse.Balance == 0);
+                && logMedia.Purse.TPurse.BalanceRead == 0);
 
             if (bMediaFitForOperation)
                 bMediaFitForOperation = !MediaDenyList.VerifyMedia((int)logMedia.Media.HardwareType, logMedia.Media.ChipSerialNumber);
@@ -676,7 +676,7 @@ namespace IFS2.Equipment.TicketingRules
 
             _curMediaDistributionTxn._cntMediaSentToBinForCurrentMedia_SinceTheyWereUnReadable = 0;
 
-            int balance = logMedia.Purse.TPurse.Balance;
+            int balance = logMedia.Purse.TPurse.BalanceRead;
             SalesRules.RefundUpdateCard(logMedia);
 
             bool bMediaWritten = hwCsc.UpdateTPurseData(logMedia, -balance, false)

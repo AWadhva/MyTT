@@ -5,9 +5,9 @@ using System.Text;
 
 namespace IFS2.Equipment.TicketingRules
 {
-    abstract public class IReader
+    public interface IMacCalcultor
     {
-        abstract public void StartPolling();
-        abstract public void StopPolling();
+        byte[] Calculate(LogicalMedia logMedia);
+        bool VerfiyMac(LogicalMedia logMedia);
     }
 }

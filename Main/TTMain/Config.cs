@@ -30,7 +30,7 @@ namespace IFS2.Equipment.TicketingRules
             nMaxTimeInMilliSecToGiveVendedTokenToLeaveFieldAfterReceivingPositiveThrowTokenToOTAck = (int)Configuration.ReadParameter("MaxTimeInMilliSecToGiveVendedTokenToLeaveFieldAfterReceivingPositiveThrowTokenToOTAck", "int", "5000");
             _bEODReceivedInXml = Configuration.ReadBoolParameter("EODReceivedInXmlFromCC", false);
             _bCoreCommonUsed = Configuration.ReadBoolParameter("CoreCommonFunctionalityUsed", false);
-            _bTreatTicketSaleParameterInEOD = Configuration.ReadBoolParameter("TreatTicketSaleParameterInEOD", false);
+            _bTreatTicketSaleParameterInEOD = Configuration.ReadBoolParameter("TreatTicketSaleParameterInEOD", true);
             _bTreatTVMEquipmentParametersInEOD = Configuration.ReadBoolParameter("TreatTVMEquipmentParametersInEOD", true);
             _bSignCurrentXmlParameter = Configuration.ReadBoolParameter("SignCurrentXmlParameter", false);
 
@@ -68,7 +68,7 @@ namespace IFS2.Equipment.TicketingRules
             MaxTime_InMillisec_ToLetLastMediaExhaustiveDetectionRemovalWhenInLoginState = Configuration.ReadIntParameter("MaxSecs_ToLetLastMediaExhaustiveDetectionRemovalWhenInLoginState", 0);
 
             _VirtualSiteId = new Dictionary<int, int>();
-            for (int siteId = 1; siteId <= 500; siteId++)
+            for (int siteId = 1; siteId <= 1024; siteId++)
             {
                 int virtSiteId = Configuration.ReadIntParameter("VirtualSiteId_" + siteId, siteId);
                 _VirtualSiteId[siteId] = virtSiteId;

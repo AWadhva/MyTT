@@ -54,21 +54,30 @@ namespace IFS2.Equipment.TicketingRules
         #endregion
         ISyncContext syncContext;
 
-        public V4ReaderMediaMonitor(ISyncContext context_, int handle_, CSC_READER_TYPE rwTyp_, List<int> isamSlots, List<ScenarioPolling> scenario1, List<ScenarioPolling> scenario2)
+        public class V4ReaderAssembly
+        {
+            public int handle;
+            public CSC_READER_TYPE rwTyp;
+            public List<int> isamSlots;
+            public List<ScenarioPolling> scenario1;
+            public List<ScenarioPolling> scenario2;
+        }
+
+        public V4ReaderMediaMonitor(ISyncContext context_, V4ReaderAssembly rdr)
         {
             syncContext = context_;
 
-            rw = handle_;
-            rwTyp = rwTyp_;
+            rw = rdr.handle;
+            rwTyp = rdr.rwTyp;
 
-            if (!InstallMifare(isamSlots))
+            if (!InstallMifare(rdr.isamSlots))
                 throw new Exception("Couldn't install Mifare");
-            if (scenario1 != null && scenario1.Count > 0)
-                if (Reader.ConfigureForPolling(rwTyp, rw, scenario1.ToArray(), Scenario.SCENARIO_1) != CSC_API_ERROR.ERR_NONE)
+            if (rdr.scenario1 != null && rdr.scenario1.Count > 0)
+                if (Reader.ConfigureForPolling(rdr.rwTyp, rdr.handle, rdr.scenario1.ToArray(), Scenario.SCENARIO_1) != CSC_API_ERROR.ERR_NONE)
                     throw new Exception("Couldn't configure for polling scenario 1");
-            var z = Reader.ConfigureForPolling(rwTyp, rw, scenario2.ToArray(), Scenario.SCENARIO_2);
-            if (scenario2 != null && scenario2.Count > 0)
-                if (Reader.ConfigureForPolling(rwTyp, rw, scenario2.ToArray(), Scenario.SCENARIO_2) != CSC_API_ERROR.ERR_NONE)
+            var z = Reader.ConfigureForPolling(rdr.rwTyp, rdr.handle, rdr.scenario2.ToArray(), Scenario.SCENARIO_2);
+            if (rdr.scenario2 != null && rdr.scenario2.Count > 0)
+                if (Reader.ConfigureForPolling(rdr.rwTyp, rdr.handle, rdr.scenario2.ToArray(), Scenario.SCENARIO_2) != CSC_API_ERROR.ERR_NONE)
                 {
                     throw new Exception("Couldn't configure for polling scenario 2");
                 }
@@ -149,7 +158,7 @@ namespace IFS2.Equipment.TicketingRules
             if (MediaProduced != null)
                 syncContext.Message(()=> {
                     if (MediaProduced != null)
-                        MediaProduced(new StatusCSCEx(pStatusCSC), msgReceptionTimestamp);
+                        MediaProduced(new StatusCSCEx(rw, pStatusCSC), msgReceptionTimestamp);
                 });
 
             // TODO: I think it is necessary, else we leak memory. But executing it is causing crash. So, commenting it FTTB
@@ -177,7 +186,7 @@ namespace IFS2.Equipment.TicketingRules
             if (MediaRemoved != null)
                 syncContext.Message(() => { 
                     if (MediaRemoved != null)
-                        MediaRemoved(new StatusCSCEx(pStatusCSC), msgReceptionTimestamp); 
+                        MediaRemoved(new StatusCSCEx(rw, pStatusCSC), msgReceptionTimestamp); 
                 });
             
             code = IntPtr.Zero;

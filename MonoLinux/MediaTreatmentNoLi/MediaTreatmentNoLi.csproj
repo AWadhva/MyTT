@@ -71,6 +71,9 @@
     <Compile Include="..\..\Rules\CommonRules\CommonRules.cs">
       <Link>CommonRules.cs</Link>
     </Compile>
+    <Compile Include="..\..\Rules\CommonRules\Config.cs">
+      <Link>Config.cs</Link>
+    </Compile>
     <Compile Include="..\..\Rules\CommonRules\Errors.cs">
       <Link>Errors.cs</Link>
     </Compile>
@@ -86,8 +89,8 @@
     <Compile Include="..\..\Rules\CommonRules\SharedData.cs">
       <Link>SharedData.cs</Link>
     </Compile>
-    <Compile Include="..\..\Rules\CommonRules\ValidationRules.cs">
-      <Link>ValidationRules.cs</Link>
+    <Compile Include="..\..\Rules\CommonRules\ValidationRules2.cs">
+      <Link>ValidationRules2.cs</Link>
     </Compile>
     <Compile Include="..\..\SAM\CCHSSAM\CCSHSAM\CCHSSAMManger.cs">
       <Link>CCHSSAMManger.cs</Link>
@@ -173,6 +176,10 @@
     <Reference Include="IFS2.Equipment.Common.Utilities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Common\MonoLinux\Output_MonoLinux\IFS2.Equipment.Common.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="IFS2.Equipment.EODParametersMoLi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\CoreCommon\OutputsMoLi\IFS2.Equipment.EODParametersMoLi.dll</HintPath>
     </Reference>
     <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

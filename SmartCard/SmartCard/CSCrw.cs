@@ -1015,7 +1015,7 @@ namespace IFS2.Equipment.TicketingRules
 
                 tp.SequenceNumberRead = pSqN;
                 if (_bAssumePurseSeqNumAsLocal)
-                    logMedia.Application.TransportApplication.SequenceNumber = pSqN;
+                    logMedia.Application.TransportApplication.SequenceNumberRead = pSqN;
 
                 logMedia.DESFireDelhiLayout._df_a1_01_sequenceNumber._mainSequenceNumber.ValueRead = pSqN;
                 return true;
@@ -1262,8 +1262,7 @@ namespace IFS2.Equipment.TicketingRules
             Media m = logMedia.Media;
             Customer cu = logMedia.Application.Customer;
             LastAddValue lav = logMedia.Purse.LastAddValue;
-            AutoReload ar = logMedia.Purse.AutoReload;
-            TransportApplication ta = logMedia.Application.TransportApplication;
+            AutoReload ar = logMedia.Purse.AutoReload;            
 
             var bitBuffer = new bool[256];
 
@@ -1345,8 +1344,7 @@ namespace IFS2.Equipment.TicketingRules
             {
                 int i = 0;
                 var bitBuffer = new bool[256];
-
-                TransportApplication ta = logMedia.Application.TransportApplication;
+                
                 Media m = logMedia.Media;
                 Customer cu = logMedia.Application.Customer;
                 LastAddValue lav = logMedia.Purse.LastAddValue;
@@ -1486,7 +1484,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             int i = 0;
             var bitBuffer = new bool[256];
-            TransportApplication ta = logMedia.Application.TransportApplication;
+            
             OneProduct pr = logMedia.Application.Products.Product(0); //Only one product on DMRC
             i = CFunctions.ConvertToBits((ulong)pr.Type, i, 8, bitBuffer);
             ushort dosDate = CFunctions.ToDosDate(pr.StartOfValidity);
@@ -1505,6 +1503,9 @@ namespace IFS2.Equipment.TicketingRules
 
         private bool _tempUpdateLocal_SaleNAddVal_Data(LogicalMedia logMedia, int version)
         {
+            if (!SelectApplication(CONSTANT.DM2_AREA_CODE))
+                return false;
+
             LocalLastAddValue lcav = logMedia.Application.LocalLastAddValue;
             byte[] pResData = new byte[32];            
             
@@ -1579,6 +1580,8 @@ namespace IFS2.Equipment.TicketingRules
         private bool _tempInsertOneRecordInDM1HistoryFile(LogicalMedia logMedia, int versionId)
         {
             if (logMedia.Purse.History.List.Count != 1)
+                return false;
+            if (!SelectApplication(CONSTANT.DM1_AREA_CODE))
                 return false;
             
             byte[] pResData;
@@ -1736,8 +1739,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             if (SelectApplication(CONSTANT.DM1_AREA_CODE))
             {
-                var bitBuffer = new bool[256];
-                var autoreload = logMedia.Purse.AutoReload;
+                var bitBuffer = new bool[256];                
                 var customer = logMedia.Application.Customer;
                 int i = 64;
                 
@@ -1998,6 +2000,242 @@ namespace IFS2.Equipment.TicketingRules
                 Logging.Log(LogLevel.Information, "GetLastStatus FailedNotCategorized Err = " + Err.ToString() + " pSw1/pSw2 = " + pSw1.ToString("X2") + "/" + pSw2.ToString("X2"));
                 return Status.FailedNotCategorized;
             }
+        }
+        public delegate bool FileWriter (LogicalMedia logMedia);
+        
+        class FilesToWrite
+        {
+            public bool dm1PurseLinkage = false;
+            public bool dm1SequenceNumber = false;
+            public bool dm1Purse = false;
+            public bool dm1History = false;
+            public bool dm1Validation = false;
+            public bool dm1Sale = false;
+            public bool dm1Personalization = false;
+            public bool dm1CardHolder = false;
+
+            public bool dm2PendingFareDeduction = false;
+            public bool dm2Sale = false;
+            public bool dm2Validation = false;
+            public bool dm2SaleAddValue = false;
+            public bool dm2AgentPersonalization = false;            
+        }
+
+        public bool Write(LogicalMedia logMedia)
+        {
+            FilesToWrite writeFns = GatherUpdateFunctions(logMedia);
+            Write_(logMedia, writeFns);
+            return true;
+        }
+        
+        private FilesToWrite GatherUpdateFunctions(LogicalMedia logMedia)
+        {
+            FilesToWrite toWrite = new FilesToWrite();
+            var purse = logMedia.Purse;
+            var tPurse = purse.TPurse;
+            if (tPurse.Balance != tPurse.BalanceRead)
+                toWrite.dm1Purse = true;
+
+            if (tPurse.SequenceNumber != tPurse.SequenceNumberRead)
+                toWrite.dm1SequenceNumber = true;
+            
+            if (purse.LastAddValue.isSomethingModified)
+                toWrite.dm1Validation = true;//_WriteCommonValidationFile
+
+            if (purse.History.isSomethingModified)
+                toWrite.dm1History = true;
+
+            var ar = purse.AutoReload;
+            if (ar.isSomethingModified)
+            {
+                if (ar.Threshold != ar.ThresholdRead
+                    || ar.Amount != ar.AmountRead
+                    || ar.ExpiryDate != ar.ExpiryDateRead
+                    || ar.Status != ar.StatusRead
+                    || ar.AutoTopupDateAndTime != ar.AutoTopupDateAndTimeRead)
+                    toWrite.dm2Validation = true;
+                if (ar.UnblockingSequenceNumber != ar.UnblockingSequenceNumberRead)
+                    toWrite.dm1Validation = true;
+            }
+
+            if (logMedia.Application.LocalLastAddValue.isSomethingModified)
+                toWrite.dm2SaleAddValue = true; // _tempUpdateLocal_SaleNAddVal_Data
+
+            var cust = logMedia.Application.Customer;
+            if (cust.BirthDate != cust.BirthDateRead
+                || cust.ID != cust.IDRead
+                || cust.IDType != cust.IDTypeRead)
+                toWrite.dm1CardHolder = true;
+            if (cust.Language != cust.LanguageRead)
+                toWrite.dm1Validation = true;
+
+            if (logMedia.Application.Validation.isSomethingModified)
+                toWrite.dm2Validation = true;
+
+            var ag = logMedia.Application.Agent;
+            if (ag.isSomethingModified)
+            {
+                if (ag.TripsExpiryDate != ag.TripsExpiryDateRead)
+                    toWrite.dm2Sale = true;
+                if (ag.Code != ag.CodeRead
+                    || ag.MaxTripsNumber != ag.MaxTripsNumberRead
+                    || ag.Profile != ag.ProfileRead
+                    || ag.Reference != ag.ReferenceRead)
+                    toWrite.dm2AgentPersonalization = true;
+            }
+            OneProduct pr = null;
+            try
+            {
+                pr = logMedia.Application.Products.Product(0);
+            }
+            catch { }
+            if (pr != null && pr.isSomethingModified)
+                toWrite.dm2Sale = true;
+
+            var media = logMedia.Media;
+            if (media.ExpiryDate != media.ExpiryDateRead
+                || media.Status != media.StatusRead)
+                toWrite.dm1Sale = true;
+
+            var transportApplication = logMedia.Application.TransportApplication;
+            if (transportApplication.Deposit != transportApplication.DepositRead)
+                toWrite.dm1Sale = true;
+            if (transportApplication.ExpiryDate != transportApplication.ExpiryDateRead)
+                toWrite.dm1Sale = true; // Attention.
+
+
+            return toWrite;
+        }
+        bool Write_(LogicalMedia logMedia, 
+            FilesToWrite toWrite
+            )
+        {
+            bool bDM1 = false;
+
+            if (toWrite.dm1PurseLinkage)
+            {
+                // TODO
+            }
+
+            if (toWrite.dm1SequenceNumber)
+            {
+                if (!WriteSequenceNumberFile(logMedia))
+                    return false;
+                bDM1 = true;
+            }
+
+            if (toWrite.dm1Purse)
+            {
+                if (!WritePurseFile(logMedia))
+                    return false;
+                bDM1 = true;
+            }
+
+            if (toWrite.dm1CardHolder)
+            {
+                if (!_WriteCardHolderData(logMedia))
+                    return false;
+                bDM1 = true;
+            }
+
+            if (toWrite.dm1History)
+            {
+                if (!_tempInsertOneRecordInDM1HistoryFile(logMedia, SharedData.DM1HistoryVersion))
+                    return false;
+                bDM1 = true;
+            }
+
+            if (toWrite.dm1Validation)
+            {
+                if (!_WriteCommonValidationFile(logMedia))
+                    return false;
+                bDM1 = true;
+            }
+
+            if (toWrite.dm1Sale)
+            {
+                if (!_WriteMainSaleData(logMedia))
+                    return false;
+                bDM1 = true;
+            }
+
+            if (toWrite.dm1Personalization)
+            {
+                // TODO
+            }
+
+            if (bDM1)
+            {
+                Err = sf.CommitTransaction(out pSw1, out pSw2);
+                if (Err != CONSTANT.NO_ERROR || pSw1 != CONSTANT.COMMAND_SUCCESS)
+                    return false;
+            }
+            //-------------DM1 ends----
+            bool bDM2 = false;
+            if (toWrite.dm2Sale)
+            {
+                if (!_WriteLocalSaleData(logMedia, false /*i.e. don't commit*/))
+                    return false;
+                bDM2 = true;
+            }
+
+            if (toWrite.dm2SaleAddValue)
+            {
+                if (!_tempUpdateLocal_SaleNAddVal_Data(logMedia, SharedData.DM2SaleAddValueVersion))
+                    return false;
+                bDM2 = true;
+            }
+
+            if (toWrite.dm2Validation)
+            {
+                if (!_WriteLocalValidationData(logMedia))
+                    return false;
+                bDM2 = true;
+            }
+
+            if (toWrite.dm2AgentPersonalization)
+            {
+                // TODO:
+            }
+
+            if (toWrite.dm2PendingFareDeduction)
+            {
+                // TODO:
+            }
+            if (bDM2)
+            {
+                Err = sf.CommitTransaction(out pSw1, out pSw2);
+                if (Err != CONSTANT.NO_ERROR || pSw1 != CONSTANT.COMMAND_SUCCESS)
+                    return false;
+            }
+            return true;
+        }
+
+        private bool WriteSequenceNumberFile(LogicalMedia logMedia)
+        {
+            if (!SelectApplication(CONSTANT.DM1_AREA_CODE))
+                return false;
+            Err = sf.WriteSequenceNbrFile(out pSw1, out pSw2, (int)(logMedia.Purse.TPurse.SequenceNumber - logMedia.Purse.TPurse.SequenceNumberRead));
+
+            if (Err != CONSTANT.NO_ERROR || pSw1 != CONSTANT.COMMAND_SUCCESS || pSw2 != 0)
+                return false;
+
+            return true;
+        }
+
+        bool WritePurseFile(LogicalMedia logMedia)
+        {
+            if (!SelectApplication(CONSTANT.DM1_AREA_CODE))
+                return false;
+            
+            var logPurse = logMedia.Purse.TPurse;
+            if (logPurse.Balance == logPurse.BalanceRead)
+                return true;
+            Err = sf.WritePurseFile(out pSw1, out pSw2, (logPurse.Balance - logPurse.BalanceRead) / 10);
+            
+            if (Err != CONSTANT.NO_ERROR || pSw1 != CONSTANT.COMMAND_SUCCESS || pSw2 != 0)
+                return false;
+            return true;
         }
     }
 }
