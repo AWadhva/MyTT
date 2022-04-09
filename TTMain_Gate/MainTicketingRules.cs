@@ -75,29 +75,27 @@ namespace IFS2.Equipment.TicketingRules
                 hRw = hRw_;
             }
 
-            public void MediaProduced(StatusCSC status, DateTime dt)
+            public void MediaProduced(StatusCSCEx status, DateTime dt)
             {
                 SmartFunctions sf = new SmartFunctions();
-                StatusCSCEx x = new StatusCSCEx(status);
+                
                 sf._delhiCCHSSAMUsage = true;
                 sf._cryptoflexSAMUsage = false;
 
                 sf.SetReaderType(rwTyp, hRw);
-                sf.SetSerialNbr(x.SerialNumber);
+                sf.SetSerialNbr(status.SerialNumber);
 
-                if (x.IsNFC)
+                if (status.IsNFC)
                     if (Configuration.ReadBoolParameter("NFCFunctionality", false))
                         sf._IsNFCCardDetected = true;
-
-
                 
                 LogicalMedia logMedia = new LogicalMedia();
-                if (x.IsDesFire)
+                if (status.IsDesFire)
                 {
                     DelhiDesfireEV0 csc = new DelhiDesfireEV0(sf);
                     csc.ReadTPurseData(logMedia, MediaDetectionTreatment.Gate_CheckIn);
                 }
-                else if (x.IsUltraLight)
+                else if (status.IsUltraLight)
                 {
                     DelhiTokenUltralight token = new DelhiTokenUltralight(sf, 0);
                     token.SetRWHandle(hRw);
@@ -105,7 +103,7 @@ namespace IFS2.Equipment.TicketingRules
                 }
                 mediaMonitor.DoneReadWriteWithThisMedia(MediaRemoved);
             }
-            public void MediaRemoved(StatusCSC status, DateTime dt)
+            public void MediaRemoved(StatusCSCEx status, DateTime dt)
             {
                 mediaMonitor.StartPolling(1, MediaProduced);
             }

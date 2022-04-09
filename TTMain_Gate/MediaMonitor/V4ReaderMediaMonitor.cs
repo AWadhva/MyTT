@@ -6,6 +6,7 @@ using IFS2.Equipment.TicketingRules.CommonTT;
 using IFS2.Equipment.CSCReader;
 using IFS2.Equipment.Common;
 using System.Runtime.InteropServices;
+using Common;
 
 namespace IFS2.Equipment.TicketingRules
 {
@@ -13,7 +14,7 @@ namespace IFS2.Equipment.TicketingRules
     {
         #region ReaderMediaMonitor
         public override void StartPolling(object obj, 
-            Action<StatusCSC, DateTime> MediaProduced_
+            Action<StatusCSCEx, DateTime> MediaProduced_
             )
         {
             MediaProduced = MediaProduced_;
@@ -27,10 +28,10 @@ namespace IFS2.Equipment.TicketingRules
         }
 
         public override void StopPolling()
-        {                
+        {
             _tsPriorToWhenAsynchMessagesOfMediaProducedOrRemovedHasToBeIgnored = DateTime.Now;
             MediaRemoved = null;
-            MediaProduced = null;            
+            MediaProduced = null;
 
             if (_readerStatus == CONSTANT.ST_INIT)
                 return;
@@ -41,19 +42,14 @@ namespace IFS2.Equipment.TicketingRules
                     GetReaderStatus();
         }
         
-        public override void DoneReadWriteWithThisMedia(Action<StatusCSC, DateTime> MediaRemoved_)
+        public override void DoneReadWriteWithThisMedia(Action<StatusCSCEx, DateTime> MediaRemoved_)
         {
             MediaRemoved = MediaRemoved_;
-            //var x = Reader.SwitchToDetectRemovalState(rwTyp, rw, StatusListenerMediaRemoved);
+            
             if (Reader.SwitchToDetectRemovalState(rwTyp, rw, StatusListenerMediaRemoved) == CSC_API_ERROR.ERR_NONE)
                 _readerStatus = CONSTANT.ST_DETECT_REMOVAL;
             else
                 GetReaderStatus();
-        }
-
-        public override void SetIgnoreMediaList(List<int> media)
-        {
-            throw new NotImplementedException();
         }
         #endregion
         ISyncContext syncContext;
@@ -153,7 +149,7 @@ namespace IFS2.Equipment.TicketingRules
             if (MediaProduced != null)
                 syncContext.Message(()=> {
                     if (MediaProduced != null)
-                        MediaProduced(pStatusCSC, msgReceptionTimestamp);
+                        MediaProduced(new StatusCSCEx(pStatusCSC), msgReceptionTimestamp);
                 });
 
             // TODO: I think it is necessary, else we leak memory. But executing it is causing crash. So, commenting it FTTB
@@ -181,7 +177,7 @@ namespace IFS2.Equipment.TicketingRules
             if (MediaRemoved != null)
                 syncContext.Message(() => { 
                     if (MediaRemoved != null)
-                        MediaRemoved(pStatusCSC, msgReceptionTimestamp); 
+                        MediaRemoved(new StatusCSCEx(pStatusCSC), msgReceptionTimestamp); 
                 });
             
             code = IntPtr.Zero;
@@ -189,6 +185,6 @@ namespace IFS2.Equipment.TicketingRules
             // It causes problem. Anyway, it was redundant, and is correctly set inside MediaRemovedInt
             //_curStatus = ReaderStatus.ST_INIT;
         }
-        #endregion       
+        #endregion
     }
 }
