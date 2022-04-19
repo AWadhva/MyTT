@@ -20,7 +20,12 @@ namespace IFS2.Equipment.TicketingRules.Rules.CheckIn.Fam060
 
         public static TTErrorTypes PurseValueIsAboveThreshold(LogicalMedia logMedia)
         {
-            return Rules.CheckIn.Fam060.Common.PurseValueIsAboveThreshold(logMedia);
+            var purse = logMedia.Purse;
+            if (purse.AutoReload.StatusRead == AutoReload.StatusValues.Enabled
+            && purse.TPurse.BalanceRead < purse.AutoReload.ThresholdRead)
+                return TTErrorTypes.NeedToPerformAutoTopup;
+            else
+                return Rules.CheckIn.Fam060.Common.PurseValueIsAboveThreshold(logMedia);
         }
     }
 }

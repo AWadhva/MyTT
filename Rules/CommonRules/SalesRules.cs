@@ -156,9 +156,8 @@ namespace IFS2.Equipment.TicketingRules
             }
         }
 
-        public static bool AddValueUpdate(LogicalMedia logMedia,int amount,PaymentMethods payment//,bool increaseSequence
-            )
-        {            
+        public static bool AddValueUpdate(LogicalMedia logMedia,int amount,PaymentMethods payment)
+        {
             try
             {
                 logMedia.Purse.TPurse.SequenceNumber = logMedia.Purse.TPurse.SequenceNumberRead - 1;

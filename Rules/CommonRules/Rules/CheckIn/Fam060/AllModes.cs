@@ -23,7 +23,7 @@ namespace IFS2.Equipment.TicketingRules.Rules.CheckIn.Fam060
                 case (short)TTErrorCodeOnMedia.TicketNotStillValid:
                 case (short)TTErrorCodeOnMedia.OutOfDate:
                 case (short)TTErrorCodeOnMedia.NoEntryFound:
-                case (short)TTErrorCodeOnMedia.ExitNotDone:
+                case (short)TTErrorCodeOnMedia.ExitNotDone: // TODO: THIS IS CERTAINLY WRONG. How could????
                 case (short)TTErrorCodeOnMedia.NoAuthorizedEntry:
                 case (short)TTErrorCodeOnMedia.NotSaleStation:
                 case (short)TTErrorCodeOnMedia.DelayAfterSaleExceeded:

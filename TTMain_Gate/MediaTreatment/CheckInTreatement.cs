@@ -43,7 +43,16 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
                 {
                 }
                 var validationResult = ValidationRules.ValidateFor(MediaDetectionTreatment.CheckIn, logMedia);
-                if(validationResult == TTErrorTypes.NoError)
+                if (validationResult == TTErrorTypes.NeedToPerformAutoTopup)
+                {
+                    int amt = logMedia.Purse.AutoReload.AmountRead;
+                    SalesRules.AddValueUpdate(logMedia, amt, PaymentMethods.BankTopup);
+                    if (logMedia.isSomethingModified)
+                        csc.Write(logMedia);
+                    // TODO: logMedia has isSomethingModified for fields it has already written. Those fields can be avoid writing in the following call 
+                    ValidationRules.UpdateForCheckIn(logMedia);
+                }
+                else if(validationResult == TTErrorTypes.NoError)
                     ValidationRules.UpdateForCheckIn(logMedia);
                 
                 if (logMedia.isSomethingModified)
