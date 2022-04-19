@@ -17,5 +17,10 @@ namespace IFS2.Equipment.TicketingRules.Rules.CheckIn.Fam060
         {
             return Rules.CheckIn.Fam060.Common.PurseValueIsAboveThreshold(logMedia);
         }
+
+        public static TTErrorTypes EF_CSCC_ControlRejectCode(LogicalMedia logMedia)
+        {
+            return Rules.CheckIn.Fam060.Common.EF_CSCC_ControlRejectCode(logMedia);
+        }
     }
 }

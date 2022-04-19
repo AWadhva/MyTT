@@ -22,5 +22,10 @@ namespace IFS2.Equipment.TicketingRules.Rules.CheckOut.Fam060
         {
             return Rules.Common.CheckTravelTimeIsNotExceeded(logMedia);
         }
+
+        public static TTErrorTypes EF_CSCC_ControlRejectCode(LogicalMedia logMedia)
+        {
+            return Rules.CheckOut.Common.ControlRejectCode_NormalMode(logMedia);
+        }
     }
 }

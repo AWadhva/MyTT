@@ -47,10 +47,12 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
                 {
                     int amt = logMedia.Purse.AutoReload.AmountRead;
                     SalesRules.AddValueUpdate(logMedia, amt, PaymentMethods.BankTopup);
-                    if (logMedia.isSomethingModified)
-                        csc.Write(logMedia);
-                    // TODO: logMedia has isSomethingModified for fields it has already written. Those fields can be avoid writing in the following call 
-                    ValidationRules.UpdateForCheckIn(logMedia);
+                    if (csc.Write(logMedia))
+                    {
+                        // TODO: raise notification to outer world informing about auto-topup
+                        logMedia.OverlapModifiedToRead();// we don't want to waste time in re-reading the CSC
+                        ValidationRules.UpdateForCheckIn(logMedia);
+                    }
                 }
                 else if(validationResult == TTErrorTypes.NoError)
                     ValidationRules.UpdateForCheckIn(logMedia);

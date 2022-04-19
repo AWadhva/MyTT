@@ -73,7 +73,8 @@ namespace IFS2.Equipment.TicketingRules
             OneTransaction trans = new OneTransaction();
             try
             {
-                trans.SequenceNumber = logMedia.Application.TransportApplication.SequenceNumberRead + 1;                
+                if (amount != 0) // affect sequence number only when there is an effect on purse.
+                    trans.SequenceNumber = logMedia.Application.TransportApplication.SequenceNumberRead - 1;                
                 trans.Amount = amount;
                 trans.DateTime = DateTime.Now;
                 trans.EquipmentNumber = SharedData.EquipmentNumber;

@@ -16,5 +16,14 @@ namespace IFS2.Equipment.TicketingRules.Rules.CheckIn.Fam060
             
             return TTErrorTypes.NoError;
         }
+
+        public static TTErrorTypes EF_CSCC_ControlRejectCode(LogicalMedia logMedia)
+        {
+            var validation = logMedia.Application.Validation;
+            if (validation.RejectCodeRead != 0)
+                return TTErrorTypes.SomeRejectCode;
+
+            return TTErrorTypes.NoError;
+        }
     }
 }

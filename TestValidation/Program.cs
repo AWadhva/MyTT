@@ -88,6 +88,15 @@ namespace TestValidation
             cu.IDTypeRead = 1;
             cu.IDRead = "123456789";
             cu.Language = Customer.LanguageValues.Hindi;
+
+            Purse purse = lm.Purse;
+            purse.TPurse.BalanceRead = 100;
+            purse.TPurse.Balance = 35;
+
+            purse.OverlapModifiedToRead();
+
+            var x3 = purse.isSomethingModified;
+            var y = purse.TPurse.BalanceRead;
             
             ValidationRules.ValidateFor(MediaDetectionTreatment.CheckIn, lm);
 

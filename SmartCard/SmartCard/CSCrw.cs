@@ -2215,7 +2215,10 @@ namespace IFS2.Equipment.TicketingRules
         {
             if (!SelectApplication(CONSTANT.DM1_AREA_CODE))
                 return false;
-            Err = sf.WriteSequenceNbrFile(out pSw1, out pSw2, (int)(logMedia.Purse.TPurse.SequenceNumber - logMedia.Purse.TPurse.SequenceNumberRead));
+            Err = sf.WriteSequenceNbrFile(out pSw1, out pSw2, 
+                Math.Abs(
+                (int)(logMedia.Purse.TPurse.SequenceNumber - logMedia.Purse.TPurse.SequenceNumberRead)
+                ));
 
             if (Err != CONSTANT.NO_ERROR || pSw1 != CONSTANT.COMMAND_SUCCESS || pSw2 != 0)
                 return false;
