@@ -13,12 +13,8 @@ namespace IFS2.Equipment.TicketingRules
     public class V4ReaderMediaMonitor : ReaderMediaMonitor
     {
         #region ReaderMediaMonitor
-        public override void StartPolling(object obj, 
-            Action<StatusCSCEx, DateTime> MediaProduced_
-            )
+        public override void StartPolling(object obj)
         {
-            MediaProduced = MediaProduced_;
-
             int scenario = (int)obj;
 
             if (Reader.StartPolling(rwTyp, rw, (byte)scenario, (Utility.StatusListenerDelegate)StatusListenerMediaProduced) == CSC_API_ERROR.ERR_NONE)
@@ -29,23 +25,21 @@ namespace IFS2.Equipment.TicketingRules
 
         public override void StopPolling()
         {
-            _tsPriorToWhenAsynchMessagesOfMediaProducedOrRemovedHasToBeIgnored = DateTime.Now;
-            MediaRemoved = null;
-            MediaProduced = null;
+            base.StopPolling();
 
+            _tsPriorToWhenAsynchMessagesOfMediaProducedOrRemovedHasToBeIgnored = DateTime.Now;
+            
             if (_readerStatus == CONSTANT.ST_INIT)
                 return;
             else
                 if (Reader.StopField(rwTyp, rw) == CSC_API_ERROR.ERR_NONE)
                     _readerStatus = CONSTANT.ST_INIT;
                 else
-                    GetReaderStatus();
+                    GetReaderStatus();            
         }
         
-        public override void DoneReadWriteWithThisMedia(Action<StatusCSCEx, DateTime> MediaRemoved_)
+        public override void WaitForMediaRemoval()
         {
-            MediaRemoved = MediaRemoved_;
-            
             if (Reader.SwitchToDetectRemovalState(rwTyp, rw, StatusListenerMediaRemoved) == CSC_API_ERROR.ERR_NONE)
                 _readerStatus = CONSTANT.ST_DETECT_REMOVAL;
             else
@@ -84,6 +78,11 @@ namespace IFS2.Equipment.TicketingRules
             _readerStatus = GetReaderStatus();
             if (_readerStatus != CONSTANT.ST_INIT)
                 throw new Exception("unexpected reader state found " + _readerStatus.ToString());
+        }
+
+        public void MakeCardReady()
+        {
+            Reader.SwitchToCardOnState(rwTyp, rw);
         }
 
         private byte GetReaderStatus()
@@ -155,10 +154,10 @@ namespace IFS2.Equipment.TicketingRules
             }
 
             StatusCSC pStatusCSC = (StatusCSC)(Marshal.PtrToStructure(status, typeof(StatusCSC)));
-            if (MediaProduced != null)
+            
                 syncContext.Message(()=> {
-                    if (MediaProduced != null)
-                        MediaProduced(new StatusCSCEx(rw, pStatusCSC), msgReceptionTimestamp);
+              
+                        RaiseMediaProduced(new StatusCSCEx(rw, pStatusCSC));
                 });
 
             // TODO: I think it is necessary, else we leak memory. But executing it is causing crash. So, commenting it FTTB
@@ -183,10 +182,10 @@ namespace IFS2.Equipment.TicketingRules
 
             StatusCSC pStatusCSC = (StatusCSC)(Marshal.PtrToStructure(status, typeof(StatusCSC)));
             // memory occupied by status gets leaked, but we are helpless, as attempt to free it causes crash
-            if (MediaRemoved != null)
+            
                 syncContext.Message(() => { 
-                    if (MediaRemoved != null)
-                        MediaRemoved(new StatusCSCEx(rw, pStatusCSC), msgReceptionTimestamp); 
+             
+                        RaiseMediaRemoved(new StatusCSCEx(rw, pStatusCSC)); 
                 });
             
             code = IntPtr.Zero;

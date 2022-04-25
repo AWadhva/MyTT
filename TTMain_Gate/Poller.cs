@@ -14,29 +14,38 @@ namespace IFS2.Equipment.TicketingRules
         ReaderMediaMonitor mediaMonitor;
         CSC_READER_TYPE rwTyp;
         int hRw;
-        IMediaTreatment mediaTreatement;
 
-        public Poller(ReaderMediaMonitor mediaMonitor_, CSC_READER_TYPE rwTyp_, int hRw_, IMediaTreatment mediaTreatement_)
+        // TODO: make this constructor parameters {CSC_READER_TYPE, int} of type 'object', so that this class is available for use with all readers.
+        public Poller(ReaderMediaMonitor mediaMonitor_, CSC_READER_TYPE rwTyp_, int hRw_)
         {
             mediaMonitor = mediaMonitor_;
+            mediaMonitor.AddMediaProducedListener(this.MediaProduced);
+            mediaMonitor.AddMediaRemovedListener(this.MediaRemoved);
+
             rwTyp = rwTyp_;
             hRw = hRw_;
-            mediaTreatement = mediaTreatement_;
         }
-
-        void MediaProduced(StatusCSCEx status, DateTime dt)
-        {
-            mediaTreatement.Do(status, dt);
-
-            mediaMonitor.DoneReadWriteWithThisMedia(MediaRemoved);
-        }
-        void MediaRemoved(StatusCSCEx status, DateTime dt)
-        {
-            mediaMonitor.StartPolling(1, MediaProduced);
-        }
+        
         public void Start()
         {
-            mediaMonitor.StartPolling(1, MediaProduced);
+            mediaMonitor.StartPolling(1);
+        }
+
+        DateTime dtWhenPollingWasStopped = new DateTime();
+        public void Stop()
+        {
+            dtWhenPollingWasStopped = DateTime.Now;
+            mediaMonitor.StopPolling();
+        }
+
+        void MediaProduced(StatusCSCEx status)
+        {
+            mediaMonitor.WaitForMediaRemoval();
+        }
+
+        void MediaRemoved(StatusCSCEx status)
+        {
+            mediaMonitor.StartPolling(1);
         }
     }
 }

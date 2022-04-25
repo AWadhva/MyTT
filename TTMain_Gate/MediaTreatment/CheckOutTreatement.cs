@@ -10,6 +10,7 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
 {
     class CheckOutTreatement : IMediaTreatment
     {
+        // TODO: make this constructor parameters {CSC_READER_TYPE, int} of type 'object', so that this class is available for use with all readers.
         public CheckOutTreatement(CSC_READER_TYPE rwTyp_, int hRw_)
         {
             rwTyp = rwTyp_;
@@ -21,7 +22,9 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
 
         #region IMediaTreatment Members
 
-        public void Do(StatusCSCEx status, DateTime dt)
+        public void Do(StatusCSCEx status
+            //, DateTime dt
+            )
         {
             SmartFunctions sf = new SmartFunctions();
 
@@ -50,6 +53,12 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
                     csc.Write(logMedia);
             }
         }
+
+        public void Resume()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

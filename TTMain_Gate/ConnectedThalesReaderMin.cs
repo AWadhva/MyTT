@@ -5,7 +5,7 @@ using System.Text;
 
 namespace IFS2.Equipment.TicketingRules
 {
-    public class ThalesReader
+    public class ConnectedThalesReaderMin
     {
         public int handle;
         public string firmwareVersion;

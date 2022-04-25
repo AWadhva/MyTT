@@ -104,6 +104,7 @@
       <Link>CCHSSAMManger.cs</Link>
     </Compile>
     <Compile Include="ConnectionMonitor\V4ReaderConf.cs" />
+    <Compile Include="ISupervisor.cs" />
     <Compile Include="IV4ReaderApi.cs" />
     <Compile Include="MainTicketingRules.cs" />
     <Compile Include="MediaMonitor\V4ReaderMediaMonitor.cs" />
@@ -120,7 +121,7 @@
     <Compile Include="SecurityModule\ISAMOnThalesReader.cs" />
     <Compile Include="SecurityModule\SAM.cs" />
     <Compile Include="SecurityModule\ThalesSAMOnThalesReader.cs" />
-    <Compile Include="ThalesReader.cs" />
+    <Compile Include="ConnectedThalesReaderMin.cs" />
     <Compile Include="V4ReaderApi.cs" />
     <Compile Include="ConnectionMonitor\ThalesReaderConnectionMonitor.cs" />
   </ItemGroup>

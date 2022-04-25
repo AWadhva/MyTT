@@ -75,7 +75,7 @@ namespace TestParameters
 
             //int FareTier;
             int faretiers;
-            int tokenPrice = (int)SalePriceCalculation.CalculatePriceSiteBased(1, 47, 46, out faretiers);
+            int tokenPrice = (int)SalePriceCalculation.CalculatePriceSiteBased(1, 47, 46, DateTime.Now, out faretiers);
             tokenPrice = (int)SalePriceCalculation.CalculateTokenPriceZoneBased(3);
             /*
 

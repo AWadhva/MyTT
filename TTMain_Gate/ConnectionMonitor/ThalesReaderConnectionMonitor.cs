@@ -63,7 +63,7 @@ namespace IFS2.Equipment.TicketingRules
                     return false;
             }
             
-            var details = new ThalesReader();
+            var details = new ConnectedThalesReaderMin();
             details.handle = _hRw;
             
             readerDetails = details;

@@ -10,18 +10,30 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
 {
     class CheckInTreatement : IMediaTreatment
     {
-        public CheckInTreatement(CSC_READER_TYPE rwTyp_, int hRw_)
+        // TODO: make this constructor parameters {CSC_READER_TYPE, int} of type 'object', so that this class is available for use with all readers.
+        public CheckInTreatement(CSC_READER_TYPE rwTyp_, int hRw_, ISupervisor supervisor_)
         {
             rwTyp = rwTyp_;
             hRw = hRw_;
+            supervisor = supervisor_;
         }
 
         CSC_READER_TYPE rwTyp;
         int hRw;
+        ISupervisor supervisor;
+        StatusCSCEx status;
 
         #region IMediaTreatment Members
 
-        public void Do(StatusCSCEx status, DateTime dt)
+        public void Do(StatusCSCEx status_)
+        {
+            status = status_;
+            if (supervisor != null && !supervisor.MediaDetected(status))
+                return;
+            Resume();
+        }
+
+        public void Resume()
         {
             SmartFunctions sf = new SmartFunctions();
 
@@ -54,13 +66,14 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
                         ValidationRules.UpdateForCheckIn(logMedia);
                     }
                 }
-                else if(validationResult == TTErrorTypes.NoError)
+                else if (validationResult == TTErrorTypes.NoError)
                     ValidationRules.UpdateForCheckIn(logMedia);
-                
+
                 if (logMedia.isSomethingModified)
                     csc.Write(logMedia);
             }
         }
+
         #endregion
     }
 }

@@ -8,6 +8,7 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
 {
     interface IMediaTreatment
     {
-        void Do(StatusCSCEx status, DateTime dt);
+        void Do(StatusCSCEx status);
+        void Resume();
     }
 }
