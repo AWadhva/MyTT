@@ -103,6 +103,7 @@
     <Compile Include="..\SAM\CCHSSAM\CCSHSAM\CCHSSAMManger.cs">
       <Link>CCHSSAMManger.cs</Link>
     </Compile>
+    <Compile Include="Application.cs" />
     <Compile Include="ConnectionMonitor\V4ReaderConf.cs" />
     <Compile Include="ISupervisor.cs" />
     <Compile Include="IV4ReaderApi.cs" />
@@ -111,7 +112,7 @@
     <Compile Include="MediaTreatment\CheckOutTreatement.cs" />
     <Compile Include="MediaTreatment\CheckInTreatement.cs" />
     <Compile Include="MediaTreatment\IMediaTreatment.cs" />
-    <Compile Include="Poller.cs" />
+    <Compile Include="MediaMonitor\Poller.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ConnectionMonitor\ReaderConnectionMonitor.cs" />

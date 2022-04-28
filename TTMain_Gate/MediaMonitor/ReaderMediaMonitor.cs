@@ -19,7 +19,7 @@ namespace IFS2.Equipment.TicketingRules
             }
         }
 
-        abstract public void WaitForMediaRemoval();       
+        abstract public void WaitForMediaRemoval();
 
         StatusCSCEx statusCur;
 
