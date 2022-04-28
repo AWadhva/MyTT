@@ -109,10 +109,14 @@
     <Compile Include="IV4ReaderApi.cs" />
     <Compile Include="MainTicketingRules.cs" />
     <Compile Include="MediaMonitor\V4ReaderMediaMonitor.cs" />
+    <Compile Include="MediaTreatment\Actions.cs" />
     <Compile Include="MediaTreatment\CheckOutTreatement.cs" />
     <Compile Include="MediaTreatment\CheckInTreatement.cs" />
+    <Compile Include="MediaTreatment\IActionTransmitter.cs" />
     <Compile Include="MediaTreatment\IMediaTreatment.cs" />
     <Compile Include="MediaMonitor\Poller.cs" />
+    <Compile Include="MediaTreatment\SendMessage_ActionTransmitter.cs" />
+    <Compile Include="MediaTreatment\SendMsg.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ConnectionMonitor\ReaderConnectionMonitor.cs" />

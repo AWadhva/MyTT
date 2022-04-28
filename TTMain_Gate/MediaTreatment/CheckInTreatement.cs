@@ -5,17 +5,20 @@ using System.Text;
 using IFS2.Equipment.Common;
 using Common;
 using IFS2.Equipment.TicketingRules.CommonTT;
+using System.Diagnostics;
 
 namespace IFS2.Equipment.TicketingRules.MediaTreatment
 {
     class CheckInTreatement : IMediaTreatment
     {
         // TODO: make this constructor parameters {CSC_READER_TYPE, int} of type 'object', so that this class is available for use with all readers.
-        public CheckInTreatement(CSC_READER_TYPE rwTyp_, int hRw_, ISupervisor supervisor_)
+        public CheckInTreatement(CSC_READER_TYPE rwTyp_, int hRw_, ISupervisor supervisor_, IActionTransmitter actionTransmitter_)
         {
             rwTyp = rwTyp_;
             hRw = hRw_;
             supervisor = supervisor_;
+
+            Transmit.transmitter = actionTransmitter_;
         }
 
         CSC_READER_TYPE rwTyp;
@@ -53,6 +56,8 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
                 DelhiDesfireEV0 csc = new DelhiDesfireEV0(sf);
                 if (!csc.ReadMediaData(logMedia, MediaDetectionTreatment.CheckIn))
                 {
+                    Transmit.FailedRead();
+                    return;
                 }
                 var validationResult = ValidationRules.ValidateFor(MediaDetectionTreatment.CheckIn, logMedia);
                 if (validationResult == TTErrorTypes.NeedToPerformAutoTopup)
@@ -61,16 +66,42 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
                     SalesRules.AddValueUpdate(logMedia, amt, PaymentMethods.BankTopup);
                     if (csc.Write(logMedia))
                     {
-                        // TODO: raise notification to outer world informing about auto-topup
+                        Transmit.AutoTopup(amt, logMedia);
+                        
                         logMedia.OverlapModifiedToRead();// we don't want to waste time in re-reading the CSC
+                        
+                        validationResult = ValidationRules.ValidateFor(MediaDetectionTreatment.CheckIn, logMedia);
                         ValidationRules.UpdateForCheckIn(logMedia);
                     }
+                    else
+                        Transmit.FailedWrite();
                 }
                 else if (validationResult == TTErrorTypes.NoError)
                     ValidationRules.UpdateForCheckIn(logMedia);
 
                 if (logMedia.isSomethingModified)
-                    csc.Write(logMedia);
+                {
+                    if (csc.Write(logMedia))
+                    {
+                        switch (validationResult)
+                        {
+                            case TTErrorTypes.NoError:
+                                Transmit.SuccessfulCheckin(logMedia);
+                                break;
+                            case TTErrorTypes.MediaInDenyList:
+                                Transmit.Blacklisted(logMedia);
+                                break;
+                        }
+                        if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
+                            Transmit.CheckInBlocked_And_RejectCodeWrittenByMe(validationResult, logMedia);
+                        else
+                            Debug.Assert(false);
+                    }
+                    else
+                        Transmit.FailedWrite();
+                }
+                else
+                    Transmit.CheckInNotPermitted_NoRejectCodeWrittenByMe(validationResult, logMedia);
             }
         }
 

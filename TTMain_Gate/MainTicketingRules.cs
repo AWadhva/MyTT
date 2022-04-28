@@ -18,7 +18,7 @@ namespace IFS2.Equipment.TicketingRules
             : base("MainTicketingRules")
         {
             InitParameterRelated();
-            app = new IFS2.Equipment.TicketingRules.Gate.Application(this);
+            app = new IFS2.Equipment.TicketingRules.Gate.Application(this, new SendMessage_ActionTransmitter());
         }
 
         IFS2.Equipment.TicketingRules.Gate.Application app;
