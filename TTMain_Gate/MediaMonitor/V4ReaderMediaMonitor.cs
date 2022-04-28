@@ -154,14 +154,10 @@ namespace IFS2.Equipment.TicketingRules
             }
 
             StatusCSC pStatusCSC = (StatusCSC)(Marshal.PtrToStructure(status, typeof(StatusCSC)));
-            
-                syncContext.Message(()=> {
-              
-                        RaiseMediaProduced(new StatusCSCEx(rw, pStatusCSC));
-                });
-
-            // TODO: I think it is necessary, else we leak memory. But executing it is causing crash. So, commenting it FTTB
-            //Marshal.FreeHGlobal(status);
+            syncContext.Message(()=> {
+                RaiseMediaProduced(new StatusCSCEx(rw, pStatusCSC));
+                Marshal.FreeHGlobal(status);
+            });            
 
             code = IntPtr.Zero;
             status = IntPtr.Zero;
@@ -180,18 +176,14 @@ namespace IFS2.Equipment.TicketingRules
                 return;
             }
 
-            StatusCSC pStatusCSC = (StatusCSC)(Marshal.PtrToStructure(status, typeof(StatusCSC)));
-            // memory occupied by status gets leaked, but we are helpless, as attempt to free it causes crash
-            
-                syncContext.Message(() => { 
-             
-                        RaiseMediaRemoved(new StatusCSCEx(rw, pStatusCSC)); 
-                });
+            StatusCSC pStatusCSC = (StatusCSC)(Marshal.PtrToStructure(status, typeof(StatusCSC)));            
+            syncContext.Message(() => {
+                RaiseMediaRemoved(new StatusCSCEx(rw, pStatusCSC));
+                Marshal.FreeHGlobal(status);
+            });
             
             code = IntPtr.Zero;
-            status = IntPtr.Zero;
-            // It causes problem. Anyway, it was redundant, and is correctly set inside MediaRemovedInt
-            //_curStatus = ReaderStatus.ST_INIT;
+            status = IntPtr.Zero;            
         }
         #endregion
     }

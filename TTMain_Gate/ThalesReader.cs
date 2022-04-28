@@ -18,10 +18,10 @@ namespace IFS2.Equipment.TicketingRules
         public ConnectedThalesReaderMin connectedReader;
 
         // It is reader-type independent (ALMOST). TODO:Make it completly reader-type independent.
-        public IMediaTreatment curMediaTreatment = null; // 1-per-media appearance. Gets destroyed when media is removed
+        public IMediaTreatment curMediaTreatment = null;
 
         // It is reader-type independent (ALMOST). TODO:Make it completly reader-type independent.
-        public Poller poller; // 1-per-reader per session
+        public Poller poller;
 
         public ThalesReader(ConnectedThalesReaderMin rdrMin, ISyncContext syncContext, Action<StatusCSCEx> MediaProduced, Action<StatusCSCEx> MediaRemoved)
         {
