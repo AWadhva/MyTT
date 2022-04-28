@@ -122,6 +122,7 @@
     <Compile Include="SecurityModule\SAM.cs" />
     <Compile Include="SecurityModule\ThalesSAMOnThalesReader.cs" />
     <Compile Include="ConnectedThalesReaderMin.cs" />
+    <Compile Include="ThalesReader.cs" />
     <Compile Include="V4ReaderApi.cs" />
     <Compile Include="ConnectionMonitor\ThalesReaderConnectionMonitor.cs" />
   </ItemGroup>
