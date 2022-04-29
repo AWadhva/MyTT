@@ -8,10 +8,8 @@ namespace IFS2.Equipment.TicketingRules
 {
     public abstract class ReaderConnectionMonitor
     {
-        public ReaderConnectionMonitor(
-            ISyncContext syncContext_
-            )
-        {
+        public ReaderConnectionMonitor(ISyncContext syncContext_)
+        {            
             syncContext = syncContext_;
  
             timerCheckForInitialization = new MyTimer(syncContext, CheckConnection);
@@ -19,14 +17,14 @@ namespace IFS2.Equipment.TicketingRules
 
             timerRoutineCheck = new MyTimer(syncContext, RoutineCheck);
         }
-
+        
         MyTimer timerCheckForInitialization;
         MyTimer timerRoutineCheck;
         bool bConnected = false;
 
         protected ISyncContext syncContext;
         public event Action<object> ReaderConnected; // the parameter would contain the details of the reader which is connected.
-        public event Action<object> ReaderDisconnected;
+        public event Action ReaderDisconnected;
 
         void CheckConnection()
         {
@@ -55,7 +53,7 @@ namespace IFS2.Equipment.TicketingRules
             {
                 timerCheckForInitialization.StartOneShot(1000);
                 if (ReaderDisconnected != null)
-                    ReaderDisconnected(null);
+                    ReaderDisconnected();
             }
         }
 

@@ -12,7 +12,7 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
     class CheckInTreatement : IMediaTreatment
     {
         // TODO: make this constructor parameters {CSC_READER_TYPE, int} of type 'object', so that this class is available for use with all readers.
-        public CheckInTreatement(CSC_READER_TYPE rwTyp_, int hRw_, ISupervisor supervisor_, IActionTransmitter actionTransmitter_)
+        public CheckInTreatement(CSC_READER_TYPE rwTyp_, int hRw_, ISupervisor supervisor_, Action<ActionTaken, string[]> actionTransmitter_)
         {
             rwTyp = rwTyp_;
             hRw = hRw_;
@@ -95,7 +95,7 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
                         if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
                             Transmit.CheckInBlocked_And_RejectCodeWrittenByMe(validationResult, logMedia);
                         else
-                            Debug.Assert(false);
+                            Transmit.CheckInBlocked_ForSomethingElse(validationResult, logMedia);
                     }
                     else
                         Transmit.FailedWrite();

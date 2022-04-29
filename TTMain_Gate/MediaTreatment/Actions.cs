@@ -5,6 +5,7 @@
         CheckInPermitted,
         CheckInNotPermitted_RejectCodePutByMe,
         CheckInNotPermitted_RejectCodeAlreadyPresent,
+        CheckInNotPermitted_LetsFinalizeTheseCodesLater,
         
         CheckOutPermitted,
         CheckOutNotPermitted_RejectCodePutByMe,
@@ -13,8 +14,7 @@
         AutoToppedUp,
         Blocked_ie_BlackListedByMe,
         AlreadyBlocked_ie_BlackListed,
-        //RejectCodePutByMe,
-        //RejectCodeAlreadyPresent,
+        
         ProblemWhileRW
     }
 }

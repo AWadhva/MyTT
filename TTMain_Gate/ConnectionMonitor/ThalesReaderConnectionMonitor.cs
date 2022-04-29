@@ -21,8 +21,7 @@ namespace IFS2.Equipment.TicketingRules
         IV4ReaderApi api;
         V4ReaderConf conf;
 
-        CryptoFlexFunctions cFlex;
-        CCHSSAMManger mCCHSSAMMgr;
+        CryptoFlexFunctions cFlex;        
 
         public ThalesReaderConnectionMonitor(IV4ReaderApi api_, ISyncContext syncContext_, string port_, int comSpeed_, object otherConf)
             : base(syncContext_)
