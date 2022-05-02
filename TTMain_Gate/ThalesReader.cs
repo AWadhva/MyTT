@@ -7,6 +7,7 @@ using IFS2.Equipment.TicketingRules.MediaTreatment;
 using IFS2.Equipment.TicketingRules.CommonTT;
 using IFS2.Equipment.Common;
 using Common;
+using IFS2.Equipment.TicketingRules.MediaMonitor;
 
 namespace IFS2.Equipment.TicketingRules
 {

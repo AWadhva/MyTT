@@ -71,7 +71,10 @@ namespace GateUI
 
         public void Transmit(int rdrMnemonic, ActionTaken act, params string[] pars)
         {
-            userControlRW1.Transmit(act, pars);
+            if (rdrMnemonic == 1)
+                userControlRW1.Transmit(act, pars);
+            else
+                userControlRW2.Transmit(act, pars);
         }
 
         #endregion

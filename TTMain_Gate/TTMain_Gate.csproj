@@ -109,6 +109,7 @@
     <Compile Include="IV4ReaderApi.cs" />
     <Compile Include="Application\MainTicketingRules.cs" />
     <Compile Include="MediaMonitor\V4ReaderMediaMonitor.cs" />
+    <Compile Include="MediaMonitor\V4Reader_MediaCallbacks.cs" />
     <Compile Include="MediaTreatment\Actions.cs" />
     <Compile Include="MediaTreatment\CheckOutTreatement.cs" />
     <Compile Include="MediaTreatment\CheckInTreatement.cs" />

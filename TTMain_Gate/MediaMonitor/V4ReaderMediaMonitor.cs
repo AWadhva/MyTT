@@ -8,7 +8,7 @@ using IFS2.Equipment.Common;
 using System.Runtime.InteropServices;
 using Common;
 
-namespace IFS2.Equipment.TicketingRules
+namespace IFS2.Equipment.TicketingRules.MediaMonitor
 {
     public class V4ReaderMediaMonitor : ReaderMediaMonitor
     {
@@ -17,10 +17,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             int scenario = (int)obj;
 
-            if (Reader.StartPolling(rwTyp, rw, (byte)scenario, (Utility.StatusListenerDelegate)StatusListenerMediaProduced) == CSC_API_ERROR.ERR_NONE)
-                _readerStatus = CONSTANT.ST_POLLON;
-            else
-                GetReaderStatus();
+            Reader.StartPolling(rwTyp, rw, (byte)scenario, V4Reader_MediaCallbacks.StatusListenerMediaProduced);
         }
 
         public override void StopPolling()
@@ -28,22 +25,12 @@ namespace IFS2.Equipment.TicketingRules
             base.StopPolling();
 
             _tsPriorToWhenAsynchMessagesOfMediaProducedOrRemovedHasToBeIgnored = DateTime.Now;
-            
-            if (_readerStatus == CONSTANT.ST_INIT)
-                return;
-            else
-                if (Reader.StopField(rwTyp, rw) == CSC_API_ERROR.ERR_NONE)
-                    _readerStatus = CONSTANT.ST_INIT;
-                else
-                    GetReaderStatus();            
+            Reader.StopField(rwTyp, rw);
         }
         
         public override void WaitForMediaRemoval()
         {
-            if (Reader.SwitchToDetectRemovalState(rwTyp, rw, StatusListenerMediaRemoved) == CSC_API_ERROR.ERR_NONE)
-                _readerStatus = CONSTANT.ST_DETECT_REMOVAL;
-            else
-                GetReaderStatus();
+            Reader.SwitchToDetectRemovalState(rwTyp, rw, V4Reader_MediaCallbacks.StatusListenerMediaRemoved);
         }
         #endregion
         ISyncContext syncContext;
@@ -64,6 +51,8 @@ namespace IFS2.Equipment.TicketingRules
             rw = rdr.handle;
             rwTyp = rdr.rwTyp;
 
+            V4Reader_MediaCallbacks.Subscribe(rw, MediaProduced, MediaRemoved);
+
             if (!InstallMifare(rdr.isamSlots))
                 throw new Exception("Couldn't install Mifare");
             if (rdr.scenario1 != null && rdr.scenario1.Count > 0)
@@ -75,9 +64,10 @@ namespace IFS2.Equipment.TicketingRules
                 {
                     throw new Exception("Couldn't configure for polling scenario 2");
                 }
-            _readerStatus = GetReaderStatus();
-            if (_readerStatus != CONSTANT.ST_INIT)
-                throw new Exception("unexpected reader state found " + _readerStatus.ToString());
+
+            var status = GetReaderStatus();
+            if (status != CONSTANT.ST_INIT)
+                throw new Exception("unexpected reader state found " + status.ToString());
         }
 
         public void MakeCardReady()
@@ -89,11 +79,10 @@ namespace IFS2.Equipment.TicketingRules
         {
             StatusCSC status = new StatusCSC();
             Reader.StatusCheck(rwTyp, rw, ref status);
-            _readerStatus = status.ucStatCSC;
-            return _readerStatus;
+            return status.ucStatCSC;
         }
 
-        byte _readerStatus;
+        //byte _readerStatus;
 
         private bool InstallMifare(List<int> isamSlots)
         {
@@ -141,49 +130,33 @@ namespace IFS2.Equipment.TicketingRules
         DateTime _tsPriorToWhenAsynchMessagesOfMediaProducedOrRemovedHasToBeIgnored = new DateTime(2000, 1, 1);
 
         #region Functions called back by V4 reader in its own thread
-        void StatusListenerMediaProduced(
-            IntPtr code, IntPtr status
-            )
-        {
-            _readerStatus = CONSTANT.ST_CARDON;
-            DateTime msgReceptionTimestamp = DateTime.Now;
+        void MediaProduced(StatusCSCEx status, DateTime msgReceptionTimestamp)
+        {            
             if (msgReceptionTimestamp < _tsPriorToWhenAsynchMessagesOfMediaProducedOrRemovedHasToBeIgnored)
             {
                 Logging.Log(LogLevel.Information, "StatusListenerMediaProduced: Ignoring message since _tsPriorToWhenMediaProducedHasToBeIgnored = " + _tsPriorToWhenAsynchMessagesOfMediaProducedOrRemovedHasToBeIgnored.ToString("yyyy-MM-dd hh:MM:ss.ffffzzz"));
                 return;
             }
-
-            StatusCSC pStatusCSC = (StatusCSC)(Marshal.PtrToStructure(status, typeof(StatusCSC)));
+            
             syncContext.Message(()=> {
-                RaiseMediaProduced(new StatusCSCEx(rw, pStatusCSC));
-                Marshal.FreeHGlobal(status);
+                RaiseMediaProduced(status);
             });            
-
-            code = IntPtr.Zero;
-            status = IntPtr.Zero;
         }
 
-        void StatusListenerMediaRemoved(
-            IntPtr code, IntPtr status
-            )
-        {
-            _readerStatus = CONSTANT.ST_INIT;
-
-            DateTime msgReceptionTimestamp = DateTime.Now;
+        void MediaRemoved(StatusCSCEx status, DateTime msgReceptionTimestamp)
+        {            
             if (msgReceptionTimestamp < _tsPriorToWhenAsynchMessagesOfMediaProducedOrRemovedHasToBeIgnored)
             {
                 Logging.Log(LogLevel.Information, "StatusListenerMediaRemoved: Ignoring message since _tsPriorToWhenMediaProducedHasToBeIgnored = " + _tsPriorToWhenAsynchMessagesOfMediaProducedOrRemovedHasToBeIgnored.ToString("yyyy-MM-dd hh:MM:ss.ffffzzz"));
                 return;
             }
-
-            StatusCSC pStatusCSC = (StatusCSC)(Marshal.PtrToStructure(status, typeof(StatusCSC)));            
+            
             syncContext.Message(() => {
-                RaiseMediaRemoved(new StatusCSCEx(rw, pStatusCSC));
-                Marshal.FreeHGlobal(status);
+                RaiseMediaRemoved(status);                
             });
             
-            code = IntPtr.Zero;
-            status = IntPtr.Zero;            
+            //code = IntPtr.Zero;
+            //status = IntPtr.Zero;            
         }
         #endregion
     }

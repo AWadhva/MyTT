@@ -8,10 +8,8 @@ namespace Common
 {
     public class StatusCSCEx
     {
-        public StatusCSCEx(object readerId_, StatusCSC pStatusCSC)
+        public StatusCSCEx(StatusCSC pStatusCSC)
         {
-            readerId = readerId_;
-
             cardTyp = (CSC_TYPE)pStatusCSC.xCardType;
 
             byte[] serialNbrBytes = new byte[8];
@@ -44,8 +42,7 @@ namespace Common
             }
             SerialNumber = ConvertSNbr(serialNbrBytes);
         }
-
-        object readerId;
+        
         public CSC_TYPE cardTyp { private set; get; }
         public bool IsUltraLight { private set; get; }
         public bool IsDesFire { private set; get; }

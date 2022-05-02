@@ -112,3 +112,6 @@ Outputs/*.*
 SAM/CCHSSAM/Outputs/*.*
 
 ThalesCscApi.log
+/Debug/*.ilk
+/Tests/TstV4Callbacks/Debug/BuildLog.htm
+/Tests/TstV4Callbacks/Debug/TstV4Callbacks.exe.embed.manifest.res

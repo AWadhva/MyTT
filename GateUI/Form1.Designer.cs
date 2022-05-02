@@ -29,20 +29,29 @@
         private void InitializeComponent()
         {
             this.userControlRW1 = new GateUI.UserControlRW();
+            this.userControlRW2 = new GateUI.UserControlRW();
             this.SuspendLayout();
             // 
             // userControlRW1
             // 
-            this.userControlRW1.Location = new System.Drawing.Point(577, 27);
+            this.userControlRW1.Location = new System.Drawing.Point(89, 44);
             this.userControlRW1.Name = "userControlRW1";
             this.userControlRW1.Size = new System.Drawing.Size(511, 484);
             this.userControlRW1.TabIndex = 11;
+            // 
+            // userControlRW2
+            // 
+            this.userControlRW2.Location = new System.Drawing.Point(660, 44);
+            this.userControlRW2.Name = "userControlRW2";
+            this.userControlRW2.Size = new System.Drawing.Size(511, 484);
+            this.userControlRW2.TabIndex = 12;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1214, 584);
+            this.Controls.Add(this.userControlRW2);
             this.Controls.Add(this.userControlRW1);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -53,6 +62,7 @@
         #endregion
 
         private UserControlRW userControlRW1;
+        private UserControlRW userControlRW2;
 
     }
 }

@@ -20,11 +20,11 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
             transmitter(ActionTaken.CheckInPermitted, new string[]{logMedia.ToXMLString()});
         }
 
-        internal static void SuccessfulCheckout(LogicalMedia logMedia, 
-            int purseAmtDeducted // should be set to zero if the product has no purse e.g. for family 80
+        internal static void SuccessfulCheckout(LogicalMedia logMedia 
+            //, int purseAmtDeducted // should be set to zero if the product has no purse e.g. for family 80
             )
         {
-            transmitter(ActionTaken.CheckOutPermitted, new string[]{logMedia.ToXMLString()});
+            transmitter(ActionTaken.CheckOutPermitted, new string[] { logMedia.ToXMLString(), (logMedia.Purse.TPurse.BalanceRead - logMedia.Purse.TPurse.Balance).ToString() });
         }
 
         internal static void FailedWrite()
@@ -57,6 +57,11 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
         internal static void FailedRead()
         {
             transmitter(ActionTaken.ProblemWhileRW, new string[]{});
+        }
+
+        internal static void CheckOutBlocked_And_RejectCodeWrittenByMe(short p, LogicalMedia logMedia)
+        {
+            
         }
     }
 }

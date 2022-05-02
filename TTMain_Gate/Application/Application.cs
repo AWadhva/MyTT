@@ -7,6 +7,7 @@ using Common;
 using IFS2.Equipment.TicketingRules.CommonTT;
 using IFS2.Equipment.Common;
 using IFS2.Equipment.TicketingRules.MediaTreatment;
+using IFS2.Equipment.TicketingRules.MediaMonitor;
 
 namespace IFS2.Equipment.TicketingRules.Gate
 {
@@ -23,10 +24,9 @@ namespace IFS2.Equipment.TicketingRules.Gate
             cxnMonitor1.ReaderConnected += new Action<object>(x => ThalesReaderConnected(1, x));
             cxnMonitor1.ReaderDisconnected += new Action(() => ReaderDisconnected(1));
 
-            //cxnMonitor2 = new ThalesReaderConnectionMonitor(2, new V4ReaderApi(), syncContext_, "COM2:", 115200, conf);
-            //cxnMonitor2.ReaderConnected += new Action<object>(ThalesReaderConnected);
-            //cxnMonitor2.ReaderDisconnected += new Action<int>(ReaderDisconnected);
-
+            cxnMonitor2 = new ThalesReaderConnectionMonitor(new V4ReaderApi(), syncContext_, "COM4:", 115200, conf);
+            cxnMonitor2.ReaderConnected += new Action<object>(x => ThalesReaderConnected(2, x));
+            cxnMonitor2.ReaderDisconnected += new Action(() => ReaderDisconnected(2));
             actionTransmitter = actionTransmitter_;
         }
 
@@ -52,8 +52,10 @@ namespace IFS2.Equipment.TicketingRules.Gate
         public void SetOperatingMode(int rdrMnemonic, bool bCheckIn)
         {
             var rdr = GetReader(rdrMnemonic);
-
-            bSetAsEntry = bCheckIn; // TODO: correct it
+            if (rdrMnemonic == 1)
+                bSet_1_AsEntry = bCheckIn;
+            else
+                bSet_1_AsEntry = !bCheckIn;
 
             rdr.poller.Stop();
             rdr.poller.Start();
@@ -62,12 +64,18 @@ namespace IFS2.Equipment.TicketingRules.Gate
         void ThalesReaderConnected(int rdrMnemonic, object obj)
         {
             var connectedReader = (ConnectedThalesReaderMin)obj;
-            rdr1 = new ThalesReader(connectedReader, syncContext, 
-                x => this.MediaProduced(1, x),
-                x => this.MediaRemoved(1, x));
+
+            if (rdrMnemonic == 1)
+                rdr1 = new ThalesReader(connectedReader, syncContext, 
+                    x => this.MediaProduced(1, x),
+                    x => this.MediaRemoved(1, x));
+            else
+                rdr2 = new ThalesReader(connectedReader, syncContext,
+                    x => this.MediaProduced(2, x),
+                    x => this.MediaRemoved(2, x));
         }
 
-        bool bSetAsEntry = true; // TODO: read it from context/configuration
+        bool bSet_1_AsEntry = true; // TODO: read it from context/configuration
 
         ThalesReader GetReader(int rdrMnemonic)
         {
@@ -84,13 +92,22 @@ namespace IFS2.Equipment.TicketingRules.Gate
         {
             var rdr = GetReader(rdrMnemonic);
 
-            if (bSetAsEntry)
-                rdr1.curMediaTreatment = new CheckInTreatement(CSC_READER_TYPE.V4_READER, rdr1.connectedReader.handle, null,
-                    (act, pars) => { actionTransmitter.Transmit(1, act, pars); });
+            if (rdrMnemonic == 1)
+                if (bSet_1_AsEntry)
+                    rdr.curMediaTreatment = new CheckInTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle, null,
+                        (act, pars) => { actionTransmitter.Transmit(1, act, pars); });
+                else
+                    rdr.curMediaTreatment = new CheckOutTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle, null,
+                        (act, pars) => { actionTransmitter.Transmit(1, act, pars); });
             else
-                rdr1.curMediaTreatment = new CheckOutTreatement(CSC_READER_TYPE.V4_READER, rdr1.connectedReader.handle);
+                if (!bSet_1_AsEntry)
+                    rdr.curMediaTreatment = new CheckInTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle, null,
+                        (act, pars) => { actionTransmitter.Transmit(2, act, pars); });
+                else
+                    rdr.curMediaTreatment = new CheckOutTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle, null,
+                        (act, pars) => { actionTransmitter.Transmit(2, act, pars); });
             
-            rdr1.curMediaTreatment.Do(status);
+            rdr.curMediaTreatment.Do(status);
         }
 
         void MediaRemoved(int rdrMnemonic, StatusCSCEx status)
@@ -111,7 +128,7 @@ namespace IFS2.Equipment.TicketingRules.Gate
                 rdr2 = null;
         }
 
-        ReaderConnectionMonitor cxnMonitor1, cnxMonitor2; // one such object per r/w
+        ReaderConnectionMonitor cxnMonitor1, cxnMonitor2; // one such object per r/w
         ThalesReader rdr1, rdr2; // one such object per r/w per Connection session. Gets created when the r/w gets connected. Gets destroyed when r/w gets disconnected
     }
 }
