@@ -51,7 +51,7 @@ namespace IFS2.Equipment.TicketingRules.MediaMonitor
             rw = rdr.handle;
             rwTyp = rdr.rwTyp;
 
-            V4Reader_MediaCallbacks.Subscribe(rw, MediaProduced, MediaRemoved);
+            V4Reader_MediaCallbacks.Register(rw, MediaProduced, MediaRemoved);
 
             if (!InstallMifare(rdr.isamSlots))
                 throw new Exception("Couldn't install Mifare");
@@ -81,8 +81,6 @@ namespace IFS2.Equipment.TicketingRules.MediaMonitor
             Reader.StatusCheck(rwTyp, rw, ref status);
             return status.ucStatCSC;
         }
-
-        //byte _readerStatus;
 
         private bool InstallMifare(List<int> isamSlots)
         {
@@ -124,9 +122,8 @@ namespace IFS2.Equipment.TicketingRules.MediaMonitor
         }
         
         int rw;
-        CSC_READER_TYPE rwTyp;        
-
-        // TODO: see how relevant it is.
+        CSC_READER_TYPE rwTyp;
+        
         DateTime _tsPriorToWhenAsynchMessagesOfMediaProducedOrRemovedHasToBeIgnored = new DateTime(2000, 1, 1);
 
         #region Functions called back by V4 reader in its own thread
@@ -154,9 +151,6 @@ namespace IFS2.Equipment.TicketingRules.MediaMonitor
             syncContext.Message(() => {
                 RaiseMediaRemoved(status);                
             });
-            
-            //code = IntPtr.Zero;
-            //status = IntPtr.Zero;            
         }
         #endregion
     }

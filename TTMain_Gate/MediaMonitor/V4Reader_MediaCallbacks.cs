@@ -10,6 +10,13 @@ using System.Runtime.InteropServices;
 
 namespace IFS2.Equipment.TicketingRules.MediaMonitor
 {
+    /// <summary>
+    /// Is a static class. Maintains a datastructure of each R/W's
+    ///     handle vs. {MediaProduced, MediaRemoved}
+    /// Each r/w should 
+    /// - Register itself, when connected.
+    /// - DeRegister itself, when disconnected
+    /// </summary>
     static class V4Reader_MediaCallbacks
     {
         class My
@@ -20,7 +27,7 @@ namespace IFS2.Equipment.TicketingRules.MediaMonitor
         }
 
         static List<My> Rdrs = new List<My>();
-        static public void Subscribe(int handle, Action<StatusCSCEx, DateTime> MediaProduced, Action<StatusCSCEx, DateTime> MediaRemoved)
+        static public void Register(int handle, Action<StatusCSCEx, DateTime> MediaProduced, Action<StatusCSCEx, DateTime> MediaRemoved)
         {
             My rdr = new My();
             rdr.handle = handle;
@@ -29,11 +36,22 @@ namespace IFS2.Equipment.TicketingRules.MediaMonitor
             Rdrs.Add(rdr);
         }
 
-        static public void UnSubscribe(int handle)
+        static public void DeRegister(int handle)
         {
             Rdrs.RemoveAll(x => x.handle == handle);
         }
 
+        /// <summary>
+        /// Callback method supplied to sSmartStartPollingEx. 
+        /// The callback function is executed in the context of a task that is internal to ThalesCscApi.  ThalesCscApi assumes that the callback routine immediately returns.  It is your responsibility to ensure the following assertions:
+        ///- make the callback routine as fast as possible.  Don’t perform any long processing from within the callback routine.  Instead, wake an application thread with a system synchronizing object;
+        ///- allocate as little memory as possible from the stack;
+        ///- you cannot call any blocking (especially system) function from within the callback routine;
+        ///- you cannot call any function of ThalesCscApi.  It would result in a deadlock
+
+        /// </summary>
+        /// <param name="code"> contains the handle of the reader</param>
+        /// <param name="status"> of type StatusCSC</param>
         static public void StatusListenerMediaProduced(
             IntPtr code, IntPtr status
             )
@@ -45,9 +63,21 @@ namespace IFS2.Equipment.TicketingRules.MediaMonitor
             var rdr = Rdrs.Find(x => x.handle == handle);
             if (rdr != null)
                 rdr.MediaProduced(new StatusCSCEx(pStatusCSC), msgReceptionTimestamp);
+
             Marshal.FreeHGlobal(status);
         }
 
+        /// <summary>
+        /// Callback method supplied to sSmartStartDetectRemovalEx. 
+        /// The callback function is executed in the context of a task that is internal to ThalesCscApi.  ThalesCscApi assumes that the callback routine immediately returns.  It is your responsibility to ensure the following assertions:
+        ///- make the callback routine as fast as possible.  Don’t perform any long processing from within the callback routine.  Instead, wake an application thread with a system synchronizing object;
+        ///- allocate as little memory as possible from the stack;
+        ///- you cannot call any blocking (especially system) function from within the callback routine;
+        ///- you cannot call any function of ThalesCscApi.  It would result in a deadlock
+
+        /// </summary>
+        /// <param name="code"> contains the handle of the reader</param>
+        /// <param name="status"> of type StatusCSC</param>
         static public void StatusListenerMediaRemoved(
             IntPtr code, IntPtr status
             )
