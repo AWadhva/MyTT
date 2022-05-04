@@ -51,7 +51,6 @@ namespace IFS2.Equipment.TicketingRules
     {
         static internal IMacCalcultor macCalculator;
 
-        // TODO: rethink of this approach. It may be dangerous in long run. now we see that order of PurseValueIsAboveThreshold matters (IT MUST BE LAST).
         static ValidationRules()
         {
             AddValidateRule_All(Rules.AllPurpose.CheckIfMediaIsBlocked, Rules.AllPurpose.CheckMediaExpiry, Rules.AllPurpose.CheckForLastOperationEquipmentBlacklisted, Rules.AllPurpose.EF_CSCC_ControlTicketNotSurrendered, Rules.AllPurpose.EF_TOM_ControlCSCCIssuanceData, Rules.AllPurpose.CheckForMediaBlackList);
@@ -62,9 +61,9 @@ namespace IFS2.Equipment.TicketingRules
             AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckIn, 10, FareMode.TMO, Rules.CheckIn.Fam010.TMO.CheckTokenIsIssued);
             AddValidateRule_ATreatmentType_AFamily_AllFareModes(MediaDetectionTreatment.CheckIn, 40, Rules.CheckIn.Fam040.AllModes.VerifyMac);
             AddValidateRule_ATreatmentType_AFamily_AllFareModes(MediaDetectionTreatment.CheckIn, 60, Rules.CheckIn.Fam060.AllModes.CheckCSCIsIssued);
-            AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckIn, 60, FareMode.Normal, Rules.CheckIn.Fam060.Normal.CheckEntryExitBit, Rules.CheckIn.Fam060.Normal.TestFlagIsCompatibleWithEqptMode, Rules.CheckIn.Fam060.Normal.MinimumPurseValueForCheckin, Rules.CheckIn.Fam060.Normal.EF_CSCC_ControlRejectCode);
-            AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckIn, 60, FareMode.EEO, Rules.CheckIn.Fam060.EEO.TestFlagIsCompatibleWithEqptMode, Rules.CheckIn.Fam060.EEO.PurseValueIsAboveThreshold, Rules.CheckIn.Fam060.EEO.EF_CSCC_ControlRejectCode);
-            AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckIn, 60, FareMode.TMO, Rules.CheckIn.Fam060.TMO.CheckEntryExitBit, Rules.CheckIn.Fam060.TMO.TestFlagIsCompatibleWithEqptMode, Rules.CheckIn.Fam060.TMO.PurseValueIsAboveThreshold, Rules.CheckIn.Fam060.TMO.EF_CSCC_ControlRejectCode);
+            AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckIn, 60, FareMode.Normal, Rules.CheckIn.Fam060.Normal.CheckEntryExitBit, Rules.CheckIn.Fam060.Normal.TestFlagIsCompatibleWithEqptMode, Rules.CheckIn.Fam060.Normal.EF_CSCC_ControlRejectCode, Rules.CheckIn.Fam060.Normal.MinimumPurseValueForCheckin);
+            AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckIn, 60, FareMode.EEO, Rules.CheckIn.Fam060.EEO.TestFlagIsCompatibleWithEqptMode, Rules.CheckIn.Fam060.EEO.EF_CSCC_ControlRejectCode, Rules.CheckIn.Fam060.EEO.PurseValueIsAboveThreshold);
+            AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckIn, 60, FareMode.TMO, Rules.CheckIn.Fam060.TMO.CheckEntryExitBit, Rules.CheckIn.Fam060.TMO.TestFlagIsCompatibleWithEqptMode, Rules.CheckIn.Fam060.TMO.EF_CSCC_ControlRejectCode, Rules.CheckIn.Fam060.TMO.PurseValueIsAboveThreshold);
             AddValidateRule_ATreatmentType_AFamily_AllFareModes(MediaDetectionTreatment.CheckIn, 80, Rules.CheckIn.Fam080.AllModes.CheckCSCIsIssued);
             AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckIn, 80, FareMode.Normal, Rules.CheckIn.Fam080.Normal.TestFlagIsCompatibleWithEqptMode);
             AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckIn, 80, FareMode.EEO, Rules.CheckIn.Fam080.EEO.TestFlagIsCompatibleWithEqptMode);
@@ -84,6 +83,7 @@ namespace IFS2.Equipment.TicketingRules
             AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckOut, 80, FareMode.EEO, Rules.CheckOut.Fam080.EEO.TestFlagIsCompatibleWithEqptMode, Rules.CheckOut.Fam080.EEO.CheckTravelTimeIsNotExceeded, Rules.CheckOut.Fam080.EEO.EF_CSCC_ControlRejectCode);
             AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckOut, 80, FareMode.TMO, Rules.CheckOut.Fam080.TMO.TestFlagIsCompatibleWithEqptMode, Rules.CheckOut.Fam080.TMO.CheckEntryExitBit);
         }
+
         internal delegate TTErrorTypes // ANUJ: TODO: Ideally we should have a separate set of error codes for validation. We should not mix Validation errors with TTErrorTypes
             ValRule (LogicalMedia logMedia);
         internal delegate void UpdateRule(LogicalMedia read);

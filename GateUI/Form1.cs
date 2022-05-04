@@ -69,12 +69,37 @@ namespace GateUI
     
         #region IActionTransmitter Members
 
-        public void Transmit(int rdrMnemonic, ActionTaken act, params string[] pars)
+        public void MediaTreated(int rdrMnemonic, ActionTaken act, params string[] pars)
         {
             if (rdrMnemonic == 1)
                 userControlRW1.Transmit(act, pars);
             else
                 userControlRW2.Transmit(act, pars);
+        }
+
+        #endregion
+
+        #region ITransmitter Members
+
+
+        public void ReaderConnected(int rdrMnemonic)
+        {
+            
+        }
+
+        public void ReaderDisconnected(int rdrMnemonic)
+        {
+            
+        }
+
+        public void MediaProduced(int rdrMnemonic)
+        {
+            
+        }
+
+        public void MediaRemoved(int rdrMnemonic)
+        {
+            
         }
 
         #endregion

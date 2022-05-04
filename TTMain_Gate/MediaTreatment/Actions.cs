@@ -4,12 +4,11 @@
     {
         CheckInPermitted,
         CheckInNotPermitted_RejectCodePutByMe,
-        CheckInNotPermitted_RejectCodeAlreadyPresent,
-        CheckInNotPermitted_LetsFinalizeTheseCodesLater,
+        CheckInNotPermitted,
         
         CheckOutPermitted,
         CheckOutNotPermitted_RejectCodePutByMe,
-        CheckOutNotPermitted_RejectCodeAlreadyPresent,
+        CheckOutNotPermitted,        
 
         AutoToppedUp,
         Blocked_ie_BlackListedByMe,

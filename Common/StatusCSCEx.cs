@@ -6,6 +6,9 @@ using IFS2.Equipment.TicketingRules.CommonTT;
 
 namespace Common
 {
+    /// <summary>
+    /// a R/W type agnostic class, telling the brief about the media produced in front of a R/W
+    /// </summary>
     public class StatusCSCEx
     {
         public StatusCSCEx(StatusCSC pStatusCSC)

@@ -45,13 +45,8 @@ namespace GateUI
                         UpdateFields(GetLogicalMedia(pars[0]));
 
                         break;
-                    }
-                case ActionTaken.CheckInNotPermitted_LetsFinalizeTheseCodesLater:
-                    ShowPassageNotAllowedIcon();
-                    UpdateFields(GetLogicalMedia(pars[1]));
-
-                    break;
-                case ActionTaken.CheckInNotPermitted_RejectCodeAlreadyPresent:
+                    }                
+                case ActionTaken.CheckInNotPermitted:
                     ShowPassageNotAllowedIcon();
                     UpdateFields(GetLogicalMedia(pars[1]));
                     break;
@@ -67,7 +62,7 @@ namespace GateUI
                     ShowPassageNotAllowedIcon();
                     UpdateFields(GetLogicalMedia(pars[1]));
                     break;
-                case ActionTaken.CheckOutNotPermitted_RejectCodeAlreadyPresent:
+                case ActionTaken.CheckOutNotPermitted:
                     ShowPassageNotAllowedIcon();
                     UpdateFields(GetLogicalMedia(pars[1]));
                     break;

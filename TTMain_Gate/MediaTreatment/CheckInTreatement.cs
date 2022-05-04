@@ -12,14 +12,16 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
     class CheckInTreatement : IMediaTreatment
     {
         // TODO: make this constructor parameters {CSC_READER_TYPE, int} of type 'object', so that this class is available for use with all readers.
-        public CheckInTreatement(CSC_READER_TYPE rwTyp_, int hRw_, ISupervisor supervisor_, Action<ActionTaken, string[]> actionTransmitter_)
+        public CheckInTreatement(CSC_READER_TYPE rwTyp_, int hRw_, ISupervisor supervisor_, Action<ActionTaken, string[]> actionTransmitter)
         {
             rwTyp = rwTyp_;
             hRw = hRw_;
             supervisor = supervisor_;
 
-            Transmit.transmitter = actionTransmitter_;
+            Transmit = new ActionTransmitter(actionTransmitter);
         }
+
+        ActionTransmitter Transmit;
 
         CSC_READER_TYPE rwTyp;
         int hRw;
@@ -81,27 +83,27 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
 
                 if (logMedia.isSomethingModified)
                 {
-                    if (csc.Write(logMedia))
-                    {
-                        switch (validationResult)
-                        {
-                            case TTErrorTypes.NoError:
-                                Transmit.SuccessfulCheckin(logMedia);
-                                break;
-                            case TTErrorTypes.MediaInDenyList:
-                                Transmit.Blacklisted(logMedia);
-                                break;
-                        }
-                        if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
-                            Transmit.CheckInBlocked_And_RejectCodeWrittenByMe(validationResult, logMedia);
-                        else
-                            Transmit.CheckInBlocked_ForSomethingElse(validationResult, logMedia);
-                    }
-                    else
+                    if (!csc.Write(logMedia))
                         Transmit.FailedWrite();
+                    else
+                    {
+                        if (validationResult == TTErrorTypes.NoError)
+                            Transmit.CheckInPermitted(logMedia);
+                        else if (validationResult == TTErrorTypes.MediaInDenyList)
+                            Transmit.Blacklisted(logMedia);
+                        else if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
+                            Transmit.CheckInNotPermitted_And_RejectCodeWrittenByMe(logMedia.Application.Validation.RejectCode, logMedia);
+                        else
+                            Transmit.CheckInNotPermitted(validationResult, logMedia);
+                    }
                 }
                 else
-                    Transmit.CheckInNotPermitted_NoRejectCodeWrittenByMe(validationResult, logMedia);
+                {
+                    if (validationResult == TTErrorTypes.NoError)
+                        Transmit.CheckInPermitted(logMedia);
+                    else
+                        Transmit.CheckInNotPermitted(validationResult, logMedia);
+                }
             }
         }
 

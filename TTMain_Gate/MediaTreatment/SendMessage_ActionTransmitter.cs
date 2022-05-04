@@ -15,7 +15,7 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
 
         #region IActionTransmitter Members
 
-        public void Transmit(int rdrMnemonic, ActionTaken act, params string[] pars)
+        public void MediaTreated(int rdrMnemonic, ActionTaken act, params string[] pars)
         {
             string []p = new string[pars.Length + 1];
             
@@ -23,6 +23,26 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
             Array.Copy(pars, 0, p, 1, pars.Length);
             
             Communication.SendMessage("", "", "ActionTaken", p);
+        }
+
+        public void ReaderConnected(int rdrMnemonic)
+        {
+            
+        }
+
+        public void ReaderDisconnected(int rdrMnemonic)
+        {
+            
+        }
+
+        public void MediaProduced(int rdrMnemonic)
+        {
+            
+        }
+
+        public void MediaRemoved(int rdrMnemonic)
+        {
+            
         }
 
         #endregion
