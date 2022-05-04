@@ -9,6 +9,16 @@ using IFS2.Equipment.TicketingRules.MediaTreatment;
 
 namespace IFS2.Equipment.TicketingRules
 {
+    /// <summary>
+    /// Enables continuous polling of underlying ReaderMediaMonitor. i.e. 
+    /// - as soon as the media is removed from R/W, it StartPolling, 
+    /// - as soon as the media is produced, it WaitForMediaRemoval
+    /// It remains in this cycle until Stop() is called on it.
+    /// 
+    /// Lifetime: 
+    /// - should be created when R/W has got connected.
+    /// - should be destroyed when R/W has got disconnected
+    /// </summary>
     class Poller
     {
         ReaderMediaMonitor mediaMonitor;
