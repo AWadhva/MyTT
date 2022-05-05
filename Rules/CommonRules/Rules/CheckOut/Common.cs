@@ -21,7 +21,7 @@ namespace IFS2.Equipment.TicketingRules.Rules.CheckOut
         {
             if (logMedia.Media.Type == Media.TypeValues.CSC)
                 if (logMedia.Application.Validation.EntryExitBitRead == Validation.TypeValues.Exit)
-                    return TTErrorTypes.ExitNotDone;
+                    return TTErrorTypes.ExitMismatch;
             return TTErrorTypes.NoError;
         }
 

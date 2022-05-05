@@ -2024,8 +2024,7 @@ namespace IFS2.Equipment.TicketingRules
         public bool Write(LogicalMedia logMedia)
         {
             FilesToWrite writeFns = GatherUpdateFunctions(logMedia);
-            Write_(logMedia, writeFns);
-            return true;
+            return Write_(logMedia, writeFns);            
         }
         
         private FilesToWrite GatherUpdateFunctions(LogicalMedia logMedia)

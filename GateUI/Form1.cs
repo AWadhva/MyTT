@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using IFS2.Equipment.Common;
 using IFS2.Equipment.TicketingRules.MediaTreatment;
 using IFS2.Equipment.TicketingRules;
+using IFS2.Equipment.Parameters;
 
 namespace GateUI
 {
@@ -17,7 +18,7 @@ namespace GateUI
         public Form1()
         {
             InitializeComponent();
-            ParametersRelated();
+            ParametersRelated();            
         }
 
         private void ParametersRelated()
@@ -42,6 +43,8 @@ namespace GateUI
             FareProductSpecs.Load(false);
             SharedData._fpSpecsRepository = FareProductSpecs.GetInstance();
             FareParameters.Initialise();
+
+            BasicParameterFile.Register(new MaxiTravelTime());
         }
 
         public class Combobox_FareMode_Item
@@ -70,7 +73,10 @@ namespace GateUI
             comboFareModes.Items.Add(new Combobox_FareMode_Item(FareMode.Normal, FareMode.Normal.ToString()));
             comboFareModes.Items.Add(new Combobox_FareMode_Item(FareMode.EEO, FareMode.EEO.ToString()));
             comboFareModes.Items.Add(new Combobox_FareMode_Item(FareMode.TMO, FareMode.TMO.ToString()));
-            comboFareModes.Items.Add(new Combobox_FareMode_Item(FareMode.Incident, FareMode.Incident.ToString()));            
+            comboFareModes.Items.Add(new Combobox_FareMode_Item(FareMode.Incident, FareMode.Incident.ToString()));
+
+            comboFareModes.SelectedIndex = 0;
+            txtSiteId.Text = "15";
         }
 
         IFS2.Equipment.TicketingRules.Gate.Application app;
@@ -178,17 +184,21 @@ namespace GateUI
 
         private void btnSetSiteId_Click(object sender, EventArgs e)
         {
+            
+        }
+
+        private void txtSiteId_TextChanged(object sender, EventArgs e)
+        {
             try
             {
                 int siteId = Convert.ToInt32(txtSiteId.Text);
-                app.SetStationNumber(siteId);
-                btnSetSiteId.Enabled = false;
+                app.SetStationNumber(siteId);                
             }
             catch
             { }
-        }        
+        }
 
-        private void btnSetFareMode_Click(object sender, EventArgs e)
+        private void comboFareModes_SelectedIndexChanged(object sender, EventArgs e)
         {
             int idx = comboFareModes.SelectedIndex;
 
@@ -203,19 +213,8 @@ namespace GateUI
                 mode = FareMode.Incident;
             else
                 return;
-            
-            app.SetFareMode(mode);
-            btnSetFareMode.Enabled = false;
-        }        
 
-        private void txtSiteId_TextChanged(object sender, EventArgs e)
-        {
-            btnSetSiteId.Enabled = true;
-        }
-
-        private void comboFareModes_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            btnSetFareMode.Enabled = true;
+            app.SetFareMode(mode);            
         }        
     }
 }
