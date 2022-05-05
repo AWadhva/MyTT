@@ -16,6 +16,7 @@ namespace GateUI
         public UserControlRW()
         {
             InitializeComponent();
+            this.BackColor = colorRdrDisconnected;
         }
 
         public void Transmit(ActionTaken act, params string[] pars)
@@ -129,6 +130,29 @@ namespace GateUI
             txtBalance.Text = ((logMedia.Purse.TPurse.Balance) / 100).ToString();
         }
 
+        Color colorRdrConnectedWithNoMedia = Color.FromArgb(192, 255, 192);
+        Color colorRdrDisconnected = Color.FromArgb(255, 192, 192);
+        internal void ReaderConnected()
+        {
+            this.BackColor = colorRdrConnectedWithNoMedia;
+            ClearEveryThing();
+        }
 
+        internal void ReaderDisconnected()
+        {
+            this.BackColor = colorRdrDisconnected;
+            ClearEveryThing();
+        }
+
+        internal void MediaProduced()
+        {
+            this.BackColor = Color.FromArgb(255, 255, 192);
+        }
+
+        internal void MediaRemoved()
+        {
+            this.BackColor = colorRdrConnectedWithNoMedia;
+            ClearEveryThing();
+        }
     }
 }

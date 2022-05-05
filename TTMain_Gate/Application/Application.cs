@@ -116,7 +116,7 @@ namespace IFS2.Equipment.TicketingRules.Gate
         void MediaRemoved(int rdrMnemonic, StatusCSCEx status)
         {
             var rdr = GetReader(rdrMnemonic);
-            transmitter.MediaProduced(rdrMnemonic);
+            transmitter.MediaRemoved(rdrMnemonic);
 
             rdr.curMediaTreatment = null;
         }

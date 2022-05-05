@@ -101,6 +101,7 @@
             this.imgIcon.Location = new System.Drawing.Point(52, 283);
             this.imgIcon.Name = "imgIcon";
             this.imgIcon.Size = new System.Drawing.Size(256, 144);
+            this.imgIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.imgIcon.TabIndex = 17;
             this.imgIcon.TabStop = false;
             // 
@@ -118,6 +119,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.Controls.Add(this.panelRejectCode);
             this.Controls.Add(this.txtToppedUp);
             this.Controls.Add(this.lblToppedUp);

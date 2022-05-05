@@ -77,6 +77,14 @@ namespace GateUI
                 userControlRW2.Transmit(act, pars);
         }
 
+        UserControlRW GetUcForRdr(int rdrMnemonic)
+        {
+            if (rdrMnemonic == 1)
+                return userControlRW1;
+            else
+                return userControlRW2;
+        }
+
         #endregion
 
         #region ITransmitter Members
@@ -84,22 +92,22 @@ namespace GateUI
 
         public void ReaderConnected(int rdrMnemonic)
         {
-            
+            GetUcForRdr(rdrMnemonic).ReaderConnected();
         }
 
         public void ReaderDisconnected(int rdrMnemonic)
         {
-            
+            GetUcForRdr(rdrMnemonic).ReaderDisconnected();
         }
 
         public void MediaProduced(int rdrMnemonic)
         {
-            
+            GetUcForRdr(rdrMnemonic).MediaProduced();
         }
 
         public void MediaRemoved(int rdrMnemonic)
         {
-            
+            GetUcForRdr(rdrMnemonic).MediaRemoved();
         }
 
         #endregion
