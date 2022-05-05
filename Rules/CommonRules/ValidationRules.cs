@@ -51,6 +51,7 @@ namespace IFS2.Equipment.TicketingRules
     {
         static internal IMacCalcultor macCalculator;
 
+        // Can either be written manually or using project GenRules (VS2019)
         static ValidationRules()
         {
             AddValidateRule_All(Rules.AllPurpose.CheckIfMediaIsBlocked, Rules.AllPurpose.CheckMediaExpiry, Rules.AllPurpose.CheckForLastOperationEquipmentBlacklisted, Rules.AllPurpose.EF_CSCC_ControlTicketNotSurrendered, Rules.AllPurpose.EF_TOM_ControlCSCCIssuanceData, Rules.AllPurpose.CheckForMediaBlackList);
@@ -140,13 +141,16 @@ namespace IFS2.Equipment.TicketingRules
                 x.purpose = purpose;
 
                 x.family = family; // specific family of the fare product present of media
-                rules.AddRange(rules_PerPurpose_PerFamily[x]);
+                List<ValRule> lstValRule;
+                if (rules_PerPurpose_PerFamily.TryGetValue(x, out lstValRule))
+                    rules.AddRange(lstValRule);
 
                 var y = new Purpose_Family_Mode();
                 y.purpose = purpose;
                 y.family = family;
                 y.mode = FareMode;
-                rules.AddRange(rules_PerPurpose_PerFamily_PerMode[y]);
+                if (rules_PerPurpose_PerFamily_PerMode.TryGetValue(y, out lstValRule))
+                    rules.AddRange(lstValRule);
 
                 var result = Execute(logMedia, rules);
                 if (result != TTErrorTypes.NoError)
@@ -211,6 +215,7 @@ namespace IFS2.Equipment.TicketingRules
             validation.EntryExitBit = Validation.TypeValues.Entry;
             validation.LastTransactionDateTime = DateTime.Now;
             validation.Location = SharedData.StationNumber;
+            validation.RejectCode = 0;
 
             // TODO: see if we need to put PeriodicTicketEntry for family 80
             SalesRules.AddTrasactionHistoryRecord(logMedia, OperationTypeValues.NoValueDeductedInEntry, 0);
@@ -229,6 +234,7 @@ namespace IFS2.Equipment.TicketingRules
             validation.EntryExitBit = Validation.TypeValues.Exit;
             validation.LastTransactionDateTime = DateTime.Now;
             validation.Location = SharedData.StationNumber;
+            validation.RejectCode = 0;
 
             purse.TPurse.Balance = purse.TPurse.BalanceRead - fare;
             purse.TPurse.SequenceNumber = purse.TPurse.SequenceNumberRead - 1;

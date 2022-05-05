@@ -66,7 +66,7 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
 
         internal void CheckOutNotPermitted(TTErrorTypes validationResult, LogicalMedia logMedia)
         {
-            transmitter(ActionTaken.CheckOutNotPermitted, new string[] { validationResult.ToString(), logMedia.ToXMLString()});
+            transmitter(ActionTaken.CheckOutNotPermitted, new string[] { ((int)validationResult).ToString(), logMedia.ToXMLString()});
         }
     }
 }

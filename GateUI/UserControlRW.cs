@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using IFS2.Equipment.TicketingRules;
 using IFS2.Equipment.TicketingRules.MediaTreatment;
+using IFS2.Equipment.Common;
 
 namespace GateUI
 {
@@ -50,6 +51,7 @@ namespace GateUI
                 case ActionTaken.CheckInNotPermitted:
                     ShowPassageNotAllowedIcon();
                     UpdateFields(GetLogicalMedia(pars[1]));
+                    SetErrorField(pars[0]);
                     break;
                 case ActionTaken.CheckInNotPermitted_RejectCodePutByMe:
                     ShowPassageNotAllowedIcon();
@@ -66,8 +68,17 @@ namespace GateUI
                 case ActionTaken.CheckOutNotPermitted:
                     ShowPassageNotAllowedIcon();
                     UpdateFields(GetLogicalMedia(pars[1]));
+                    SetErrorField(pars[0]);
                     break;
             }
+        }
+
+        private void SetErrorField(string p)
+        {
+            txtError.Show();
+
+            int code = Convert.ToInt32(p);
+            txtError.Text = String.Format("({0}){1}", code, ((TTErrorTypes)code).ToString());
         }
 
         private LogicalMedia GetLogicalMedia(string p)
@@ -83,9 +94,10 @@ namespace GateUI
             txtRejectCode.Text = "";
             txtBalance.Text = "";
             txtToppedUp.Text = "";
+            txtError.Text = "";
 
             lblToppedUp.Hide();
-            txtToppedUp.Hide();
+            txtToppedUp.Hide();            
 
             panelRejectCode.Hide();
         }

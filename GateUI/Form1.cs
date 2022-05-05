@@ -44,12 +44,36 @@ namespace GateUI
             FareParameters.Initialise();
         }
 
+        public class Combobox_FareMode_Item
+        {
+            public string Text { get; set; }
+            public FareMode Value { get; set; }
+
+            public Combobox_FareMode_Item(FareMode value, string text)
+            {
+                Text = text;
+                Value = value;
+            }
+
+            public override string ToString()
+            {
+                return Text;
+            }
+        }
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
 
-            IFS2.Equipment.TicketingRules.Gate.Application app = new IFS2.Equipment.TicketingRules.Gate.Application(this, this);
+            app = new IFS2.Equipment.TicketingRules.Gate.Application(this, this);
+
+            comboFareModes.Items.Add(new Combobox_FareMode_Item(FareMode.Normal, FareMode.Normal.ToString()));
+            comboFareModes.Items.Add(new Combobox_FareMode_Item(FareMode.EEO, FareMode.EEO.ToString()));
+            comboFareModes.Items.Add(new Combobox_FareMode_Item(FareMode.TMO, FareMode.TMO.ToString()));
+            comboFareModes.Items.Add(new Combobox_FareMode_Item(FareMode.Incident, FareMode.Incident.ToString()));            
         }
+
+        IFS2.Equipment.TicketingRules.Gate.Application app;
 
         #region ISyncContext Members
 
@@ -110,6 +134,88 @@ namespace GateUI
             GetUcForRdr(rdrMnemonic).MediaRemoved();
         }
 
-        #endregion
+        #endregion        
+
+        private void rd1CheckIn_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton btn = (RadioButton)sender;
+            if (!btn.Focused)
+                return;
+
+            rd2CheckOut.Checked = true;
+            app.SetOperatingMode(1, true);
+        }
+
+        private void rd1CheckOut_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton btn = (RadioButton)sender;
+            if (!btn.Focused)
+                return;
+
+            rd2CheckIn.Checked = true;
+            app.SetOperatingMode(1, false);
+        }
+
+        private void rd2CheckIn_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton btn = (RadioButton)sender;
+            if (!btn.Focused)
+                return;
+
+            rd1CheckOut.Checked = true;
+            app.SetOperatingMode(2, true);
+        }
+
+        private void rd2CheckOut_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton btn = (RadioButton)sender;
+            if (!btn.Focused)
+                return;
+
+            rd1CheckIn.Checked = true;
+            app.SetOperatingMode(2, false);
+        }
+
+        private void btnSetSiteId_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int siteId = Convert.ToInt32(txtSiteId.Text);
+                app.SetStationNumber(siteId);
+                btnSetSiteId.Enabled = false;
+            }
+            catch
+            { }
+        }        
+
+        private void btnSetFareMode_Click(object sender, EventArgs e)
+        {
+            int idx = comboFareModes.SelectedIndex;
+
+            FareMode mode;
+            if (idx == 0)
+                mode = FareMode.Normal;
+            else if (idx == 1)
+                mode = FareMode.EEO;
+            else if (idx == 2)
+                mode = FareMode.TMO;
+            else if (idx == 3)
+                mode = FareMode.Incident;
+            else
+                return;
+            
+            app.SetFareMode(mode);
+            btnSetFareMode.Enabled = false;
+        }        
+
+        private void txtSiteId_TextChanged(object sender, EventArgs e)
+        {
+            btnSetSiteId.Enabled = true;
+        }
+
+        private void comboFareModes_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            btnSetFareMode.Enabled = true;
+        }        
     }
 }

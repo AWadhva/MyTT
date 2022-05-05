@@ -57,8 +57,17 @@ namespace IFS2.Equipment.TicketingRules.Gate
             else
                 bSet_1_AsEntry = !bCheckIn;
 
-            rdr.poller.Stop();
-            rdr.poller.Start();
+            if (rdr1 != null)
+            {
+                rdr1.poller.Stop();
+                rdr1.poller.Start();
+            }
+
+            if (rdr2 != null)
+            {
+                rdr2.poller.Stop();
+                rdr2.poller.Start();
+            }
         }
 
         void ReaderConnected(int rdrMnemonic, object obj)
@@ -135,5 +144,17 @@ namespace IFS2.Equipment.TicketingRules.Gate
 
         ReaderConnectionMonitor cxnMonitor1, cxnMonitor2; // one such object per r/w
         ThalesReader rdr1, rdr2; // one such object per r/w per Connection session. Gets created when the r/w gets connected. Gets destroyed when r/w gets disconnected
+
+        public void SetStationNumber(int siteId)
+        {
+#if Test
+            SharedData.StationNumber = siteId;
+#endif
+        }
+
+        public void SetFareMode(FareMode fareMode)
+        {
+            ValidationRules.SetFareMode(fareMode);
+        }
     }
 }

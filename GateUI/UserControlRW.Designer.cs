@@ -36,8 +36,12 @@
             this.txtBalance = new System.Windows.Forms.TextBox();
             this.imgIcon = new System.Windows.Forms.PictureBox();
             this.lblPurse = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.txtError = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.panelRejectCode.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imgIcon)).BeginInit();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelRejectCode
@@ -98,7 +102,7 @@
             // 
             // imgIcon
             // 
-            this.imgIcon.Location = new System.Drawing.Point(52, 283);
+            this.imgIcon.Location = new System.Drawing.Point(86, 368);
             this.imgIcon.Name = "imgIcon";
             this.imgIcon.Size = new System.Drawing.Size(256, 144);
             this.imgIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -115,11 +119,40 @@
             this.lblPurse.TabIndex = 16;
             this.lblPurse.Text = "Balance";
             // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.txtError);
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Location = new System.Drawing.Point(15, 260);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(480, 79);
+            this.panel1.TabIndex = 22;
+            // 
+            // txtError
+            // 
+            this.txtError.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtError.Location = new System.Drawing.Point(92, 27);
+            this.txtError.Name = "txtError";
+            this.txtError.ReadOnly = true;
+            this.txtError.Size = new System.Drawing.Size(385, 31);
+            this.txtError.TabIndex = 10;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(13, 27);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(80, 33);
+            this.label1.TabIndex = 9;
+            this.label1.Text = "Error";
+            // 
             // UserControlRW
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.panelRejectCode);
             this.Controls.Add(this.txtToppedUp);
             this.Controls.Add(this.lblToppedUp);
@@ -127,10 +160,12 @@
             this.Controls.Add(this.imgIcon);
             this.Controls.Add(this.lblPurse);
             this.Name = "UserControlRW";
-            this.Size = new System.Drawing.Size(511, 484);
+            this.Size = new System.Drawing.Size(511, 528);
             this.panelRejectCode.ResumeLayout(false);
             this.panelRejectCode.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imgIcon)).EndInit();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -146,6 +181,9 @@
         private System.Windows.Forms.TextBox txtBalance;
         private System.Windows.Forms.PictureBox imgIcon;
         private System.Windows.Forms.Label lblPurse;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.TextBox txtError;
+        private System.Windows.Forms.Label label1;
 
 
     }
