@@ -18,7 +18,7 @@ namespace GateUI
         public Form1()
         {
             InitializeComponent();
-            ParametersRelated();            
+            ParametersRelated();
         }
 
         private void ParametersRelated()

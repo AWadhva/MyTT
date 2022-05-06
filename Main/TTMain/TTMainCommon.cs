@@ -81,7 +81,7 @@ namespace IFS2.Equipment.TicketingRules
                     s += IFSEventsList.GetStringForCC("DSMDriver");
 #endif
                         SendCommand("GetAllEventsAnswer", "TTApplication", s);
-                    }                    
+                    }
                     return true;
                 case "VERIFYAGENTDATA": // TODO: see if it can be moved to Parameters.cs
                     try
@@ -128,13 +128,21 @@ namespace IFS2.Equipment.TicketingRules
                         }
                         return true;
                     }
+                case "GETFAREMODEREPLY": // used exclusively by TOM
+                    _eqptStatus = SerializeHelper<RegisterEquipmentStatus>.XMLDeserialize(eventMessage._par[0]);
+                    ValidationRules.SetFareMode((FareMode)_eqptStatus.FareMode);
+                    break;
+                case "REGISTEREQUIPMENTSTATUS": // used exclusively by TOM
+                    _eqptStatus = SerializeHelper<RegisterEquipmentStatus>.XMLDeserialize(eventMessage._par[0]);
+                    ValidationRules.SetFareMode((FareMode)_eqptStatus.FareMode);
+                    break;
                 case "AGENTLOGGEDIN":
                     Handle_AgentLoggedIn(eventMessage);
                     return true;
             }
             return false;
         }
-        
+
         private void Handle_AgentLoggedIn(EventMessage eventMessage)
         {
             if (eventMessage._par.Length == 1)
@@ -149,7 +157,8 @@ namespace IFS2.Equipment.TicketingRules
             SharedData._agentShift = new AgentShift(shiftId, agentId, profile);
         }
 
-        
+        private RegisterEquipmentStatus _eqptStatus = null;
+
         private void RegisterCommonMessages()
         {
             Communication.AddEventsToReceive(ThreadName, "StopApplication;AgentLoggedIn;VerifyAgentData;GetAllEvents;EquipmentLocation;Initialisation;KillApplication", this);
@@ -158,8 +167,15 @@ namespace IFS2.Equipment.TicketingRules
             Communication.AddEventsToReceive(ThreadName, "GetProductFamily", this);
 
             Communication.AddEventsToExternal("GetSoftwareVersionAnswer;StopApplicationAnswer", "MMIChannel");
-            Communication.AddEventsToExternal("GetProductFamilyAnswer", "MMIChannel");
+            Communication.AddEventsToExternal("GetProductFamilyAnswer;VerifyAgentDataAnswer", "MMIChannel");
+            Communication.AddEventsToExternal("GetAllEventsAnswer", "CoreChannel");
+
+            Communication.AddEventToReceive(ThreadName, "RegisterEquipmentStatus", this);
+
+            Communication.AddEventsToExternal("GetFareMode", "MMIChannel");
+            Communication.AddEventToReceive(ThreadName, "GetFareModeReply", this);
+
+            Communication.AddEventsToExternal("StoreAlarm", "CoreChannel");
         }
-        
     }
 }
