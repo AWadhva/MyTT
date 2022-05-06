@@ -36,7 +36,7 @@ namespace IFS2.Equipment.TicketingRules
                     {
                         int readerId = Convert.ToInt32(eventMessage._par[0]);
                         app.SetOperatingMode(readerId, eventMessage._par[1] == "1");
-                        break;
+                        return 0;
                     }
                 case "ResumeOperationOnRW":
                     {
@@ -44,8 +44,25 @@ namespace IFS2.Equipment.TicketingRules
                         int messageId = Convert.ToInt32(eventMessage._par[0]);
 
                         app.ResumeOperationOnRW(readerId, messageId);
-                        break;
+                        return 0;
                     }
+                case "GetMachineID":
+                    return 0;
+                case "GetCSCReloaderStatus":
+                    return 0;
+                case "GetSAMStatus":
+                    return 0;
+                case "GetCertificateOfEqpt":
+                    return 0;
+                case "GetCertificateOfCA":
+                    return 0;
+                case "GetCertificate":
+                    return 0;
+                case "NewTicketingKeysFile":
+                    return 0;
+                case "Shutdown":
+                    Communication.RemoveAllEvents(ThreadName);
+                    return (-1); //To terminate the process
             }
             return base.TreatMessageReceived(eventMessage);
         }        
