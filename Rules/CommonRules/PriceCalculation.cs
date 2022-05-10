@@ -41,7 +41,7 @@ namespace IFS2.Equipment.TicketingRules
             if (FareGroup <= 0) return -1;
             //Determination of Fare Tiers in the station to station matrix
             FareTier = FareParameters.GetFareTier(pOrigin, pDestination);
-            if (FareTier <= 0) return -1;
+            if (FareTier < 0) return -1;
             //Determination of price
             FareValue = FareParameters.GetFareValue(FareGroup, FareTier, 1);
             pFareTier = FareTier;

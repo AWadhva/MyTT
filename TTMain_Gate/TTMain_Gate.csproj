@@ -105,7 +105,6 @@
     </Compile>
     <Compile Include="Application\Application.cs" />
     <Compile Include="ConnectionMonitor\V4ReaderConf.cs" />
-    <Compile Include="ISupervisor.cs" />
     <Compile Include="IV4ReaderApi.cs" />
     <Compile Include="Application\MainTicketingRules.cs" />
     <Compile Include="MediaMonitor\V4ReaderMediaMonitor.cs" />

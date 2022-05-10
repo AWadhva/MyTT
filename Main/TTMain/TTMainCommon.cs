@@ -12,22 +12,22 @@ namespace IFS2.Equipment.TicketingRules
     {
         public static OneEvent _cscReloaderMetaStatus = null;
 
-        private static OneEvent _readerSerialNumber = null;
-        private static OneEvent _firmwareVersion = null;
-        private static OneEvent _cscAPIVersion = null;
-        private static OneEvent _cscChargeurVersion = null;
+        private static OneEvent _readerSerialNumber;
+        private static OneEvent _firmwareVersion;
+        private static OneEvent _cscAPIVersion;
+        private static OneEvent _cscChargeurVersion;
 
         // CCHS SAM Status
-        private static OneEvent _cchsSAMType = null;
+        private static OneEvent _cchsSAMType;
 
         public static OneEvent _dataSecurityModuleLocked = null;
         public static OneEvent _dataSecurityModuleFailure = null;
         public static OneEvent _dataSecurityModuleAusent = null;
         public static OneEvent _dataSecurityModuleIsOffLine = null;
         public static OneEvent _dataSecurityModuleMetaStatus = null;
-        private static OneEvent _dataSecurityModuleSerialNumber = null;
-        private static OneEvent _dataSecurityModuleFirmwareVersion = null;
-        private static OneEvent _dataSecurityModuleDeviceNumber = null;
+        private static OneEvent _dataSecurityModuleSerialNumber;
+        private static OneEvent _dataSecurityModuleFirmwareVersion;
+        private static OneEvent _dataSecurityModuleDeviceNumber;
 
 
         public bool TreatCommonMessage(EventMessage eventMessage)

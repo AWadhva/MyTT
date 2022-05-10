@@ -12,7 +12,8 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
     class CheckOutTreatement : IMediaTreatment
     {
         // TODO: make this constructor parameters {CSC_READER_TYPE, int} of type 'object', so that this class is available for use with all readers.
-        public CheckOutTreatement(CSC_READER_TYPE rwTyp_, int hRw_, ISupervisor supervisor_, Action<ActionTaken, string[]> actionTransmitter)
+        public CheckOutTreatement(CSC_READER_TYPE rwTyp_, int hRw_,
+            Action<ActionTaken, string[]> actionTransmitter)
         {
             rwTyp = rwTyp_;
             hRw = hRw_;
@@ -20,69 +21,91 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
             Transmit = new ActionTransmitter(actionTransmitter);
         }
 
+        readonly Guid id = Guid.NewGuid();
+
         ActionTransmitter Transmit;
         CSC_READER_TYPE rwTyp;
         int hRw;
-        Action<ActionTaken, string[]> actionTransmitter;
+        
+        SmartFunctions sf = new SmartFunctions();
+        LogicalMedia logMedia = new LogicalMedia();
+        DelhiDesfireEV0 csc;
+        TTErrorTypes validationResult;
 
         #region IMediaTreatment Members
 
-        public void Do(StatusCSCEx status)
+        public bool ReadAndValidate(StatusCSCEx status, out TTErrorTypes validationResult_, out LogicalMedia logMedia)
         {
-            SmartFunctions sf = new SmartFunctions();
-
-            sf._delhiCCHSSAMUsage = true;
-            sf._cryptoflexSAMUsage = false;
-
-            sf.SetReaderType(rwTyp, hRw);
-            sf.SetSerialNbr(status.SerialNumber);
-
-            if (status.IsNFC)
-                if (Configuration.ReadBoolParameter("NFCFunctionality", false))
-                    sf._IsNFCCardDetected = true;
-
-            LogicalMedia logMedia = new LogicalMedia();
-            if (status.IsDesFire)
+            try
             {
-                DelhiDesfireEV0 csc = new DelhiDesfireEV0(sf);
-                if (!csc.ReadMediaData(logMedia, MediaDetectionTreatment.CheckOut))
-                {
-                    Transmit.FailedRead();
-                    return;
-                }
-                var validationResult = ValidationRules.ValidateFor(MediaDetectionTreatment.CheckOut, logMedia);
-                if (validationResult == TTErrorTypes.NoError)
-                    ValidationRules.UpdateForCheckOut(logMedia);
+                logMedia = this.logMedia;
 
-                if (logMedia.isSomethingModified)
+                sf._delhiCCHSSAMUsage = true;
+                sf._cryptoflexSAMUsage = false;
+
+                sf.SetReaderType(rwTyp, hRw);
+                sf.SetSerialNbr(status.SerialNumber);
+
+                if (status.IsNFC)
+                    if (Configuration.ReadBoolParameter("NFCFunctionality", false))
+                        sf._IsNFCCardDetected = true;
+
+                if (status.IsDesFire)
                 {
-                    if (!csc.Write(logMedia))
-                        Transmit.FailedWrite();
-                    else
+                    csc = new DelhiDesfireEV0(sf);
+                    if (!csc.ReadMediaData(logMedia, MediaDetectionTreatment.CheckOut))
                     {
-                        if (validationResult == TTErrorTypes.NoError)
-                            Transmit.CheckOutPermitted(logMedia);
-                        else if (validationResult == TTErrorTypes.MediaInDenyList)
-                            Transmit.Blacklisted(logMedia);
-                        else if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
-                            Transmit.CheckOutNotPermitted_And_RejectCodeWrittenByMe(logMedia.Application.Validation.RejectCode, logMedia);
-                        else
-                            Transmit.CheckOutNotPermitted(validationResult, logMedia);
+                        Transmit.FailedRead();
+                        validationResult = this.validationResult = TTErrorTypes.NoError;
+
+                        return false;
                     }
+                    validationResult = this.validationResult = ValidationRules.ValidateFor(MediaDetectionTreatment.CheckOut, logMedia);
+
+                    return true;
                 }
+                validationResult = TTErrorTypes.NoError;
+                return false;
+            }
+            finally
+            {
+                validationResult_ = validationResult;
+            }
+        }
+
+        public void ResumeWrite()
+        {
+            if (validationResult == TTErrorTypes.NoError)
+                ValidationRules.UpdateForCheckOut(logMedia);
+
+            if (logMedia.isSomethingModified)
+            {
+                if (!csc.Write(logMedia))
+                    Transmit.FailedWrite();
                 else
                 {
                     if (validationResult == TTErrorTypes.NoError)
                         Transmit.CheckOutPermitted(logMedia);
+                    else if (validationResult == TTErrorTypes.MediaInDenyList)
+                        Transmit.Blacklisted(logMedia);
+                    else if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
+                        Transmit.CheckOutNotPermitted_And_RejectCodeWrittenByMe(logMedia.Application.Validation.RejectCode, logMedia);
                     else
                         Transmit.CheckOutNotPermitted(validationResult, logMedia);
                 }
             }
+            else
+            {
+                if (validationResult == TTErrorTypes.NoError)
+                    Transmit.CheckOutPermitted(logMedia);
+                else
+                    Transmit.CheckOutNotPermitted(validationResult, logMedia);
+            }
         }
-
-        public void Resume()
+        
+        public Guid Id
         {
-            throw new NotImplementedException();
+            get { return id; }
         }
 
         #endregion

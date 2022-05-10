@@ -41,9 +41,9 @@ namespace IFS2.Equipment.TicketingRules
                 case "ResumeOperationOnRW":
                     {
                         int readerId = Convert.ToInt32(eventMessage._par[0]);
-                        int messageId = Convert.ToInt32(eventMessage._par[0]);
+                        Guid messageId = new Guid(eventMessage._par[1]);
 
-                        app.ResumeOperationOnRW(readerId, messageId);
+                        app.ResumeOperation(readerId, messageId);
                         return 0;
                     }
                 case "GetMachineID":
@@ -65,7 +65,7 @@ namespace IFS2.Equipment.TicketingRules
                     return (-1); //To terminate the process
             }
             return base.TreatMessageReceived(eventMessage);
-        }        
+        }
 
 #if WindowsCE
         public OpenNETCF.Threading.Semaphore semStopAsked = new OpenNETCF.Threading.Semaphore(0, 10000);

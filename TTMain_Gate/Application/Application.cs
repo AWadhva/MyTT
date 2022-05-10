@@ -30,25 +30,10 @@ namespace IFS2.Equipment.TicketingRules.Gate
             transmitter = transmitter_;
         }
 
-        int suspendedOpTxnId;
+        
         readonly ISyncContext syncContext;
         readonly ITransmitter transmitter;
-
-        public void ResumeOperationOnRW(int rdrMnemonic, int messageId)
-        {
-            //var rdr = GetReader(rdrMnemonic);
-
-            if (messageId == suspendedOpTxnId)
-            {
-                var monitor = rdr1.mediaMonitor as V4ReaderMediaMonitor;
-                if (monitor != null)
-                    monitor.MakeCardReady();
-
-                if (rdr1.curMediaTreatment != null)
-                    rdr1.curMediaTreatment.Resume();
-            }
-        }
-
+        
         public void SetOperatingMode(int rdrMnemonic, bool bCheckIn)
         {
             var rdr = GetReader(rdrMnemonic);
@@ -97,8 +82,7 @@ namespace IFS2.Equipment.TicketingRules.Gate
             else
                 return null;
         }
-
-        // It will not be this simple.
+        
         void MediaProduced(int rdrMnemonic, StatusCSCEx status)
         {
             var rdr = GetReader(rdrMnemonic);
@@ -106,20 +90,43 @@ namespace IFS2.Equipment.TicketingRules.Gate
             
             if (rdrMnemonic == 1)
                 if (bSet_1_AsEntry)
-                    rdr.curMediaTreatment = new CheckInTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle, null,
+                    rdr.curMediaTreatment = new CheckInTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle,
                         (act, pars) => { transmitter.MediaTreated(1, act, pars); });
                 else
-                    rdr.curMediaTreatment = new CheckOutTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle, null,
+                    rdr.curMediaTreatment = new CheckOutTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle,
                         (act, pars) => { transmitter.MediaTreated(1, act, pars); });
             else
                 if (!bSet_1_AsEntry)
-                    rdr.curMediaTreatment = new CheckInTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle, null,
+                    rdr.curMediaTreatment = new CheckInTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle,
                         (act, pars) => { transmitter.MediaTreated(2, act, pars); });
                 else
-                    rdr.curMediaTreatment = new CheckOutTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle, null,
+                    rdr.curMediaTreatment = new CheckOutTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle,
                         (act, pars) => { transmitter.MediaTreated(2, act, pars); });
-            
-            rdr.curMediaTreatment.Do(status);
+
+            TTErrorTypes validationResult;
+            LogicalMedia logMedia;
+            if (rdr.curMediaTreatment.ReadAndValidate(status, out validationResult, out logMedia))
+            {
+                // TODO: In reality we would be informing a supervisor, which in turn would send ResumeOperationOnRW
+                rdr.curMediaTreatment.ResumeWrite();
+            }
+        }
+
+        public void ResumeOperation(int rdrMnemonic, Guid id)
+        {
+            var rdr = GetReader(rdrMnemonic);
+            if (rdr == null)
+                return;
+            if (rdr.curMediaTreatment == null)
+                return;
+            if (rdr.curMediaTreatment.Id != id)
+                return;
+
+            var monitor = rdr.mediaMonitor as V4ReaderMediaMonitor;
+            if (monitor != null)
+                monitor.MakeCardReady();
+
+            rdr.curMediaTreatment.ResumeWrite();
         }
 
         void MediaRemoved(int rdrMnemonic, StatusCSCEx status)
