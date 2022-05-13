@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using IFS2.Equipment.TicketingRules.ConnectionMonitor;
-using Common;
-using IFS2.Equipment.TicketingRules.CommonTT;
+
 using IFS2.Equipment.Common;
 using IFS2.Equipment.TicketingRules.MediaTreatment;
 using IFS2.Equipment.TicketingRules.MediaMonitor;
+using Common;
+using IFS2.Equipment.TicketingRules.MediaTreatment.TVM;
+using IFS2.Equipment.TicketingRules.CommonTT;
 
-using IFS2.Equipment.TicketingRules.Gate.MediaTreatment;
-
-namespace IFS2.Equipment.TicketingRules.Gate
+namespace IFS2.Equipment.TicketingRules.TVM
 {
     public class Application
     {
@@ -70,7 +70,7 @@ namespace IFS2.Equipment.TicketingRules.Gate
                     x => this.MediaProduced(2, x),
                     x => this.MediaRemoved(2, x));
 
-            transmitter.ReaderConnected(rdrMnemonic);
+            //transmitter.ReaderConnected(rdrMnemonic);
         }
 
         bool bSet_1_AsEntry = true; // TODO: read it from context/configuration
@@ -87,43 +87,6 @@ namespace IFS2.Equipment.TicketingRules.Gate
         
         void MediaProduced(int rdrMnemonic, StatusCSCEx status)
         {
-            var rdr = GetReader(rdrMnemonic);
-            transmitter.MediaProduced(rdrMnemonic);
-            
-            if (rdrMnemonic == 1)
-                if (bSet_1_AsEntry)
-                    rdr.curMediaTreatment = new CheckInTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle,
-                        (act, pars) => { transmitter.MediaTreated(1, act, pars); });
-                else
-                    rdr.curMediaTreatment = new CheckOutTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle,
-                        (act, pars) => { transmitter.MediaTreated(1, act, pars); });
-            else
-                if (!bSet_1_AsEntry)
-                    rdr.curMediaTreatment = new CheckInTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle,
-                        (act, pars) => { transmitter.MediaTreated(2, act, pars); });
-                else
-                    rdr.curMediaTreatment = new CheckOutTreatement(CSC_READER_TYPE.V4_READER, rdr.connectedReader.handle,
-                        (act, pars) => { transmitter.MediaTreated(2, act, pars); });
-
-            TTErrorTypes validationResult;
-            LogicalMedia logMedia = rdr.curMediaTreatment.Read(status);
-            if (logMedia == null)
-                return;
-            if (logMedia.Media.OperationalType == MediaDescription.OperationalTypeValues.Agent)
-            {
-                rdr.curMediaTreatment = new AgentCardTreatment(rdr.curMediaTreatment.sf, rdr.curMediaTreatment.hwCSC, logMedia,
-                    (act, pars) => { transmitter.AgentCardTreated(rdrMnemonic, act, pars); }
-                    );
-                logMedia = rdr.curMediaTreatment.Read(status);
-                if (logMedia != null)
-                    rdr.curMediaTreatment.Validate(logMedia);
-            }
-            else
-            {
-                rdr.curMediaTreatment.Validate(logMedia);
-                // TODO: In reality we would be informing a supervisor, which in turn would send ResumeOperationOnRW
-                rdr.curMediaTreatment.Write();
-            }
         }
 
         public void ResumeOperation(int rdrMnemonic, Guid id)
@@ -145,22 +108,22 @@ namespace IFS2.Equipment.TicketingRules.Gate
 
         void MediaRemoved(int rdrMnemonic, StatusCSCEx status)
         {
-            var rdr = GetReader(rdrMnemonic);
-            transmitter.MediaRemoved(rdrMnemonic);
+            //var rdr = GetReader(rdrMnemonic);
+            //transmitter.MediaRemoved(rdrMnemonic);
 
-            rdr.curMediaTreatment = null;
+            //rdr.curMediaTreatment = null;
         }
 
         void ReaderDisconnected(int rdrMnemonic)
         {
-            var rdr = GetReader(rdrMnemonic);
-            rdr.poller.Stop();
+            //var rdr = GetReader(rdrMnemonic);
+            //rdr.poller.Stop();
 
-            if (rdrMnemonic == 1)
-                rdr1 = null;
-            else if (rdrMnemonic == 2)
-                rdr2 = null;
-            transmitter.ReaderDisconnected(rdrMnemonic);
+            //if (rdrMnemonic == 1)
+            //    rdr1 = null;
+            //else if (rdrMnemonic == 2)
+            //    rdr2 = null;
+            //transmitter.ReaderDisconnected(rdrMnemonic);
         }
 
         ReaderConnectionMonitor cxnMonitor1, cxnMonitor2; // one such object per r/w
@@ -173,9 +136,9 @@ namespace IFS2.Equipment.TicketingRules.Gate
 #endif
         }
 
-        public void SetFareMode(FareMode fareMode)
+        internal void ReloadTPurseOnCard(long cardSerNbr, int pValue, PaymentMethods paymentType)
         {
-            ValidationRules.SetFareMode(fareMode);
+            throw new NotImplementedException();
         }
     }
 }

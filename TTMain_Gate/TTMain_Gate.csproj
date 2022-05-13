@@ -99,8 +99,8 @@
     <Compile Include="MediaTreatment\Actions.cs" />
     <Compile Include="MediaTreatment\CheckOutTreatement.cs" />
     <Compile Include="MediaTreatment\CheckInTreatement.cs" />
-    <Compile Include="MediaTreatment\ITransmitter.cs" />
-    <Compile Include="MediaTreatment\SendMessage_ActionTransmitter.cs" />
+    <Compile Include="ITransmitter.cs" />
+    <Compile Include="SendMessage_ActionTransmitter.cs" />
     <Compile Include="MediaTreatment\ActionTransmitter.cs" />
     <Compile Include="Application\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

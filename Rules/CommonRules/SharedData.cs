@@ -31,7 +31,7 @@ namespace IFS2.Equipment.TicketingRules
         //private static int SAM_SLOT = 1;
         public static List<cSAMConf> mSAMUsed = new List<cSAMConf>();/// to support multiple SAM's 
         public static long mDSMId = 0;
-        public static DateTime CSC_oldEndOfValidityDate =DateTime.Parse("1/1/1999");
+        //public static DateTime CSC_oldEndOfValidityDate =DateTime.Parse("1/1/1999");
         public static byte CompanyID = 0x00;
 
         public static EquipmentFamily EquipmentType { get { return _equipmentType; } set { _equipmentType = value; } }

@@ -371,7 +371,7 @@ namespace IFS2.Equipment.TicketingRules
                     if (!SalesRules.AddValueUpdate(_logicalMediaUpdatedForCurrentOp, _purseValue, _paymentType))
                         return ResultLastAttempt.MediaCouldntBeRead;
 
-                    SharedData.CSC_oldEndOfValidityDate = _logicalMediaUpdatedForCurrentOp.Application.Products.Product(0).EndOfValidity;
+                    //SharedData.CSC_oldEndOfValidityDate = _logicalMediaUpdatedForCurrentOp.Application.Products.Product(0).EndOfValidity;
                     if (
                     CommonRules.SetupProductEndOfValidity(_logicalMediaUpdatedForCurrentOp,
                         EndOfValidityMode.CurrentPlusYears,

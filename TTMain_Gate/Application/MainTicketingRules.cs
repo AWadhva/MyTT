@@ -4,11 +4,8 @@ using System.Linq;
 using System.Text;
 using IFS2.Equipment.Common;
 using System.Threading;
-using IFS2.Equipment.TicketingRules.ConnectionMonitor;
-using IFS2.Equipment.TicketingRules.SecurityModuleInitializer;
-using IFS2.Equipment.TicketingRules.CommonTT;
-using Common;
 using IFS2.Equipment.TicketingRules.MediaTreatment;
+using IFS2.Equipment.TicketingRules.Gate;
 
 namespace IFS2.Equipment.TicketingRules
 {

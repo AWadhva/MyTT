@@ -19,7 +19,7 @@ namespace IFS2.Equipment.TicketingRules
         public CCHSSAMManger cchsSamMgr;
         public ISAMOnThalesReader isam;
         public V4ReaderMediaMonitor mediaMonitor;
-        public ConnectedThalesReaderMin connectedReader;
+        public ConnectedThalesReaderMin connectedReader;        
 
         // It is reader-type independent (ALMOST). TODO:Make it completly reader-type independent.
         public IMediaTreatment curMediaTreatment = null;

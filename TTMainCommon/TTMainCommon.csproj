@@ -74,6 +74,7 @@
     <Compile Include="MediaMonitor\ReaderMediaMonitor.cs" />
     <Compile Include="MediaMonitor\V4ReaderMediaMonitor.cs" />
     <Compile Include="MediaMonitor\V4Reader_MediaCallbacks.cs" />
+    <Compile Include="MediaTreatment\AgentCardTreatment.cs" />
     <Compile Include="MediaTreatment\IMediaTreatment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SecurityModule\CryptoFlexOnThalesReader.cs" />
@@ -111,6 +112,10 @@
     <ProjectReference Include="..\SAM\CCHSSAM\CCSHSAM\CCSHSAM.csproj">
       <Project>{DEE8E0C5-6D66-4B5F-A413-991D613D0707}</Project>
       <Name>CCSHSAM</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SmartCard\SmartCard\SmartFunctions.csproj">
+      <Project>{D3D88159-0B54-44F1-8456-495D57CA8180}</Project>
+      <Name>SmartFunctions</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using IFS2.Equipment.Common;
 
-namespace IFS2.Equipment.TicketingRules.MediaTreatment
+namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
 {
     public class ActionTransmitter
     {

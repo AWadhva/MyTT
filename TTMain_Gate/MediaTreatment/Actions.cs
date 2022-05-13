@@ -1,4 +1,4 @@
-﻿namespace IFS2.Equipment.TicketingRules.MediaTreatment
+﻿namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
 {
     public enum ActionTaken
     {
@@ -13,6 +13,9 @@
         AutoToppedUp,
         Blocked_ie_BlackListedByMe,
         AlreadyBlocked_ie_BlackListed,
+
+        GoodAgentCardDetected,
+        BadAgentCardDetected,
         
         ProblemWhileRW
     }

@@ -1882,7 +1882,7 @@ namespace IFS2.Equipment.TicketingRules
                             );
                         //CommonRules.SetupMediaEndOfValidity(_logMediaReloader, EndOfValidityMode.CurrentPlusYears, DateTime.Now,1);
                         //CommonRules.SetupTransportApplicationEndOfValidity(_logMediaReloader, EndOfValidityMode.CurrentPlusYears, DateTime.Now,1);
-                       SharedData.CSC_oldEndOfValidityDate = _logMediaReloader.Application.Products.Product(0).EndOfValidity ; // SKS: to put count into CCHS Txn TPURSE Header
+                       //SharedData.CSC_oldEndOfValidityDate = _logMediaReloader.Application.Products.Product(0).EndOfValidity ; // SKS: to put count into CCHS Txn TPURSE Header
                         CommonRules.SetupProductEndOfValidity(_logMediaReloader, 
                             EndOfValidityMode.CurrentPlusYears,                             
                             DateTime.Now, 
@@ -1996,7 +1996,7 @@ namespace IFS2.Equipment.TicketingRules
                         OperationTypeValues ridetype = OperationTypeValues.BuyTicketFromEpurse;
                         SalesRules.AddTrasactionHistoryRecord(_logMediaReloader, ridetype, pValue);
                         //SalesRules.AddTrasactionHistoryRecord(_logMediaReloader, /*OperationTypeValues.Penalty*/ (OperationTypeValues)opType, pValue, true);
-                        SharedData.CSC_oldEndOfValidityDate = _logMediaReloader.Application.Products.Product(0).EndOfValidity; // SKS: to put count into CCHS Txn TPURSE Header
+                        //SharedData.CSC_oldEndOfValidityDate = _logMediaReloader.Application.Products.Product(0).EndOfValidity; // SKS: to put count into CCHS Txn TPURSE Header
                         if (hwCsc.UpdateTPurseData(_logMediaReloader, -pValue, false)
                                 && hwCsc.AppendCommonAreaPurseHistoryRecord(_logMediaReloader)
                                 && hwCsc._CommitModifications())
@@ -2062,7 +2062,7 @@ namespace IFS2.Equipment.TicketingRules
                         Logging.Log(LogLevel.Verbose, "dest" +Convert.ToInt32(msg_splitted[1]));
 
                         OperationTypeValues ridetype = OperationTypeValues.ValueDeductedInEntry;
-                        SharedData.CSC_oldEndOfValidityDate = _logMediaReloader.Application.Products.Product(0).EndOfValidity; 
+                        //SharedData.CSC_oldEndOfValidityDate = _logMediaReloader.Application.Products.Product(0).EndOfValidity; 
 
                         //Update Values of tPurse
                         SalesRules.PurseDeductionUpdate(_logMediaReloader, pValue, PaymentMethods.StoreValue);

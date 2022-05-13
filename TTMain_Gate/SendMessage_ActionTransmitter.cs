@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using IFS2.Equipment.Common;
+using IFS2.Equipment.TicketingRules.Gate.MediaTreatment;
+using IFS2.Equipment.TicketingRules.MediaTreatment;
 
-namespace IFS2.Equipment.TicketingRules.MediaTreatment
+namespace IFS2.Equipment.TicketingRules.Gate
 {
     public class SendMessage_ActionTransmitter : ITransmitter
     {
@@ -21,8 +23,7 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
             
             p[0] = rdrMnemonic.ToString();
             Array.Copy(pars, 0, p, 1, pars.Length);
-            
-            Communication.SendMessage("", "", "ActionTaken", p);
+            Communication.SendMessage("", "", "ActionTaken", p);            
         }
 
         public void ReaderConnected(int rdrMnemonic)
@@ -43,6 +44,10 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
         public void MediaRemoved(int rdrMnemonic)
         {
             
+        }
+
+        public void AgentCardTreated(int rdrMnemonic, AgentCardAction act, params string[] pars)
+        {            
         }
 
         #endregion

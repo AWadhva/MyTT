@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using IFS2.Equipment.TicketingRules;
-using IFS2.Equipment.TicketingRules.MediaTreatment;
 using IFS2.Equipment.Common;
+using IFS2.Equipment.TicketingRules.Gate.MediaTreatment;
 
 namespace GateUI
 {

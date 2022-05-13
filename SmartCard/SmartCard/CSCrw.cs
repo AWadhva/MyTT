@@ -2021,10 +2021,10 @@ namespace IFS2.Equipment.TicketingRules
             public bool dm2AgentPersonalization = false;            
         }
 
-        public bool Write(LogicalMedia logMedia)
+        public bool Write(LogicalMedia logMedia, out List<int> areasWritten)
         {
             FilesToWrite writeFns = GatherUpdateFunctions(logMedia);
-            return Write_(logMedia, writeFns);            
+            return Write_(logMedia, writeFns, out areasWritten);
         }
         
         private FilesToWrite GatherUpdateFunctions(LogicalMedia logMedia)
@@ -2105,10 +2105,11 @@ namespace IFS2.Equipment.TicketingRules
 
             return toWrite;
         }
-        bool Write_(LogicalMedia logMedia, 
-            FilesToWrite toWrite
+        bool Write_(LogicalMedia logMedia,
+            FilesToWrite toWrite, out List<int> areasWritten
             )
         {
+            areasWritten = new List<int>();
             bool bDM1 = false;
 
             if (toWrite.dm1PurseLinkage)
@@ -2168,6 +2169,7 @@ namespace IFS2.Equipment.TicketingRules
                 Err = sf.CommitTransaction(out pSw1, out pSw2);
                 if (Err != CONSTANT.NO_ERROR || pSw1 != CONSTANT.COMMAND_SUCCESS)
                     return false;
+                areasWritten.Add(1);
             }
             //-------------DM1 ends----
             bool bDM2 = false;
@@ -2206,6 +2208,7 @@ namespace IFS2.Equipment.TicketingRules
                 Err = sf.CommitTransaction(out pSw1, out pSw2);
                 if (Err != CONSTANT.NO_ERROR || pSw1 != CONSTANT.COMMAND_SUCCESS)
                     return false;
+                areasWritten.Add(2);
             }
             return true;
         }

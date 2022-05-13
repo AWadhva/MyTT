@@ -7,9 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using IFS2.Equipment.Common;
-using IFS2.Equipment.TicketingRules.MediaTreatment;
 using IFS2.Equipment.TicketingRules;
 using IFS2.Equipment.Parameters;
+using IFS2.Equipment.TicketingRules.Gate.MediaTreatment;
+using IFS2.Equipment.TicketingRules.Gate;
 
 namespace GateUI
 {
@@ -215,6 +216,16 @@ namespace GateUI
                 return;
 
             app.SetFareMode(mode);            
-        }        
+        }
+
+        #region ITransmitter Members
+
+
+        public void AgentCardTreated(int rdrMnemonic, IFS2.Equipment.TicketingRules.MediaTreatment.AgentCardAction act, params string[] pars)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

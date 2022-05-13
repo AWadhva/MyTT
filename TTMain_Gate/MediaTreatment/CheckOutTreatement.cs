@@ -6,8 +6,9 @@ using IFS2.Equipment.Common;
 using Common;
 using IFS2.Equipment.TicketingRules.CommonTT;
 using System.Diagnostics;
+using IFS2.Equipment.TicketingRules.MediaTreatment;
 
-namespace IFS2.Equipment.TicketingRules.MediaTreatment
+namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
 {
     class CheckOutTreatement : IMediaTreatment
     {
@@ -34,53 +35,47 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
 
         #region IMediaTreatment Members
 
-        public bool ReadAndValidate(StatusCSCEx status, out TTErrorTypes validationResult_, out LogicalMedia logMedia)
-        {
-            try
+        public LogicalMedia Read(StatusCSCEx status)
+        {            
+            sf._delhiCCHSSAMUsage = true;
+            sf._cryptoflexSAMUsage = false;
+
+            sf.SetReaderType(rwTyp, hRw);
+            sf.SetSerialNbr(status.SerialNumber);
+
+            if (status.IsNFC)
+                if (Configuration.ReadBoolParameter("NFCFunctionality", false))
+                    sf._IsNFCCardDetected = true;
+
+            if (status.IsDesFire)
             {
-                logMedia = this.logMedia;
-
-                sf._delhiCCHSSAMUsage = true;
-                sf._cryptoflexSAMUsage = false;
-
-                sf.SetReaderType(rwTyp, hRw);
-                sf.SetSerialNbr(status.SerialNumber);
-
-                if (status.IsNFC)
-                    if (Configuration.ReadBoolParameter("NFCFunctionality", false))
-                        sf._IsNFCCardDetected = true;
-
-                if (status.IsDesFire)
+                csc = new DelhiDesfireEV0(sf);
+                try
                 {
-                    csc = new DelhiDesfireEV0(sf);
-                    if (!csc.ReadMediaData(logMedia, MediaDetectionTreatment.CheckOut))
+                    bool bRead = csc.ReadMediaData(logMedia, MediaDetectionTreatment.CheckOut);
+                    if (!bRead)
                     {
                         Transmit.FailedRead();
-                        validationResult = this.validationResult = TTErrorTypes.NoError;
-
-                        return false;
+                        return null;
                     }
-                    validationResult = this.validationResult = ValidationRules.ValidateFor(MediaDetectionTreatment.CheckOut, logMedia);
-
-                    return true;
+                    else
+                        return logMedia;
                 }
-                validationResult = TTErrorTypes.NoError;
-                return false;
+                catch { return null; }
             }
-            finally
-            {
-                validationResult_ = validationResult;
-            }
+            else
+                return null;            
         }
 
-        public void ResumeWrite()
+        public void Write()
         {
             if (validationResult == TTErrorTypes.NoError)
                 ValidationRules.UpdateForCheckOut(logMedia);
 
             if (logMedia.isSomethingModified)
             {
-                if (!csc.Write(logMedia))
+                List<int> doesntMatter;
+                if (!csc.Write(logMedia, out doesntMatter))
                     Transmit.FailedWrite();
                 else
                 {
@@ -106,6 +101,27 @@ namespace IFS2.Equipment.TicketingRules.MediaTreatment
         public Guid Id
         {
             get { return id; }
+        }
+
+        public TTErrorTypes Validate(LogicalMedia logMedia)
+        {
+            validationResult = ValidationRules.ValidateFor(MediaDetectionTreatment.CheckOut, logMedia);
+            return validationResult;
+        }
+
+        #endregion
+
+        #region IMediaTreatment Members
+
+
+        SmartFunctions IMediaTreatment.sf
+        {
+            get { return sf; }
+        }
+
+        public DelhiDesfireEV0 hwCSC
+        {
+            get { return hwCSC; }
         }
 
         #endregion

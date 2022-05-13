@@ -205,7 +205,7 @@ namespace IFS2.Equipment.TicketingRules
                 SalesRules.AddValueUpdate(_logicalMediaUpdatedForCurrentOp, _purseValueToIncrement, _txn.PaymentType))
                     return ResultLastAttempt.MediaCouldntBeRead;
 
-                SharedData.CSC_oldEndOfValidityDate = _logicalMediaUpdatedForCurrentOp.Application.Products.Product(0).EndOfValidity; // SKS: to put count into CCHS Txn TPURSE Header
+                //SharedData.CSC_oldEndOfValidityDate = _logicalMediaUpdatedForCurrentOp.Application.Products.Product(0).EndOfValidity; // SKS: to put count into CCHS Txn TPURSE Header
                 if (
                 CommonRules.SetupProductEndOfValidity(_logicalMediaUpdatedForCurrentOp,
                     EndOfValidityMode.CurrentPlusYears,

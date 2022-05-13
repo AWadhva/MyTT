@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{42AF20B2-2279-4FBE-9C2C-6D8C143E5FE0}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <ProjectGuid>{41AFA457-B756-49A8-BA97-107BD7A75CF3}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GateUI</RootNamespace>
-    <AssemblyName>GateUI</AssemblyName>
+    <RootNamespace>TTMain_TVM</RootNamespace>
+    <AssemblyName>TTMain_TVM</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,22 +29,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="IFS2.Equipment.Common.CommonDataStructures, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -78,54 +62,40 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
+    <Compile Include="..\Main\TTMain\Config.cs">
+      <Link>Config.cs</Link>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="..\Main\TTMain\MacCalculator.cs">
+      <Link>MacCalculator.cs</Link>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="..\Main\TTMain\Parameters.cs">
+      <Link>Parameters.cs</Link>
+    </Compile>
+    <Compile Include="..\Main\TTMain\TTMainCommon.cs">
+      <Link>TTMainCommon.cs</Link>
+    </Compile>
+    <Compile Include="Application\Application.cs" />
+    <Compile Include="Application\MainTicketingRules.cs" />
+    <Compile Include="Application\Program.cs" />
+    <Compile Include="MediaTreatment\Actions.cs" />
+    <Compile Include="MediaTreatment\ActionTransmitter.cs" />
+    <Compile Include="MediaTreatment\TVMMediaTreatment.cs" />
+    <Compile Include="MediaTreatment\ITransmitter.cs" />
+    <Compile Include="MediaTreatment\SendMessage_ActionTransmitter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UserControlRW.resx">
-      <DependentUpon>UserControlRW.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <Compile Include="UserControlRW.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UserControlRW.Designer.cs">
-      <DependentUpon>UserControlRW.cs</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{CD865DB0-9C54-4E66-AA47-1CFC75E30075}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Constants\Constants.csproj">
+      <Project>{676BCED4-EF06-4D30-AF3A-E69C1AB62490}</Project>
+      <Name>Constants</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Parameters\OverallParameters\EODParametersW.csproj">
       <Project>{6C8ECD60-4CA2-479A-9962-C3D739FA35AD}</Project>
       <Name>EODParametersW</Name>
@@ -134,13 +104,17 @@
       <Project>{F47E39D9-3A57-4D4B-B36C-002295FF5519}</Project>
       <Name>CommonRules</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SecurityMgr\SecurityMgr\SecurityMgr.csproj">
+      <Project>{7E202DED-A1AE-4FD4-B2C5-30C28EA091D7}</Project>
+      <Name>SecurityMgr %28SecurityMgr\SecurityMgr%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SmartCard\SmartCard\SmartFunctions.csproj">
+      <Project>{D3D88159-0B54-44F1-8456-495D57CA8180}</Project>
+      <Name>SmartFunctions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TTMainCommon\TTMainCommon.csproj">
       <Project>{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}</Project>
       <Name>TTMainCommon</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TTMain_Gate\TTMain_Gate.csproj">
-      <Project>{05B5339E-EC84-48A8-8D4C-0FE59F8C1F93}</Project>
-      <Name>TTMain_Gate</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
