@@ -6,7 +6,7 @@ using IFS2.Equipment.TicketingRules.CommonTT;
 
 namespace IFS2.Equipment.TicketingRules.SecurityModuleInitializer
 {
-    class ISAMOnThalesReader : SAM
+    public class ISAMOnThalesReader : SAM
     {
         public ISAMOnThalesReader(ISAMConf conf_)
         {

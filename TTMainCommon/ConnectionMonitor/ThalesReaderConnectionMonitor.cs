@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using IFS2.Equipment.Common;
 using System.Runtime.InteropServices;
-using IFS2.Equipment.CSCReaderAdaptor;
+//using IFS2.Equipment.CSCReaderAdaptor;
 using IFS2.Equipment.TicketingRules.CommonTT;
 using IFS2.Equipment.CSCReader;
 using IFS2.Equipment.TicketingRules.ConnectionMonitor;
 using IFS2.Equipment.CryptoFlex;
+using IFS2.Equipment.CSCReaderAdaptor;
 
 namespace IFS2.Equipment.TicketingRules
 {

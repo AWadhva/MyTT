@@ -7,7 +7,7 @@ using IFS2.Equipment.Common;
 
 namespace IFS2.Equipment.TicketingRules.MediaTreatment
 {
-    interface IMediaTreatment
+    public interface IMediaTreatment
     {
         bool ReadAndValidate(StatusCSCEx status, out TTErrorTypes validationResult
             , out LogicalMedia logMedia // TODO: remove it if not needed

@@ -3,12 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using IFS2.Equipment.CSCReaderAdaptor;
+//using IFS2.Equipment.CSCReaderAdaptor;
 using System.Runtime.InteropServices;
+using IFS2.Equipment.CSCReaderAdaptor;
 
 namespace IFS2.Equipment.TicketingRules
 {
-    class V4ReaderApi : IV4ReaderApi
+    public class V4ReaderApi : IV4ReaderApi
     {
         #region IV4ReaderApi Members
 

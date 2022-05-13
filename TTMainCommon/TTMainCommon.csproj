@@ -5,23 +5,23 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{05B5339E-EC84-48A8-8D4C-0FE59F8C1F93}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IFS2.Equipment.TicketingRules</RootNamespace>
-    <AssemblyName>TTMain_Gate</AssemblyName>
+    <RootNamespace>TTMainCommon</RootNamespace>
+    <AssemblyName>TTMainCommon</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NoVirtualReader</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,22 +31,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NoVirtualReader, Test</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="IFS2.Equipment.Common.CommonDataStructures, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -54,7 +38,7 @@
     </Reference>
     <Reference Include="IFS2.Equipment.Common.FareProductSpecs, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\CoreCommon\Outputs\IFS2.Equipment.Common.FareProductSpecs.dll</HintPath>
+      <HintPath>..\..\Common\Outputs\IFS2.Equipment.Common.FareProductSpecs.dll</HintPath>
     </Reference>
     <Reference Include="IFS2.Equipment.Common.ThalesLibrary, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -63,10 +47,6 @@
     <Reference Include="IFS2.Equipment.Common.UtilitiesWin, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Common\Outputs\IFS2.Equipment.Common.UtilitiesWin.dll</HintPath>
-    </Reference>
-    <Reference Include="IFS2.Equipment.EODParameters, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\CoreCommon\Outputs\IFS2.Equipment.EODParameters.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -82,28 +62,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Main\TTMain\Config.cs">
-      <Link>Config.cs</Link>
+    <Compile Include="..\ClassLibrary1\ReaderFunctions.cs">
+      <Link>ReaderFunctions.cs</Link>
     </Compile>
-    <Compile Include="..\Main\TTMain\MacCalculator.cs">
-      <Link>MacCalculator.cs</Link>
-    </Compile>
-    <Compile Include="..\Main\TTMain\Parameters.cs">
-      <Link>Parameters.cs</Link>
-    </Compile>
-    <Compile Include="..\Main\TTMain\TTMainCommon.cs">
-      <Link>TTMainCommon.cs</Link>
-    </Compile>
-    <Compile Include="Application\Application.cs" />
-    <Compile Include="Application\MainTicketingRules.cs" />
-    <Compile Include="MediaTreatment\Actions.cs" />
-    <Compile Include="MediaTreatment\CheckOutTreatement.cs" />
-    <Compile Include="MediaTreatment\CheckInTreatement.cs" />
-    <Compile Include="MediaTreatment\ITransmitter.cs" />
-    <Compile Include="MediaTreatment\SendMessage_ActionTransmitter.cs" />
-    <Compile Include="MediaTreatment\ActionTransmitter.cs" />
-    <Compile Include="Application\Program.cs" />
+    <Compile Include="ConnectedThalesReaderMin.cs" />
+    <Compile Include="ConnectionMonitor\ReaderConnectionMonitor.cs" />
+    <Compile Include="ConnectionMonitor\ThalesReaderConnectionMonitor.cs" />
+    <Compile Include="ConnectionMonitor\V4ReaderConf.cs" />
+    <Compile Include="IV4ReaderApi.cs" />
+    <Compile Include="MediaMonitor\Poller.cs" />
+    <Compile Include="MediaMonitor\ReaderMediaMonitor.cs" />
+    <Compile Include="MediaMonitor\V4ReaderMediaMonitor.cs" />
+    <Compile Include="MediaMonitor\V4Reader_MediaCallbacks.cs" />
+    <Compile Include="MediaTreatment\IMediaTreatment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SecurityModule\CryptoFlexOnThalesReader.cs" />
+    <Compile Include="SecurityModule\ISAMOnThalesReader.cs" />
+    <Compile Include="SecurityModule\SAM.cs" />
+    <Compile Include="SecurityModule\ThalesSAMOnThalesReader.cs" />
+    <Compile Include="ThalesReader.cs" />
+    <Compile Include="V4ReaderApi.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
@@ -114,25 +92,25 @@
       <Project>{676BCED4-EF06-4D30-AF3A-E69C1AB62490}</Project>
       <Name>Constants</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Parameters\OverallParameters\EODParametersW.csproj">
-      <Project>{6C8ECD60-4CA2-479A-9962-C3D739FA35AD}</Project>
-      <Name>EODParametersW</Name>
+    <ProjectReference Include="..\CryptoflexFunctions\CryptoflexFunctions.csproj">
+      <Project>{31193C90-AB4B-4416-8E89-1D8155B05A8E}</Project>
+      <Name>CryptoflexFunctions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CSCv4Adapter\CSCv4Adapter.csproj">
+      <Project>{B68D9102-04B1-4122-B3F8-32BFA314B694}</Project>
+      <Name>CSCv4Adapter</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CSCVirtualReader\CSCVirtualReader.csproj">
+      <Project>{21D259C4-51B5-42B4-8E2C-B71A666EB16E}</Project>
+      <Name>CSCVirtualReader</Name>
     </ProjectReference>
     <ProjectReference Include="..\Rules\CommonRules\CommonRules.csproj">
       <Project>{F47E39D9-3A57-4D4B-B36C-002295FF5519}</Project>
       <Name>CommonRules</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SecurityMgr\SecurityMgr\SecurityMgr.csproj">
-      <Project>{7E202DED-A1AE-4FD4-B2C5-30C28EA091D7}</Project>
-      <Name>SecurityMgr %28SecurityMgr\SecurityMgr%29</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SmartCard\SmartCard\SmartFunctions.csproj">
-      <Project>{D3D88159-0B54-44F1-8456-495D57CA8180}</Project>
-      <Name>SmartFunctions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TTMainCommon\TTMainCommon.csproj">
-      <Project>{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}</Project>
-      <Name>TTMainCommon</Name>
+    <ProjectReference Include="..\SAM\CCHSSAM\CCSHSAM\CCSHSAM.csproj">
+      <Project>{DEE8E0C5-6D66-4B5F-A413-991D613D0707}</Project>
+      <Name>CCSHSAM</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

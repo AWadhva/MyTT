@@ -19,7 +19,7 @@ namespace IFS2.Equipment.TicketingRules
     /// - should be created when R/W has got connected.
     /// - should be destroyed when R/W has got disconnected
     /// </summary>
-    class Poller
+    public class Poller
     {
         ReaderMediaMonitor mediaMonitor;
         CSC_READER_TYPE rwTyp;

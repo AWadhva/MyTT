@@ -14,7 +14,7 @@ namespace IFS2.Equipment.TicketingRules
     /// <summary>
     /// Lifetime: from the reader found connected until it doesn't get disconnected
     /// </summary>
-    class ThalesReader
+    public class ThalesReader
     {
         public CCHSSAMManger cchsSamMgr;
         public ISAMOnThalesReader isam;

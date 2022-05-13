@@ -141,6 +141,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gate", "Gate", "{DEC40B35-3
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TstV4Callbacks", "Tests\TstV4Callbacks\TstV4Callbacks.vcproj", "{30003FCC-29EC-4EEE-BBBE-9F9B04F999F3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TTMainCommon", "TTMainCommon\TTMainCommon.csproj", "{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -829,6 +831,19 @@ Global
 		{30003FCC-29EC-4EEE-BBBE-9F9B04F999F3}.Release|Win32.ActiveCfg = Release|Win32
 		{30003FCC-29EC-4EEE-BBBE-9F9B04F999F3}.Release|Win32.Build.0 = Release|Win32
 		{30003FCC-29EC-4EEE-BBBE-9F9B04F999F3}.Release|x86.ActiveCfg = Release|Win32
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Debug|x86.Build.0 = Debug|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Release|Win32.ActiveCfg = Release|Any CPU
+		{ABF3A5C8-FFE5-4895-A365-49667CD6B32C}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
