@@ -12,5 +12,10 @@ namespace IFS2.Equipment.TicketingRules.Rules.CheckOut.Fam060
         {
             return Rules.Common.CheckCSCIsIssued(logMedia);
         }
+
+        public static TTErrorTypes CheckForRecovery(LogicalMedia logMedia)
+        {
+            return Rules.CheckOut.Common.CheckForRecovery(logMedia);
+        }
     }
 }

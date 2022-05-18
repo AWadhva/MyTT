@@ -88,13 +88,13 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                     logMedia.OverlapModifiedToRead();// we don't want to waste time in re-reading the CSC
                     
                     validationResult = ValidationRules.ValidateFor(MediaDetectionTreatment.CheckIn, logMedia);
-                    ValidationRules.UpdateForCheckIn(logMedia);
+                    CommonRules.UpdateForCheckIn(logMedia);
                 }
                 else
                     Transmit.FailedWrite();
             }
             else if (validationResult == TTErrorTypes.NoError)
-                ValidationRules.UpdateForCheckIn(logMedia);
+                CommonRules.UpdateForCheckIn(logMedia);
 
             if (logMedia.isSomethingModified)
             {

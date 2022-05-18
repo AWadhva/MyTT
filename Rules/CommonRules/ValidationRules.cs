@@ -75,7 +75,7 @@ namespace IFS2.Equipment.TicketingRules
             AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckOut, 10, FareMode.EEO, Rules.CheckOut.Fam010.EEO.CheckTokenIsIssued);
             AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckOut, 10, FareMode.TMO, Rules.CheckOut.Fam010.TMO.CheckTokenIsIssued);
             AddValidateRule_ATreatmentType_AFamily_AllFareModes(MediaDetectionTreatment.CheckOut, 40, Rules.CheckOut.Fam040.AllModes.VerifyMac);
-            AddValidateRule_ATreatmentType_AFamily_AllFareModes(MediaDetectionTreatment.CheckOut, 60, Rules.CheckOut.Fam060.AllModes.CheckCSCIsIssued);
+            AddValidateRule_ATreatmentType_AFamily_AllFareModes(MediaDetectionTreatment.CheckOut, 60, Rules.CheckOut.Fam060.AllModes.CheckCSCIsIssued, Rules.CheckOut.Fam060.AllModes.CheckForRecovery);
             AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckOut, 60, FareMode.Normal, Rules.CheckOut.Fam060.Normal.CheckEntryExitBit, Rules.CheckOut.Fam060.Normal.TestFlagIsCompatibleWithEqptMode, Rules.CheckOut.Fam060.Normal.CheckTravelTimeIsNotExceeded, Rules.CheckOut.Fam060.Normal.EF_CSCC_ControlRejectCode);
             AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckOut, 60, FareMode.EEO, Rules.CheckOut.Fam060.EEO.TestFlagIsCompatibleWithEqptMode, Rules.CheckOut.Fam060.EEO.CheckTravelTimeIsNotExceeded, Rules.CheckOut.Fam060.EEO.EF_CSCC_ControlRejectCode);
             AddValidateRule_ATreatmemntType_AFamily_AFareMode(MediaDetectionTreatment.CheckOut, 60, FareMode.TMO, Rules.CheckOut.Fam060.TMO.CheckEntryExitBit, Rules.CheckOut.Fam060.TMO.TestFlagIsCompatibleWithEqptMode);
@@ -206,41 +206,6 @@ namespace IFS2.Equipment.TicketingRules
         static public void SetMacCalculator(IMacCalcultor calc_)
         {
             macCalculator = calc_;
-        }
-
-        public static void UpdateForCheckIn(LogicalMedia logMedia)
-        {
-            var validation = logMedia.Application.Validation;
-            
-            validation.EntryExitBit = Validation.TypeValues.Entry;
-            validation.LastTransactionDateTime = DateTime.Now;
-            validation.Location = SharedData.StationNumber;
-            validation.RejectCode = 0;
-
-            // TODO: see if we need to put PeriodicTicketEntry for family 80
-            SalesRules.AddTrasactionHistoryRecord(logMedia, OperationTypeValues.NoValueDeductedInEntry, 0);
-        }
-
-        public static void UpdateForCheckOut(LogicalMedia logMedia)
-        {
-            var validation = logMedia.Application.Validation;
-            var purse = logMedia.Purse;
-
-            int productType = logMedia.Application.Products.Product(0).Type;
-            
-            int notUsed;
-            int fare = SalePriceCalculation.CalculatePriceSiteBased(productType, validation.LocationRead, SharedData.StationNumber, validation.LastTransactionDateTimeRead, out notUsed);
-            
-            validation.EntryExitBit = Validation.TypeValues.Exit;
-            validation.LastTransactionDateTime = DateTime.Now;
-            validation.Location = SharedData.StationNumber;
-            validation.RejectCode = 0;
-
-            purse.TPurse.Balance = purse.TPurse.BalanceRead - fare;
-            purse.TPurse.SequenceNumber = purse.TPurse.SequenceNumberRead - 1;
-
-            // TODO: see if we need to put PeriodicTicketExit for family 80
-            SalesRules.AddTrasactionHistoryRecord(logMedia, OperationTypeValues.ValueDeductedInExit, fare);
         }
 
         public static TTErrorTypes CheckProductEndOfValidity(LogicalMedia logMedia)

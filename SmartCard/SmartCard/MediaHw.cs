@@ -107,8 +107,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             return true;
         }
-        protected virtual Boolean _ReadAllTPurseHistory(LogicalMedia logMedia
-            )
+        protected virtual Boolean _ReadTPurseHistory(LogicalMedia logMedia, int NbrOfRecords)
         {
             return true;
         }
@@ -638,7 +637,7 @@ namespace IFS2.Equipment.TicketingRules
                 }
                 else
                 {
-                    if (_ReadAllTPurseHistory(logMedia))
+                    if (_ReadTPurseHistory(logMedia, -1))
                     {
                         _tPurseHistoryDataRead = true;
                         logMedia.Purse.History.Hidden = false;
@@ -647,7 +646,6 @@ namespace IFS2.Equipment.TicketingRules
                     else return false;
                 }
 
-
                 return false;
             }
             catch (Exception e)
@@ -655,7 +653,7 @@ namespace IFS2.Equipment.TicketingRules
                 Logging.Log(LogLevel.Error, "Error in Read Application Data : " + e.Message);
                 return false;
             }
-        }       
+        }
 
         public bool UpdateForRefundLocal(LogicalMedia logicalMediaUpdatedForCurrentOp)
         {

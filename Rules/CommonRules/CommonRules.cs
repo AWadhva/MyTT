@@ -254,5 +254,54 @@ namespace IFS2.Equipment.TicketingRules
         {
             logMedia.Application.Validation.RejectCode = (short)code;
         }
+
+        public static void UpdateForCheckIn(LogicalMedia logMedia)
+        {
+            var validation = logMedia.Application.Validation;
+
+            validation.EntryExitBit = Validation.TypeValues.Entry;
+            validation.LastTransactionDateTime = DateTime.Now;
+            validation.Location = SharedData.StationNumber;
+            validation.RejectCode = 0;
+
+            // TODO: see if we need to put PeriodicTicketEntry for family 80
+            SalesRules.AddTrasactionHistoryRecord(logMedia, OperationTypeValues.NoValueDeductedInEntry, 0);
+        }
+
+        public static void UpdateForCheckOut_NormalScenario(LogicalMedia logMedia)
+        {
+            var validation = logMedia.Application.Validation;
+            var purse = logMedia.Purse;
+
+            int productType = logMedia.Application.Products.Product(0).Type;
+
+            int fare = 0;
+            if (ProductParameters.GetProductFamily(productType) == 60)
+            {
+                int notUsed;
+                fare = SalePriceCalculation.CalculatePriceSiteBased(productType, validation.LocationRead, SharedData.StationNumber, validation.LastTransactionDateTimeRead, out notUsed);
+                purse.TPurse.Balance = purse.TPurse.BalanceRead - fare;
+            }
+
+            validation.EntryExitBit = Validation.TypeValues.Exit;
+            validation.LastTransactionDateTime = DateTime.Now;
+            validation.Location = SharedData.StationNumber;
+            validation.RejectCode = 0;
+
+            purse.TPurse.SequenceNumber = purse.TPurse.SequenceNumberRead - 1;
+
+            // TODO: see if we need to put PeriodicTicketExit for family 80
+            SalesRules.AddTrasactionHistoryRecord(logMedia, OperationTypeValues.ValueDeductedInExit, fare);
+        }
+
+        public static void UpdateForCheckOut_Recovery(LogicalMedia logMedia)
+        {
+            var validation = logMedia.Application.Validation;
+
+            validation.EntryExitBit = Validation.TypeValues.Exit;
+            validation.LastTransactionDateTime = DateTime.Now;
+            validation.Location = SharedData.StationNumber;
+            validation.RejectCode = 0;
+        }
     }
 }

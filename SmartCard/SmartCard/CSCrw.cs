@@ -249,13 +249,18 @@ namespace IFS2.Equipment.TicketingRules
             logMedia.Purse.History.Hidden = (readPurpose != MediaDetectionTreatment.TOM_DetailedAnalyis);
             if (bDM1_HistoryRead)
                 return true;
-            if (readPurpose != MediaDetectionTreatment.TOM_DetailedAnalyis)
+            if (readPurpose != MediaDetectionTreatment.TOM_DetailedAnalyis && readPurpose != MediaDetectionTreatment.CheckOut)
                 return true;
 
             if (!SelectApplication(CONSTANT.DM1_AREA_CODE))
                 return false;
 
-            if (!_ReadAllTPurseHistory(logMedia))
+            int NbrRecords;
+            if (readPurpose == MediaDetectionTreatment.CheckOut)
+                NbrRecords = 1;
+            else
+                NbrRecords = 6;
+            if (!_ReadTPurseHistory(logMedia, NbrRecords))
                 return false;
             bDM1_HistoryRead = true;
             return true;
@@ -1107,19 +1112,20 @@ namespace IFS2.Equipment.TicketingRules
         }
 
 
-        protected override Boolean _ReadAllTPurseHistory(LogicalMedia logMedia)
-        {            
+        protected override Boolean _ReadTPurseHistory(LogicalMedia logMedia, int NbrOfRecords)
+        {
+            if (NbrOfRecords == -1)
+                NbrOfRecords = 6;
+
             if (!SelectApplication(CONSTANT.DM1_AREA_CODE))
                 return false;
             if (logMedia.Purse.History.List.Count > 0) logMedia.Purse.History.List.Clear();//SKS Added on 20160516
-            History his = logMedia.Purse.History;            
+            History his = logMedia.Purse.History;
 
-            byte[] pResData = new byte[6*CONSTANT.MAX_ISO_DATA_OUT_LENGTH];
+            byte[] pResData = new byte[NbrOfRecords * CONSTANT.MAX_ISO_DATA_OUT_LENGTH];
             Err = CSC_API_ERROR.ERR_NONE;
             pSw1 = 0xFF;
             pSw2 = 0xFF;
-
-            int NbrOfRecords = 6;
 
             Err = sf.ReadHistoryFile(NbrOfRecords, out pSw1, out pSw2, out pResData);
             Logging.Log(LogLevel.Verbose, "DelhiDesfireEV0_ReadAllHistory: err["+ Err.ToString() +"] pSw1["+pSw1.ToString() +"]");
@@ -1254,6 +1260,8 @@ namespace IFS2.Equipment.TicketingRules
                 return true;
         }
 
+        // TODO: _WriteCommonValidationFile and _UpdateWhenMediaDetectedInDenyList are doing the same stuff except _UpdateWhenMediaDetectedInDenyList also selects the application first. 
+        // Remove one of them
         protected override bool _WriteCommonValidationFile(LogicalMedia logMedia)
         {
             if (!SelectApplication(CONSTANT.DM1_AREA_CODE))
@@ -1262,7 +1270,7 @@ namespace IFS2.Equipment.TicketingRules
             Media m = logMedia.Media;
             Customer cu = logMedia.Application.Customer;
             LastAddValue lav = logMedia.Purse.LastAddValue;
-            AutoReload ar = logMedia.Purse.AutoReload;            
+            AutoReload ar = logMedia.Purse.AutoReload;
 
             var bitBuffer = new bool[256];
 
@@ -1404,7 +1412,7 @@ namespace IFS2.Equipment.TicketingRules
                 i = CFunctions.ConvertToBits((ulong)lav.EquipmentNumber, i, 24, bitBuffer);
 
                 //Last Add Value SqN 
-                i = CFunctions.ConvertToBits((ulong)lav.SequenceNumber, i, 32, bitBuffer);
+                i = CFunctions.ConvertToBits((ulong)Math.Abs(lav.SequenceNumber), i, 32, bitBuffer);
 
                 //Spare Bits
                 i = CFunctions.ConvertToBits(0, i, 40, bitBuffer);
@@ -2031,6 +2039,7 @@ namespace IFS2.Equipment.TicketingRules
         {
             FilesToWrite toWrite = new FilesToWrite();
             var purse = logMedia.Purse;
+            var media = logMedia.Media;
             var tPurse = purse.TPurse;
             if (tPurse.Balance != tPurse.BalanceRead)
                 toWrite.dm1Purse = true;
@@ -2038,7 +2047,7 @@ namespace IFS2.Equipment.TicketingRules
             if (tPurse.SequenceNumber != tPurse.SequenceNumberRead)
                 toWrite.dm1SequenceNumber = true;
             
-            if (purse.LastAddValue.isSomethingModified)
+            if (purse.LastAddValue.isSomethingModified || media.Blocked != media.BlockedRead)
                 toWrite.dm1Validation = true;//_WriteCommonValidationFile
 
             if (purse.History.isSomethingModified)
@@ -2091,7 +2100,7 @@ namespace IFS2.Equipment.TicketingRules
             if (pr != null && pr.isSomethingModified)
                 toWrite.dm2Sale = true;
 
-            var media = logMedia.Media;
+            
             if (media.ExpiryDate != media.ExpiryDateRead
                 || media.Status != media.StatusRead)
                 toWrite.dm1Sale = true;

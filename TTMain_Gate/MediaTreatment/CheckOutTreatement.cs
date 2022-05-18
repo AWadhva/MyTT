@@ -36,7 +36,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
         #region IMediaTreatment Members
 
         public LogicalMedia Read(StatusCSCEx status)
-        {            
+        {
             sf._delhiCCHSSAMUsage = true;
             sf._cryptoflexSAMUsage = false;
 
@@ -70,7 +70,9 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
         public void Write()
         {
             if (validationResult == TTErrorTypes.NoError)
-                ValidationRules.UpdateForCheckOut(logMedia);
+                CommonRules.UpdateForCheckOut_NormalScenario(logMedia);
+            else if (validationResult == TTErrorTypes.RecoveryNeeded)
+                CommonRules.UpdateForCheckOut_Recovery(logMedia);
 
             if (logMedia.isSomethingModified)
             {
@@ -79,7 +81,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                     Transmit.FailedWrite();
                 else
                 {
-                    if (validationResult == TTErrorTypes.NoError)
+                    if (validationResult == TTErrorTypes.NoError || validationResult == TTErrorTypes.RecoveryNeeded)
                         Transmit.CheckOutPermitted(logMedia);
                     else if (validationResult == TTErrorTypes.MediaInDenyList)
                         Transmit.Blacklisted(logMedia);

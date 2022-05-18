@@ -76,5 +76,28 @@ namespace IFS2.Equipment.TicketingRules.Rules.CheckOut
                     return TTErrorTypes.SomeRejectCode;
             }
         }
+
+        readonly static List<OperationTypeValues> exitCodes = new List<OperationTypeValues>{
+            OperationTypeValues.ValueDeductedInExit,
+            OperationTypeValues.PointsOrRidesDeductedInExit,
+            OperationTypeValues.PeriodicTicketExit,
+            OperationTypeValues.NoValueDeductedInExit,
+            OperationTypeValues.LoyaltyPointsUsedInExit
+        };
+
+        internal static TTErrorTypes CheckForRecovery(LogicalMedia logMedia)
+        {
+            var now = DateTime.Now;
+            var historyRec = logMedia.Purse.History.Transaction(0);
+            if (historyRec.LocationRead == SharedData.StationNumber
+                && exitCodes.Contains(historyRec.OperationTypeRead)
+                && (historyRec.DateTimeRead < now
+                        ? now - historyRec.DateTimeRead < new TimeSpan(0, 5, 0) 
+                        : historyRec.DateTimeRead - now < new TimeSpan(0, 2, 0))
+                && logMedia.Application.Validation.EntryExitBitRead == Validation.TypeValues.Entry)
+                return TTErrorTypes.RecoveryNeeded;
+
+            return TTErrorTypes.NoError;
+        }
     }
 }
