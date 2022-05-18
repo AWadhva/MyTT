@@ -882,6 +882,7 @@ namespace IFS2.Equipment.TicketingRules
                         }
                     case TransactionType.TPurseDeduction:
                         {
+                            // 6.3.13
                             Generate_CSCPurse_Usage_Txn_Header(logMedia, Txnstatus);
                             FldsCSCPurseDeduction pars = (FldsCSCPurseDeduction)parsTxnSpecific;
                             pars.EmbedContentsToXdr(_xdr);
@@ -889,8 +890,38 @@ namespace IFS2.Equipment.TicketingRules
                         }
                     case TransactionType.BusCheckOutWithTPurse:
                         {
+                            // 6.3.9
                             Generate_CSCPurse_Usage_Txn_Header(logMedia, Txnstatus);
                             FldsCSCBusCheckOutRebate pars = (FldsCSCBusCheckOutRebate)parsTxnSpecific;
+                            pars.EmbedContentsToXdr(_xdr);
+                            break;
+                        }
+                    case TransactionType.MetroCheckOutWithTPurse:
+                        {
+                            // 6.3.10
+                            Generate_CSCPurse_Usage_Txn_Header(logMedia, Txnstatus);
+                            FldsCSCTrainFareDeduction pars = (FldsCSCTrainFareDeduction)parsTxnSpecific;
+                            pars.EmbedContentsToXdr(_xdr);
+                            break;
+                        }
+                    case TransactionType.MetroCheckOutWithPass:
+                        {
+                            // 6.3.11
+                            FldsCSCTrainRideDeduction pars = (FldsCSCTrainRideDeduction)parsTxnSpecific;
+                            pars.EmbedContentsToXdr(_xdr);
+                            break;
+                        }
+                    case TransactionType.MetroCheckInWithTPurse:
+                        {
+                            // 6.3.31
+                            FldsCSCTrainEntry pars = (FldsCSCTrainEntry)parsTxnSpecific;
+                            pars.EmbedContentsToXdr(_xdr);
+                            break;
+                        }
+                    case TransactionType.MetroCheckInWithPass:
+                        {
+                            // 6.3.32
+                            FldsCSCTrainPassEntry pars = (FldsCSCTrainPassEntry)parsTxnSpecific;
                             pars.EmbedContentsToXdr(_xdr);
                             break;
                         }

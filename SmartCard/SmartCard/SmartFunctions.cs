@@ -2851,7 +2851,7 @@ namespace IFS2.Equipment.TicketingRules
             byte keyIndex = 0x00;
             byte[] m_response;
             int index = 0, nbytesRead = 0;
-            int MaxDatatobeSent = 0;
+            int MaxDatatobeSent;
             pSw1 = 0xff;
             pSw2 = 0xff;
             #if !_BLUEBIRD_

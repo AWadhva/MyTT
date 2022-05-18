@@ -296,7 +296,7 @@ namespace IFS2.Equipment.TicketingRules
         }
     }
 
-    // 6.3.20
+    // 6.3.13
     public class FldsCSCPurseDeduction
     {
         public int transactionValue;
@@ -317,7 +317,7 @@ namespace IFS2.Equipment.TicketingRules
         }
     }
 
-    // 6.3.20
+    // 6.3.9
     public class FldsCSCBusCheckOutRebate
     {
         public int transactionValue;
@@ -344,7 +344,117 @@ namespace IFS2.Equipment.TicketingRules
         }
     }
 
-    // 6.3.15
+    // 6.3.10
+    public class FldsCSCTrainFareDeduction
+    {
+        public short txnValue;
+        public int purseRemainingValue;
+        public short rebateAmount;
+        public short discountAmount;
+        public DiscountReason_t discountReason;
+        public ParticipantID_t transferProvider;
+        public short entryStation;
+        public DateTime entryTime;
+        public short transit1RemainingVal;
+        public short transit2RemainingVal;
+        public FareIndicator_t fareIndicator;
+        public byte TransferNumber;
+        public byte TravelScheme;
+        public short freeTravelValue;
+        public byte fareCode;
+
+        public void EmbedContentsToXdr(XdrToXml xdr)
+        {
+            xdr.AddInt16(txnValue);
+            xdr.AddInt32(purseRemainingValue);
+            xdr.AddInt16(rebateAmount);
+            xdr.AddInt16(discountAmount);
+            xdr.AddInt8((byte)discountReason);
+            xdr.AddInt8((byte)transferProvider);
+            xdr.AddInt16(entryStation);
+            xdr.AddDateTime(entryTime);
+            xdr.AddInt16(transit1RemainingVal);
+            xdr.AddInt16(transit2RemainingVal);
+            xdr.AddInt16((short)fareIndicator);
+            xdr.AddInt8((byte)TransferNumber);
+            xdr.AddInt8((byte)TravelScheme);
+            xdr.AddInt16((short)freeTravelValue);
+            xdr.AddInt8((byte)fareCode);
+        }
+    }
+
+    // 6.3.11
+    public class FldsCSCTrainRideDeduction
+    {
+        public short txnValue;
+        public short rebateAmount;
+        public DateTime entryTime;
+        public short entryStation;
+        public byte tripCount;
+        public ParticipantID_t transferProvider;
+        public FareIndicator_t fareIndicator;
+        public byte TransferNumber;
+        public byte TravelScheme;
+        public byte fareCode;
+
+        public void EmbedContentsToXdr(XdrToXml xdr)
+        {
+            xdr.AddInt16(txnValue);
+            xdr.AddInt16(rebateAmount);
+            xdr.AddDateTime(entryTime);
+            xdr.AddInt16(entryStation);
+            xdr.AddInt8(tripCount);
+            xdr.AddInt8((byte)transferProvider);
+            xdr.AddInt16((short)fareIndicator);
+            xdr.AddInt8((byte)TransferNumber);
+            xdr.AddInt8((byte)TravelScheme);
+            xdr.AddInt8((byte)fareCode);
+        }
+    }
+
+    // 6.3.31
+    public class FldsCSCTrainEntry
+    {
+        public FareIndicator_t fareIndicator;
+        public ParticipantID_t transferProvider;
+        public int purseRemainingValue;
+        public short transit1RemainingVal;
+        public short transit2RemainingVal;
+        public byte TransferNumber;
+        public byte TravelScheme;
+
+        public void EmbedContentsToXdr(XdrToXml xdr)
+        {
+            xdr.AddInt16((short)fareIndicator);
+            xdr.AddInt8((byte)transferProvider);
+            xdr.AddInt32(purseRemainingValue);
+            xdr.AddInt16(transit1RemainingVal);
+            xdr.AddInt16(transit2RemainingVal);
+            xdr.AddInt8((byte)TransferNumber);
+            xdr.AddInt8((byte)TravelScheme);
+        }
+    }
+
+    // 6.3.32
+    public class FldsCSCTrainPassEntry
+    {
+        public ParticipantID_t transferProvider;
+        public FareIndicator_t fareIndicator;
+        public byte tripCount;
+        public byte TransferNumber;
+        public byte TravelScheme;
+
+        public void EmbedContentsToXdr(XdrToXml xdr)
+        {
+            xdr.AddInt8((byte)transferProvider);
+            xdr.AddInt16((short)fareIndicator);
+            xdr.AddInt8(tripCount);
+            xdr.AddInt8((byte)TransferNumber);
+            xdr.AddInt8((byte)TravelScheme);
+        }
+    }
+
+    // 6.3.5
     public class FldsCSCPeformAddValueViaEFT
     {        
         public int addValAmt;
@@ -609,7 +719,6 @@ namespace IFS2.Equipment.TicketingRules
             LogOffsetToWrite("bankAccountNumber", xdr);
             bankAccountNumber.EmbedContentsToXdr(xdr);
 
-
             LogOffsetToWrite("bankTopupAmount", xdr);
             xdr.AddInt32(bankTopupAmount);
 
@@ -672,7 +781,31 @@ namespace IFS2.Equipment.TicketingRules
     {
         Immediate = 1,
         Deferred = 2
-    };
+    }
+    
+    public enum DiscountReason_t
+    {
+        NoDiscount = 0
+    }
+
+    public enum ParticipantID_t
+    {
+        DMRC = 2,
+        Reliance = 3,
+        DLF = 4,
+        CRIS = 5
+    }
+
+    public enum FareIndicator_t
+    {
+        TMO,
+        Normal,
+        EEO,
+        Incident,
+        Emergency,
+        Breakdown,
+        RailInterchange
+    }
 
     public enum Payment_Method
     {

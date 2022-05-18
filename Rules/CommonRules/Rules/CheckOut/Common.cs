@@ -92,9 +92,10 @@ namespace IFS2.Equipment.TicketingRules.Rules.CheckOut
             if (historyRec.LocationRead == SharedData.StationNumber
                 && exitCodes.Contains(historyRec.OperationTypeRead)
                 && (historyRec.DateTimeRead < now
-                        ? now - historyRec.DateTimeRead < new TimeSpan(0, 5, 0) 
-                        : historyRec.DateTimeRead - now < new TimeSpan(0, 2, 0))
-                && logMedia.Application.Validation.EntryExitBitRead == Validation.TypeValues.Entry)
+                        ? now - historyRec.DateTimeRead < new TimeSpan(0, 3, 0) 
+                        : historyRec.DateTimeRead - now < new TimeSpan(0, 0, 1))
+                && logMedia.Application.Validation.EntryExitBitRead == Validation.TypeValues.Entry
+                && logMedia.Purse.TPurse.BalanceRead == historyRec.NewBalanceRead)
                 return TTErrorTypes.RecoveryNeeded;
 
             return TTErrorTypes.NoError;
