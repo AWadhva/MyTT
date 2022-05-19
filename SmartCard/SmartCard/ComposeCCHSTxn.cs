@@ -915,6 +915,7 @@ namespace IFS2.Equipment.TicketingRules
                     case TransactionType.MetroCheckOutWithPass:
                         {
                             // 6.3.11
+
                             FldsCSCTrainRideDeduction pars = (FldsCSCTrainRideDeduction)parsTxnSpecific;
                             pars.EmbedContentsToXdr(_xdr);
                             break;
@@ -922,6 +923,7 @@ namespace IFS2.Equipment.TicketingRules
                     case TransactionType.MetroCheckInWithTPurse:
                         {
                             // 6.3.31
+                            Generate_CSCPurse_Usage_Txn_Header(logMedia, Txnstatus);
                             FldsCSCTrainEntry pars = (FldsCSCTrainEntry)parsTxnSpecific;
                             pars.EmbedContentsToXdr(_xdr);
                             break;
