@@ -70,7 +70,11 @@ namespace IFS2.Equipment.TicketingRules
             {TransactionType.MediaReplacement, 0x0093},
             {TransactionType.InitialiseBankTopup, 0x0047},
             {TransactionType.TPurseDeduction, 0x0068},
-            {TransactionType.BusCheckOutWithTPurse, 0x00B2}
+            {TransactionType.BusCheckOutWithTPurse, 0x00B2},
+            {TransactionType.MetroCheckInWithTPurse, 0x00B0},
+            {TransactionType.MetroCheckInWithPass, 0x00B9},
+            {TransactionType.MetroCheckOutWithTPurse, 0x0060},
+            {TransactionType.MetroCheckOutWithPass, 0x0061}
         };
 
         static ComposeCCHSTxn()
