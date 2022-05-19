@@ -764,6 +764,10 @@ namespace IFS2.Equipment.TicketingRules
                     case TransactionType.MediaLost:
                     case TransactionType.BusCheckOutWithTPurse:
                     case TransactionType.InitialiseBankTopup:
+                    case TransactionType.MetroCheckOutWithTPurse:
+                    case TransactionType.MetroCheckOutWithPass:
+                    case TransactionType.MetroCheckInWithPass:
+                    case TransactionType.MetroCheckInWithTPurse:
                         variantDataFormatVersion = 1;
                         break;
                     default:
