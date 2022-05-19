@@ -51,7 +51,12 @@ namespace IFS2.Equipment.TicketingRules
             {TransactionType.CSC_SURCHARGE_PAYMENT, _sizeInBytesCscTpurse_header + 40 },
             {TransactionType.InitialiseBankTopup, 1304},//_sizeInBytesCscTpurse_header + 1244
             {TransactionType.TPurseDeduction,_sizeInBytesCscTpurse_header+6*4+32},
-            {TransactionType.BusCheckOutWithTPurse,_sizeInBytesCscTpurse_header+10*4}
+            {TransactionType.BusCheckOutWithTPurse,_sizeInBytesCscTpurse_header+10*4},
+
+            {TransactionType.MetroCheckInWithTPurse, 3000}, // TODO: CORRECT ME
+            {TransactionType.MetroCheckInWithPass, 3000}, // TODO: CORRECT ME            
+            {TransactionType.MetroCheckOutWithTPurse, 3000}, // TODO: CORRECT ME
+            {TransactionType.MetroCheckOutWithPass, 3000}, // TODO: CORRECT ME            
         };
 
         static readonly Dictionary<TransactionType, short> TxnTypeVsItsCCHSSubTypeCode = new Dictionary<TransactionType, short>()
@@ -212,6 +217,16 @@ namespace IFS2.Equipment.TicketingRules
                 _xdr.AddString(SharedData._agentShift.AgentId.ToString(), 8); // Also, not sure that AddString is good or not
                 _xdr.AddInt8((byte)SharedData._agentShift.Profile);
             }
+        }
+
+        private static void Generate_CSCNonMonetaryPurse_Usage_Txn_Header(LogicalMedia _logMedia, byte CSCTransactionStatus)
+        {
+            try
+            {
+                PhysicalSerialNumber(_logMedia.Media.ChipSerialNumber);
+            }
+            catch
+            {}
         }
 
         private static void Generate_CSCPurse_Usage_Txn_Header(LogicalMedia _logMedia, byte CSCTransactionStatus)
