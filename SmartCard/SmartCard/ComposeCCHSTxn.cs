@@ -773,7 +773,21 @@ namespace IFS2.Equipment.TicketingRules
                 //int size_generalHeader = 24 + 6 + 6, size_cscTpurse_header = 22, size_cscTopUP = 41 /*34+6+1*/, size_CSCUses_Header = 8, size_cscTopUPType_80 = 8;
                 int TDVariantDataLengthInBytes = TxnTypeVsVariantDataLengthInBytes[type];
                 CCHS_TXN_Type = TxnTypeVsItsCCHSSubTypeCode[type];
-                _xdr.InitResult(_sizeInBytesGeneralHeader + TDVariantDataLengthInBytes);
+
+                int xdrLen;
+                switch (type)
+                {
+                    case TransactionType.MetroCheckOutWithTPurse:
+                    case TransactionType.MetroCheckOutWithPass:
+                    case TransactionType.MetroCheckInWithPass:
+                    case TransactionType.MetroCheckInWithTPurse:
+                        xdrLen = 4000; // TO BE CORRECTED
+                        break;
+                    default:
+                        xdrLen = _sizeInBytesGeneralHeader + TDVariantDataLengthInBytes;
+                        break;
+                }
+                _xdr.InitResult(xdrLen);
                 byte variantDataFormatVersion;
                 switch (type)
                 {
