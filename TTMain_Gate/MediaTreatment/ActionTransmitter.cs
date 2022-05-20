@@ -20,9 +20,9 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
             transmitter(ActionTaken.AutoToppedUp, new string[]{amt.ToString(), logMedia.ToXMLString()});
         }
 
-        internal void CheckInPermitted(LogicalMedia logMedia)
+        internal void CheckInPermitted(LogicalMedia logMedia, string cchsStr)
         {
-            transmitter(ActionTaken.CheckInPermitted, new string[]{logMedia.ToXMLString()});
+            transmitter(ActionTaken.CheckInPermitted, new string[]{logMedia.ToXMLString(), cchsStr});
         }
 
         internal void CheckOutPermitted(LogicalMedia logMedia 

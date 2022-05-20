@@ -83,7 +83,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                 List<int> doesntMatter;
                 if (csc.Write(logMedia, out doesntMatter))
                 {
-                    string cchsStr = TTMainCommon.GenerateCCHSTxn.PerformAutoTopup(logMedia, sf);
+                    string cchsStr = TTMainCommon.GenerateCCHSTxn.PerformAutoTopup(sf, logMedia);
                     Transmit.AutoTopup(amt, logMedia, cchsStr);
                     
                     logMedia.OverlapModifiedToRead();// we don't want to waste time in re-reading the CSC
@@ -105,7 +105,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                 else
                 {
                     if (validationResult == TTErrorTypes.NoError)
-                        Transmit.CheckInPermitted(logMedia);
+                        Transmit.CheckInPermitted(logMedia, TTMainCommon.GenerateCCHSTxn.CheckIn_PurseCard(sf, logMedia, ValidationRules.GetFareMode()));
                     else if (validationResult == TTErrorTypes.MediaInDenyList)
                         Transmit.Blacklisted(logMedia);
                     else if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
@@ -117,7 +117,10 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
             else
             {
                 if (validationResult == TTErrorTypes.NoError)
-                    Transmit.CheckInPermitted(logMedia);
+                {
+                    string cchsStr = TTMainCommon.GenerateCCHSTxn.CheckIn_PurseCard(sf, logMedia, ValidationRules.GetFareMode());
+                    Transmit.CheckInPermitted(logMedia, cchsStr);
+                }
                 else
                     Transmit.CheckInNotPermitted(validationResult, logMedia);
             }
