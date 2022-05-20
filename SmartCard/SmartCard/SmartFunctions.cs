@@ -2350,6 +2350,10 @@ namespace IFS2.Equipment.TicketingRules
                 case TransactionType.InitialiseBankTopup:
                 case TransactionType.TPurseDeduction:
                 case TransactionType.BusCheckOutWithTPurse:
+                case TransactionType.MetroCheckOutWithTPurse:
+                case TransactionType.MetroCheckOutWithPass:
+                case TransactionType.MetroCheckInWithPass:
+                case TransactionType.MetroCheckInWithTPurse:
                     ComposeCCHSTxn.TreatXDRCompatibility2(logMedia, out result, Txntype, SharedData.TransactionSeqNo, _hRw, _ReaderType, bWTE, bTest, pars);
                     break;
                 default:
