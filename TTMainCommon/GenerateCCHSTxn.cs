@@ -81,8 +81,10 @@ namespace TTMainCommon
         {
             FldsCSCTrainRideDeduction txn = new FldsCSCTrainRideDeduction();
 
-            txn.entryStation = 0;
-            txn.entryTime = new DateTime();
+            var validation = logMedia.Application.Validation;
+
+            txn.entryStation = (short)validation.LocationRead;
+            txn.entryTime = validation.LastTransactionDateTimeRead;
             txn.fareCode = 0;
             txn.fareIndicator = ConvertFromFareMode(mode);
             txn.rebateAmount = 0;

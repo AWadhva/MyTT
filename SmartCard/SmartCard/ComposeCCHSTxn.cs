@@ -214,11 +214,47 @@ namespace IFS2.Equipment.TicketingRules
             }
         }
 
-        private static void Generate_CSCNonMonetaryPurse_Usage_Txn_Header(LogicalMedia _logMedia, byte CSCTransactionStatus)
+        // 6.4.4
+        private static void Generate_CSCNonMonetaryPurse_Usage_Txn_Header(LogicalMedia logMedia, byte CSCTransactionStatus)
         {
             try
             {
-                PhysicalSerialNumber(_logMedia.Media.ChipSerialNumber);
+                PhysicalSerialNumber(logMedia.Media.ChipSerialNumber);
+
+                MediaType typ;
+                switch (logMedia.Media.ChipTypeRead)
+                {
+                    case Media.ChipTypeValues.DesfireEV0:
+                    case Media.ChipTypeValues.DesfireEV1:
+                        typ = MediaType.CSC;
+                        break;
+                    case Media.ChipTypeValues.Sony:
+                        typ = MediaType.SONY_CARD;
+                        break;
+                    default:
+                        typ = MediaType.None; // TODO: See
+                        break;
+                }
+                _xdr.AddInt8((byte)typ);
+
+                //CSC Life-Cycle count	8	CSC_LifeCycleID_t	Current Life Cycle of the CSC (Not supported by current card layout.)
+                _xdr.AddInt8(0);
+
+                //CSC Issuer ID	32	IssuerID_t	Issuer ID of the CSC
+                _xdr.AddInt32(logMedia.Media.Owner); //TODO:
+
+                short fareProducttype = logMedia.Application.Products.Product(0).Type;
+                //Ticket Type	8	TicketType_t	Active Ticket type associated with Purse
+                _xdr.AddInt8((byte)fareProducttype);
+
+                _xdr.AddInt32(logMedia.Purse.TPurse.Balance);
+
+                // TODO
+                //Last Purse Purchased Price	16	SValueOneCent_t	The price paid for the Period Pass last purchased
+                _xdr.AddInt16(0);
+
+                //CSC Issuer ID	32	IssuerID_t	Issuer ID of the CSC
+                _xdr.AddInt32(logMedia.Media.Owner);
             }
             catch
             {}
@@ -383,8 +419,6 @@ namespace IFS2.Equipment.TicketingRules
                 3 = Test Transaction, CSC update not confirmed
              */
         }
-
-
 
         /////// SHA1 Hashing/////
 
