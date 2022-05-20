@@ -111,11 +111,6 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
             return validationResult;
         }
 
-        #endregion
-
-        #region IMediaTreatment Members
-
-
         SmartFunctions IMediaTreatment.sf
         {
             get { return sf; }

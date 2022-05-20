@@ -30,11 +30,11 @@ namespace TTMainCommon
             txn.transferProvider = ParticipantID_t.DMRC;
             txn.transit1RemainingVal = 0;
             txn.transit2RemainingVal = 0;
-            txn.TravelScheme = 2;
+            txn.TravelScheme = 0;
 
             string cchsStr = sf.GetTDforCCHSGen(logMedia, TransactionType.MetroCheckInWithTPurse, txn, false, logMedia.Application.TransportApplication.Test);
 
-            return cchsStr;            
+            return cchsStr;
         }
 
         public static string CheckIn_NonPurseCard(SmartFunctions sf, LogicalMedia logMedia, FareMode mode)
@@ -53,22 +53,24 @@ namespace TTMainCommon
 
         public static string CheckOut_PurseCard(SmartFunctions sf, LogicalMedia logMedia, FareMode mode)
         {
+            var validation = logMedia.Application.Validation;
+
             FldsCSCTrainFareDeduction txn = new FldsCSCTrainFareDeduction();
             txn.discountAmount = 0;
             txn.discountReason = DiscountReason_t.NoDiscount;
-            txn.entryStation = 0;
-            txn.entryTime = new DateTime();
-            txn.fareCode = 0;
+            txn.entryStation = (short)validation.LocationRead;
+            txn.entryTime = validation.LastTransactionDateTimeRead;
+            txn.fareCode = 0;   // line number 3679 of CFileManagerXml.cpp
             txn.fareIndicator = ConvertFromFareMode(mode);
-            txn.freeTravelValue = 0;
-            txn.purseRemainingValue = 0;
+            txn.freeTravelValue = 0;    // TODO: use GetFreeTravelValue like function
+            txn.purseRemainingValue = logMedia.Purse.TPurse.Balance;
             txn.rebateAmount = 0;
             txn.TransferNumber = 0;
             txn.transferProvider = ParticipantID_t.DMRC;
             txn.transit1RemainingVal = 0;
             txn.transit2RemainingVal = 0;
             txn.TravelScheme = 0;
-            txn.txnValue = 0;
+            txn.txnValue = (short)(logMedia.Purse.TPurse.BalanceRead - logMedia.Purse.TPurse.Balance);
             
             string cchsStr = sf.GetTDforCCHSGen(logMedia, TransactionType.MetroCheckOutWithTPurse, txn, false, logMedia.Application.TransportApplication.Test);
 
@@ -107,6 +109,6 @@ namespace TTMainCommon
                 default:
                     return FareIndicator_t.Normal;
             }
-        }        
+        }
     }
 }
