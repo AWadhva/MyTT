@@ -69,6 +69,7 @@
     <Compile Include="ConnectionMonitor\ReaderConnectionMonitor.cs" />
     <Compile Include="ConnectionMonitor\ThalesReaderConnectionMonitor.cs" />
     <Compile Include="ConnectionMonitor\V4ReaderConf.cs" />
+    <Compile Include="GenerateCCHSTxn.cs" />
     <Compile Include="IV4ReaderApi.cs" />
     <Compile Include="MediaMonitor\Poller.cs" />
     <Compile Include="MediaMonitor\ReaderMediaMonitor.cs" />

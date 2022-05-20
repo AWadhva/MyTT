@@ -51,12 +51,7 @@ namespace IFS2.Equipment.TicketingRules
             {TransactionType.CSC_SURCHARGE_PAYMENT, _sizeInBytesCscTpurse_header + 40 },
             {TransactionType.InitialiseBankTopup, 1304},//_sizeInBytesCscTpurse_header + 1244
             {TransactionType.TPurseDeduction,_sizeInBytesCscTpurse_header+6*4+32},
-            {TransactionType.BusCheckOutWithTPurse,_sizeInBytesCscTpurse_header+10*4},
-
-            {TransactionType.MetroCheckInWithTPurse, 3000}, // TODO: CORRECT ME
-            {TransactionType.MetroCheckInWithPass, 3000}, // TODO: CORRECT ME            
-            {TransactionType.MetroCheckOutWithTPurse, 3000}, // TODO: CORRECT ME
-            {TransactionType.MetroCheckOutWithPass, 3000}, // TODO: CORRECT ME            
+            {TransactionType.BusCheckOutWithTPurse,_sizeInBytesCscTpurse_header+10*4}
         };
 
         static readonly Dictionary<TransactionType, short> TxnTypeVsItsCCHSSubTypeCode = new Dictionary<TransactionType, short>()

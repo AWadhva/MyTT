@@ -83,7 +83,8 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                 List<int> doesntMatter;
                 if (csc.Write(logMedia, out doesntMatter))
                 {
-                    Transmit.AutoTopup(amt, logMedia);
+                    string cchsStr = TTMainCommon.GenerateCCHSTxn.PerformAutoTopup(logMedia, sf);
+                    Transmit.AutoTopup(amt, logMedia, cchsStr);
                     
                     logMedia.OverlapModifiedToRead();// we don't want to waste time in re-reading the CSC
                     

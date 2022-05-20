@@ -15,7 +15,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
             transmitter = transmitter_;
         }
 
-        internal void AutoTopup(int amt, LogicalMedia logMedia)
+        internal void AutoTopup(int amt, LogicalMedia logMedia, string cchsStr)
         {
             transmitter(ActionTaken.AutoToppedUp, new string[]{amt.ToString(), logMedia.ToXMLString()});
         }
