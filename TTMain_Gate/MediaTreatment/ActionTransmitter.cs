@@ -25,7 +25,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
             transmitter(ActionTaken.CheckInPermitted, new string[]{logMedia.ToXMLString(), cchsStr});
         }
 
-        internal void CheckOutPermitted(LogicalMedia logMedia 
+        internal void CheckOutPermitted(LogicalMedia logMedia, string cchsStr
             //, int purseAmtDeducted // should be set to zero if the product has no purse e.g. for family 80
             )
         {

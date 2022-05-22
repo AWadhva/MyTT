@@ -215,7 +215,7 @@ namespace IFS2.Equipment.TicketingRules
         }
 
         // 6.4.4
-        private static void Generate_CSCNonMonetaryPurse_Usage_Txn_Header(LogicalMedia logMedia, byte CSCTransactionStatus)
+        private static void Generate_CSCNonMonetaryPurse_Usage_Txn_Header(LogicalMedia logMedia)
         {
             try
             {
@@ -255,6 +255,29 @@ namespace IFS2.Equipment.TicketingRules
 
                 //CSC Issuer ID	32	IssuerID_t	Issuer ID of the CSC
                 _xdr.AddInt32(logMedia.Media.Owner);
+
+                _xdr.AddInt8(0); // purse number
+
+                short purseStartDate = 0; // TODO
+                _xdr.AddInt16(purseStartDate);
+
+                short purseValidityPeriod = 0; // TODO
+                _xdr.AddInt16(purseValidityPeriod);
+
+                byte purseLifecycleCount = 0; // TODO
+                _xdr.AddInt8(purseLifecycleCount);
+
+                byte purseClassification = 0; // TODO
+                _xdr.AddInt8(purseClassification);
+
+                byte transactionStatus = 0; // TODO
+                _xdr.AddInt8(transactionStatus);
+
+                byte auditGroup = 0; // TODO
+                _xdr.AddInt8(auditGroup);
+
+                int lastAddValueDevice = 0; // TODO
+                _xdr.AddInt32(lastAddValueDevice);
             }
             catch
             {}
@@ -973,7 +996,7 @@ namespace IFS2.Equipment.TicketingRules
                     case TransactionType.MetroCheckOutWithPass:
                         {
                             // 6.3.11
-
+                            Generate_CSCNonMonetaryPurse_Usage_Txn_Header(logMedia);
                             FldsCSCTrainRideDeduction pars = (FldsCSCTrainRideDeduction)parsTxnSpecific;
                             pars.EmbedContentsToXdr(_xdr);
                             break;
@@ -989,6 +1012,7 @@ namespace IFS2.Equipment.TicketingRules
                     case TransactionType.MetroCheckInWithPass:
                         {
                             // 6.3.32
+                            Generate_CSCNonMonetaryPurse_Usage_Txn_Header(logMedia);
                             FldsCSCTrainPassEntry pars = (FldsCSCTrainPassEntry)parsTxnSpecific;
                             pars.EmbedContentsToXdr(_xdr);
                             break;

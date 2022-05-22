@@ -81,8 +81,8 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                     Transmit.FailedWrite();
                 else
                 {
-                    if (validationResult == TTErrorTypes.NoError || validationResult == TTErrorTypes.RecoveryNeeded)
-                        Transmit.CheckOutPermitted(logMedia);
+                    if (validationResult == TTErrorTypes.NoError || validationResult == TTErrorTypes.RecoveryNeeded)                    
+                        Transmit.CheckOutPermitted(logMedia, GetCCHSStr(sf, logMedia));                    
                     else if (validationResult == TTErrorTypes.MediaInDenyList)
                         Transmit.Blacklisted(logMedia);
                     else if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
@@ -94,9 +94,48 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
             else
             {
                 if (validationResult == TTErrorTypes.NoError)
-                    Transmit.CheckOutPermitted(logMedia);
+                    Transmit.CheckOutPermitted(logMedia, GetCCHSStr(sf, logMedia));
                 else
                     Transmit.CheckOutNotPermitted(validationResult, logMedia);
+            }
+        }
+
+        private static string GetCCHSStr(SmartFunctions sf, LogicalMedia logMedia)
+        {            
+            if (logMedia.Purse.TPurse.Balance == logMedia.Purse.TPurse.BalanceRead)
+            {
+                FldsCSCTrainFareDeduction fld = new FldsCSCTrainFareDeduction();
+                fld.discountAmount = 0;
+                fld.discountReason = DiscountReason_t.NoDiscount;
+                fld.entryStation = 0;
+                fld.entryTime = new DateTime();
+                fld.fareCode = 0;
+                fld.fareIndicator = 0;
+                fld.freeTravelValue = 0;
+                fld.purseRemainingValue = logMedia.Purse.TPurse.Balance;
+                fld.rebateAmount = 0;
+                fld.TransferNumber = 0;
+                fld.transferProvider = 0;
+                fld.transit1RemainingVal = 0;
+                fld.transit2RemainingVal = 0;
+                fld.TravelScheme = 0;
+                fld.txnValue = 0;
+                return sf.GetTDforCCHSGen(logMedia, TransactionType.MetroCheckOutWithTPurse, fld, false, logMedia.Media.Test);
+            }
+            else
+            {
+                FldsCSCTrainRideDeduction fld = new FldsCSCTrainRideDeduction();
+                fld.entryStation = 0;
+                fld.entryTime = new DateTime();
+                fld.fareCode = 0;
+                fld.fareIndicator = 0;
+                fld.rebateAmount = 0;
+                fld.TransferNumber = 0;
+                fld.transferProvider = 0;
+                fld.TravelScheme = 0;
+                fld.tripCount = 0;
+                fld.txnValue = 0;
+                return sf.GetTDforCCHSGen(logMedia, TransactionType.MetroCheckOutWithPass, fld, false, logMedia.Media.Test);
             }
         }
         
