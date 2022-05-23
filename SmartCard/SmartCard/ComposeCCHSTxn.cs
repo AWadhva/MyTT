@@ -32,7 +32,11 @@ namespace IFS2.Equipment.TicketingRules
             //TXN_CSC_UNBLOCKED = 0x0021,
         };
 
-        const int _sizeInBytesGeneralHeader = 4 * (24 + 6 + 6), _sizeInBytesCscTpurse_header = 22 * 4, _sizeInBytesCSCUses_Header = 8 * 4;
+        const int _sizeInBytesGeneralHeader = 4 * (24 + 6 + 6)
+            , _sizeInBytesCscTpurse_header = 22 * 4
+            , _sizeInBytesCSCUses_Header = 8 * 4
+            , _sizeInBytesNonMonetaryPurseUage = 68;
+
 
         static readonly Dictionary<TransactionType, int> TxnTypeVsVariantDataLengthInBytes = new Dictionary<TransactionType, int>()
         {
@@ -53,9 +57,9 @@ namespace IFS2.Equipment.TicketingRules
             {TransactionType.TPurseDeduction,_sizeInBytesCscTpurse_header+6*4+32},
             {TransactionType.BusCheckOutWithTPurse,_sizeInBytesCscTpurse_header+10*4},
             {TransactionType.MetroCheckInWithTPurse, _sizeInBytesCscTpurse_header + 32},
-            {TransactionType.MetroCheckInWithPass, 5000},
+            {TransactionType.MetroCheckInWithPass, _sizeInBytesNonMonetaryPurseUage + 24},
             {TransactionType.MetroCheckOutWithTPurse, _sizeInBytesCscTpurse_header + 64},
-            {TransactionType.MetroCheckOutWithPass, 5000}
+            {TransactionType.MetroCheckOutWithPass, _sizeInBytesNonMonetaryPurseUage + 44}
         };
 
         static readonly Dictionary<TransactionType, short> TxnTypeVsItsCCHSSubTypeCode = new Dictionary<TransactionType, short>()
@@ -830,17 +834,8 @@ namespace IFS2.Equipment.TicketingRules
                 
                 CCHS_TXN_Type = TxnTypeVsItsCCHSSubTypeCode[type];
                 int TDVariantDataLengthInBytes = TxnTypeVsVariantDataLengthInBytes[type];
-                int xdrLen;
-                switch (type)
-                {                    
-                    case TransactionType.MetroCheckOutWithPass:
-                    case TransactionType.MetroCheckInWithPass:                    
-                        xdrLen = 4000; // TO BE CORRECTED
-                        break;
-                    default:
-                        xdrLen = _sizeInBytesGeneralHeader + TDVariantDataLengthInBytes;
-                        break;
-                }
+                int xdrLen = _sizeInBytesGeneralHeader + TDVariantDataLengthInBytes;
+                        
                 _xdr.InitResult(xdrLen);
                 byte variantDataFormatVersion;
                 switch (type)
