@@ -37,7 +37,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
             transmitter(ActionTaken.ProblemWhileRW, new string[]{});
         }
 
-        internal void Blacklisted(LogicalMedia logMedia)
+        internal void Blacklisted(LogicalMedia logMedia, string cchsStr)
         {
             transmitter(ActionTaken.Blocked_ie_BlackListedByMe, new string[]{logMedia.ToXMLString()});
         }

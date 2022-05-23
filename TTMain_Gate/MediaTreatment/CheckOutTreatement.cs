@@ -85,7 +85,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                     if (validationResult == TTErrorTypes.NoError || validationResult == TTErrorTypes.RecoveryNeeded)                    
                         Transmit.CheckOutPermitted(logMedia, GetCCHSStr(sf, logMedia));
                     else if (validationResult == TTErrorTypes.MediaInDenyList)
-                        Transmit.Blacklisted(logMedia);
+                        Transmit.Blacklisted(logMedia, GetCCHSStrForBlocking(sf, logMedia));
                     else if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
                         Transmit.CheckOutNotPermitted_And_RejectCodeWrittenByMe(logMedia.Application.Validation.RejectCode, logMedia);
                     else
@@ -99,6 +99,13 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                 else
                     Transmit.CheckOutNotPermitted(validationResult, logMedia);
             }
+        }
+
+        private string GetCCHSStrForBlocking(SmartFunctions sf, LogicalMedia logMedia)
+        {
+            string XdrDatastr;
+            SmartFunctions.Instance.GetTDforCCHS(logMedia, TransactionType.BlacklistDetection, ++SharedData.TransactionSeqNo, 0, out XdrDatastr);
+            return XdrDatastr;
         }
 
         private static string GetCCHSStr(SmartFunctions sf, LogicalMedia logMedia)

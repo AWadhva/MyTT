@@ -108,7 +108,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                     if (validationResult == TTErrorTypes.NoError)
                         Transmit.CheckInPermitted(logMedia, GetCCHSStr(sf, logMedia));
                     else if (validationResult == TTErrorTypes.MediaInDenyList)
-                        Transmit.Blacklisted(logMedia);
+                        Transmit.Blacklisted(logMedia, GetCCHSStrForBlocking(sf, logMedia));
                     else if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
                         Transmit.CheckInNotPermitted_And_RejectCodeWrittenByMe(logMedia.Application.Validation.RejectCode, logMedia);
                     else
@@ -122,7 +122,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                 else
                     Transmit.CheckInNotPermitted(validationResult, logMedia);
             }
-        }
+        }        
 
         public Guid Id
         {
@@ -149,6 +149,13 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                 return GenerateCCHSTxn.CheckIn_PurseCard(sf, logMedia, ValidationRules.GetFareMode());
             else
                 return GenerateCCHSTxn.CheckIn_NonPurseCard(sf, logMedia, ValidationRules.GetFareMode());
+        }
+
+        private string GetCCHSStrForBlocking(SmartFunctions sf, LogicalMedia logMedia)
+        {
+            string XdrDatastr;
+            SmartFunctions.Instance.GetTDforCCHS(logMedia, TransactionType.BlacklistDetection, ++SharedData.TransactionSeqNo, 0, out XdrDatastr);
+            return XdrDatastr;
         }
     }
 }
