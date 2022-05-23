@@ -7,6 +7,7 @@ using Common;
 using IFS2.Equipment.TicketingRules.CommonTT;
 using System.Diagnostics;
 using IFS2.Equipment.TicketingRules.MediaTreatment;
+using TTMainCommon;
 
 namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
 {
@@ -82,7 +83,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                 else
                 {
                     if (validationResult == TTErrorTypes.NoError || validationResult == TTErrorTypes.RecoveryNeeded)                    
-                        Transmit.CheckOutPermitted(logMedia, GetCCHSStr(sf, logMedia));                    
+                        Transmit.CheckOutPermitted(logMedia, GetCCHSStr(sf, logMedia));
                     else if (validationResult == TTErrorTypes.MediaInDenyList)
                         Transmit.Blacklisted(logMedia);
                     else if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
@@ -101,42 +102,13 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
         }
 
         private static string GetCCHSStr(SmartFunctions sf, LogicalMedia logMedia)
-        {            
-            if (logMedia.Purse.TPurse.Balance == logMedia.Purse.TPurse.BalanceRead)
-            {
-                FldsCSCTrainFareDeduction fld = new FldsCSCTrainFareDeduction();
-                fld.discountAmount = 0;
-                fld.discountReason = DiscountReason_t.NoDiscount;
-                fld.entryStation = 0;
-                fld.entryTime = new DateTime();
-                fld.fareCode = 0;
-                fld.fareIndicator = 0;
-                fld.freeTravelValue = 0;
-                fld.purseRemainingValue = logMedia.Purse.TPurse.Balance;
-                fld.rebateAmount = 0;
-                fld.TransferNumber = 0;
-                fld.transferProvider = 0;
-                fld.transit1RemainingVal = 0;
-                fld.transit2RemainingVal = 0;
-                fld.TravelScheme = 0;
-                fld.txnValue = 0;
-                return sf.GetTDforCCHSGen(logMedia, TransactionType.MetroCheckOutWithTPurse, fld, false, logMedia.Media.Test);
-            }
+        {
+            int productType = logMedia.Application.Products.Product(0).Type;
+            int family = ProductParameters.GetProductFamily(productType);
+            if (family == 60)
+                return GenerateCCHSTxn.CheckOut_PurseCard(sf, logMedia, ValidationRules.GetFareMode());
             else
-            {
-                FldsCSCTrainRideDeduction fld = new FldsCSCTrainRideDeduction();
-                fld.entryStation = 0;
-                fld.entryTime = new DateTime();
-                fld.fareCode = 0;
-                fld.fareIndicator = 0;
-                fld.rebateAmount = 0;
-                fld.TransferNumber = 0;
-                fld.transferProvider = 0;
-                fld.TravelScheme = 0;
-                fld.tripCount = 0;
-                fld.txnValue = 0;
-                return sf.GetTDforCCHSGen(logMedia, TransactionType.MetroCheckOutWithPass, fld, false, logMedia.Media.Test);
-            }
+                return GenerateCCHSTxn.CheckOut_NonPurseCard(sf, logMedia, ValidationRules.GetFareMode());
         }
         
         public Guid Id

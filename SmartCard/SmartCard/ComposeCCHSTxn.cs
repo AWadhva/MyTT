@@ -51,7 +51,11 @@ namespace IFS2.Equipment.TicketingRules
             {TransactionType.CSC_SURCHARGE_PAYMENT, _sizeInBytesCscTpurse_header + 40 },
             {TransactionType.InitialiseBankTopup, 1304},//_sizeInBytesCscTpurse_header + 1244
             {TransactionType.TPurseDeduction,_sizeInBytesCscTpurse_header+6*4+32},
-            {TransactionType.BusCheckOutWithTPurse,_sizeInBytesCscTpurse_header+10*4}
+            {TransactionType.BusCheckOutWithTPurse,_sizeInBytesCscTpurse_header+10*4},
+            {TransactionType.MetroCheckInWithTPurse, 5000},
+            {TransactionType.MetroCheckInWithPass, 5000},
+            {TransactionType.MetroCheckOutWithTPurse, _sizeInBytesCscTpurse_header + 64},
+            {TransactionType.MetroCheckOutWithPass, 5000}
         };
 
         static readonly Dictionary<TransactionType, short> TxnTypeVsItsCCHSSubTypeCode = new Dictionary<TransactionType, short>()
@@ -823,13 +827,13 @@ namespace IFS2.Equipment.TicketingRules
                 // How are these constants calculated; e.g. as per the document, size of M_PurseUsageHeader_t (size_cscTpurse_header) is 344 bits i.e. 43 bytes; but is specified as only 22 bytes here
                 // Seems it is in terms of number of 2 byte pairs. That's why it is being multiplied by 4 instead of 8.
                 //int size_generalHeader = 24 + 6 + 6, size_cscTpurse_header = 22, size_cscTopUP = 41 /*34+6+1*/, size_CSCUses_Header = 8, size_cscTopUPType_80 = 8;
-                int TDVariantDataLengthInBytes = TxnTypeVsVariantDataLengthInBytes[type];
+                
                 CCHS_TXN_Type = TxnTypeVsItsCCHSSubTypeCode[type];
-
+                int TDVariantDataLengthInBytes = TxnTypeVsVariantDataLengthInBytes[type];
                 int xdrLen;
                 switch (type)
                 {
-                    case TransactionType.MetroCheckOutWithTPurse:
+                    //case TransactionType.MetroCheckOutWithTPurse:
                     case TransactionType.MetroCheckOutWithPass:
                     case TransactionType.MetroCheckInWithPass:
                     case TransactionType.MetroCheckInWithTPurse:

@@ -8,6 +8,7 @@ using IFS2.Equipment.TicketingRules.CommonTT;
 using System.Diagnostics;
 
 using IFS2.Equipment.TicketingRules.MediaTreatment;
+using TTMainCommon;
 
 namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
 {
@@ -105,7 +106,7 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
                 else
                 {
                     if (validationResult == TTErrorTypes.NoError)
-                        Transmit.CheckInPermitted(logMedia, TTMainCommon.GenerateCCHSTxn.CheckIn_PurseCard(sf, logMedia, ValidationRules.GetFareMode()));
+                        Transmit.CheckInPermitted(logMedia, GetCCHSStr(sf, logMedia));
                     else if (validationResult == TTErrorTypes.MediaInDenyList)
                         Transmit.Blacklisted(logMedia);
                     else if (logMedia.Application.Validation.RejectCode != logMedia.Application.Validation.RejectCodeRead)
@@ -116,11 +117,8 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
             }
             else
             {
-                if (validationResult == TTErrorTypes.NoError)
-                {
-                    string cchsStr = TTMainCommon.GenerateCCHSTxn.CheckIn_PurseCard(sf, logMedia, ValidationRules.GetFareMode());
-                    Transmit.CheckInPermitted(logMedia, cchsStr);
-                }
+                if (validationResult == TTErrorTypes.NoError)                                    
+                    Transmit.CheckInPermitted(logMedia, GetCCHSStr(sf, logMedia));                
                 else
                     Transmit.CheckInNotPermitted(validationResult, logMedia);
             }
@@ -142,5 +140,15 @@ namespace IFS2.Equipment.TicketingRules.Gate.MediaTreatment
         }
 
         #endregion
+
+        private static string GetCCHSStr(SmartFunctions sf, LogicalMedia logMedia)
+        {
+            int productType = logMedia.Application.Products.Product(0).Type;
+            int family = ProductParameters.GetProductFamily(productType);
+            if (family == 60)
+                return GenerateCCHSTxn.CheckIn_PurseCard(sf, logMedia, ValidationRules.GetFareMode());
+            else
+                return GenerateCCHSTxn.CheckIn_NonPurseCard(sf, logMedia, ValidationRules.GetFareMode());
+        }
     }
 }
