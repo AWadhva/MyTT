@@ -52,7 +52,7 @@ namespace IFS2.Equipment.TicketingRules
             {TransactionType.InitialiseBankTopup, 1304},//_sizeInBytesCscTpurse_header + 1244
             {TransactionType.TPurseDeduction,_sizeInBytesCscTpurse_header+6*4+32},
             {TransactionType.BusCheckOutWithTPurse,_sizeInBytesCscTpurse_header+10*4},
-            {TransactionType.MetroCheckInWithTPurse, 5000},
+            {TransactionType.MetroCheckInWithTPurse, _sizeInBytesCscTpurse_header + 32},
             {TransactionType.MetroCheckInWithPass, 5000},
             {TransactionType.MetroCheckOutWithTPurse, _sizeInBytesCscTpurse_header + 64},
             {TransactionType.MetroCheckOutWithPass, 5000}
@@ -832,11 +832,9 @@ namespace IFS2.Equipment.TicketingRules
                 int TDVariantDataLengthInBytes = TxnTypeVsVariantDataLengthInBytes[type];
                 int xdrLen;
                 switch (type)
-                {
-                    //case TransactionType.MetroCheckOutWithTPurse:
+                {                    
                     case TransactionType.MetroCheckOutWithPass:
-                    case TransactionType.MetroCheckInWithPass:
-                    case TransactionType.MetroCheckInWithTPurse:
+                    case TransactionType.MetroCheckInWithPass:                    
                         xdrLen = 4000; // TO BE CORRECTED
                         break;
                     default:
